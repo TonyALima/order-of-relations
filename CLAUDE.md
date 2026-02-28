@@ -57,6 +57,16 @@ test("hello world", () => {
 });
 ```
 
+## Linting
+
+Uses ESLint with the recommended configuration (`@eslint/js` recommended + `typescript-eslint` recommended). Run with:
+
+```bash
+bunx eslint .
+```
+
+**Critical rule — `@typescript-eslint/no-explicit-any`**: The use of `any` is **forbidden**. Always use proper types, generics, or `unknown` instead. This is strictly enforced and must never be suppressed with `// eslint-disable` comments without a very strong justification.
+
 ## Key Architecture Decisions
 
 - **Decorator metadata**: ECMAScript Stage-3 decorators with a custom `metadataStorage` Map. No `reflect-metadata` dependency.
