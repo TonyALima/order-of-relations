@@ -1,6 +1,7 @@
 export interface ColumnMetadata {
   propertyName: string
   columnName: string
+  type?: string
   primary?: boolean
 }
 
