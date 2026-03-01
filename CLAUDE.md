@@ -56,9 +56,9 @@ This project follows **TDD (Test-Driven Development)**. When implementing new fe
 Use `bun test` to run tests. Tests live next to their source files (e.g., `src/query-builder/query-builder.test.ts`).
 
 ```ts
-import { test, expect } from "bun:test";
+import { test, expect } from 'bun:test';
 
-test("hello world", () => {
+test('hello world', () => {
   expect(1).toBe(1);
 });
 ```
@@ -81,10 +81,10 @@ bunx eslint .
 
 ## Column Type Mapping (`@Column({ type })`)
 
-| TypeScript intent | `type` value |
-| --- | --- |
+| TypeScript intent | `type` value                              |
+| ----------------- | ----------------------------------------- |
 | auto-increment PK | `'serial'` (default for `@PrimaryColumn`) |
-| integer | `'integer'` |
-| text | `'text'` (default for `@Column`) |
-| boolean | `'boolean'` |
-| timestamp | `'timestamp'` |
+| integer           | `'integer'`                               |
+| text              | `'text'` (default for `@Column`)          |
+| boolean           | `'boolean'`                               |
+| timestamp         | `'timestamp'`                             |
