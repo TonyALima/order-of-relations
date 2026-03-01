@@ -20,7 +20,7 @@ export class Repository<T> {
     const columns = meta.columns.filter(c => !c.primary)
     const tableName = this.quoteIdentifier(meta.tableName)
     const columnNames = columns.map(c => this.quoteIdentifier(c.columnName))
-    const values = columns.map(c => (entity as any)[c.propertyName])
+    const values = columns.map(c => (entity as Record<string, unknown>)[c.propertyName])
     const placeholders = values.map((_, i) => `$${i + 1}`)
 
     await Database.query(

@@ -1,13 +1,15 @@
-export class Container {
-  private static instances = new Map<any, any>()
+export type Constructor<T = unknown> = new (...args: unknown[]) => T
 
-  static register(token: any, instance: any) {
+export class Container {
+  private static instances = new Map<Constructor, unknown>()
+
+  static register<T>(token: Constructor<T>, instance: T) {
     this.instances.set(token, instance)
   }
 
-  static resolve<T>(target: new (...args: any[]) => T): T {
+  static resolve<T>(target: Constructor<T>): T {
     if (this.instances.has(target)) {
-      return this.instances.get(target)
+      return this.instances.get(target) as T
     }
 
     const instance = new target()

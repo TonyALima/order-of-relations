@@ -5,10 +5,12 @@ export interface ColumnMetadata {
   primary?: boolean
 }
 
+export type Constructor<T = unknown> = (new (...args: unknown[]) => T) | (abstract new (...args: unknown[]) => T)
+
 export interface RelationMetadata {
   propertyName: string
   type: "many-to-one" | "one-to-many"
-  target: Function
+  target: Constructor
   inverseSide?: string
 }
 
@@ -18,4 +20,4 @@ export interface EntityMetadata {
   relations: RelationMetadata[]
 }
 
-export const metadataStorage = new Map<Function, EntityMetadata>()
+export const metadataStorage = new Map<Constructor, EntityMetadata>()

@@ -1,4 +1,4 @@
-import { Container } from "../core/container"
+import { Container, type Constructor } from "../core/container"
 import { Repository } from "../core/repository"
 
 const INJECTIONS_KEY = Symbol("injections")
@@ -34,7 +34,7 @@ export function Service() {
           }
         }
 
-        Container.register(this.constructor, this)
+        Container.register(this.constructor as Constructor<this>, this)
       }
     }
   }
