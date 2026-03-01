@@ -1,6 +1,6 @@
-import { Database } from "./src/core/database"
-import { Container } from "./src/core/container"
-import { UserService } from "./src/services/UserService"
+import { Database } from "../../src/core/database"
+import { Container } from "../../src/core/container"
+import { UserService } from "./services/UserService"
 
 async function main() {
   Database.connect({
@@ -8,7 +8,7 @@ async function main() {
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
     host: process.env.DB_HOST,
-    port: parseInt(process.env.DB_PORT || "5432"),
+    port: parseInt(process.env.DB_PORT ?? "5432"),
   })
 
   const userService = Container.resolve(UserService)
