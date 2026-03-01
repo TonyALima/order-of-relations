@@ -47,6 +47,12 @@ examples/
 
 ## Testing
 
+This project follows **TDD (Test-Driven Development)**. When implementing new features or fixing bugs:
+
+1. **Write a failing test first** that describes the expected behavior.
+2. **Write the minimal code** to make the test pass.
+3. **Refactor** while keeping all tests green.
+
 Use `bun test` to run tests. Tests live next to their source files (e.g., `src/query-builder/query-builder.test.ts`).
 
 ```ts
