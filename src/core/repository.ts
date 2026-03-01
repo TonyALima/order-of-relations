@@ -1,32 +1,34 @@
-import { metadataStorage } from "./metadata"
 import { Database } from "./database"
+import { metadataStorage } from "./metadata"
 
 export class Repository<T> {
   constructor(private entity: new () => T) {}
 
-  private quoteIdentifier(identifier: string): string {
-    return `"${identifier.replace(/"/g, '""')}"`
-  }
-
   async findAll(): Promise<T[]> {
     const meta = metadataStorage.get(this.entity)!
-    const tableName = this.quoteIdentifier(meta.tableName)
-    const result = await Database.query(`SELECT * FROM ${tableName}`)
-    return result.rows
+    const sql = Database.getConnection();
+    const tableName = sql(meta.tableName);
+    const rows = await sql<T[]>`SELECT * FROM ${tableName}`;
+    return rows;
   }
 
   async save(entity: Omit<T, "id">) {
     const meta = metadataStorage.get(this.entity)!
-    const columns = meta.columns.filter(c => !c.primary)
-    const tableName = this.quoteIdentifier(meta.tableName)
-    const columnNames = columns.map(c => this.quoteIdentifier(c.columnName))
-    const values = columns.map(c => (entity as Record<string, unknown>)[c.propertyName])
-    const placeholders = values.map((_, i) => `$${i + 1}`)
+    const sql = Database.getConnection()
 
-    await Database.query(
-      `INSERT INTO ${tableName} (${columnNames.join(",")})
-       VALUES (${placeholders.join(",")})`,
-      values
-    )
+    const columns = meta.columns.filter(c => !c.primary)
+    const tableName = sql(meta.tableName)
+    
+    const objectToInsert: Record<string, unknown> = {};
+    
+    columns.forEach(col => {
+      const columnName = col.columnName
+      const propertyName = col.propertyName as keyof Omit<T, "id">
+      objectToInsert[columnName] = entity[propertyName]
+    });
+    
+    await sql`
+      INSERT INTO ${tableName} ${sql(objectToInsert)}
+      `;
   }
 }

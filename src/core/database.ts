@@ -1,13 +1,15 @@
-import { Pool, type PoolConfig } from "pg"
-
+import { SQL } from "bun"
 export class Database {
-  private static pool: Pool
+  private static connection: SQL
 
-  static connect(config: PoolConfig) {
-    this.pool = new Pool(config)
+  static connect(url?: string) {
+    this.connection = url ? new SQL(url) : new SQL()
   }
 
-  static async query(sql: string, params?: unknown[]) {
-    return this.pool.query(sql, params)
+  static getConnection(): SQL {
+    if (!this.connection) {
+      throw new Error("Database not connected. Call Database.connect() first.")
+    } 
+    return this.connection
   }
 }

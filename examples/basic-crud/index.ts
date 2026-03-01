@@ -3,22 +3,13 @@ import { UserService } from "./services/UserService"
 
 declare module "bun" {
   interface Env {
-    DB_USER: string;
-    DB_PASSWORD: string;
-    DB_NAME: string;
-    DB_HOST: string;
-    DB_PORT: string;
+    DATABASE_URL: string;
   }
 }
 
+// Connect using DATABASE_URL env var (e.g., postgres://user:pass@host:5432/dbname)
 async function main() {
-  Database.connect({
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME,
-    host: process.env.DB_HOST,
-    port: parseInt(process.env.DB_PORT),
-  })
+  Database.connect()
 
   const userService = Container.resolve(UserService)
 
