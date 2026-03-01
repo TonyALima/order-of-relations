@@ -35,3 +35,6 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 
 # Claude plans
 docs/plans
+
+#VSCode settings
+.vscode/settings.json
