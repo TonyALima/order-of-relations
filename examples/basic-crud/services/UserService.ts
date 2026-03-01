@@ -7,10 +7,14 @@ export class UserService {
   private userRepository!: Repository<User>;
 
   async createUser(name: string, email: string) {
-    await this.userRepository.save({ name, email });
+    return this.userRepository.save({ name, email });
   }
 
   async listUsers() {
     return this.userRepository.findAll();
+  }
+
+  async findOne(id: number) {
+    return this.userRepository.findOne(id);
   }
 }

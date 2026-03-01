@@ -13,10 +13,12 @@ async function main() {
 
   const userService = Container.resolve(UserService);
 
-  await userService.createUser('Maria', 'maria@email.com');
-
+  const userId = await userService.createUser('Maria', 'maria@email.com');
+  console.log('Created user with ID:', userId);
+  const user = await userService.findOne(userId);
+  console.log('Created user:', user);
   const users = await userService.listUsers();
-  console.log(users);
+  console.log('All users:', users);
 }
 
 main();
