@@ -10,7 +10,8 @@
     "build": "bun build src/index.ts --outdir dist",
     "typecheck": "bunx tsc --noEmit",
     "lint": "bun --bun eslint",
-    "prepare": "husky"
+    "prepare": "husky",
+    "format": "bun --bun prettier --write ."
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
