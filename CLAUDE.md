@@ -6,7 +6,7 @@ This is both a TCC (undergraduate thesis) project and a publishable npm package.
 
 ## Project Structure
 
-```
+```text
 src/                         ← published library
   core/
     database.ts              PostgreSQL connection pool + transaction helper
@@ -76,7 +76,7 @@ bunx eslint .
 ## Column Type Mapping (`@Column({ type })`)
 
 | TypeScript intent | `type` value |
-|---|---|
+| --- | --- |
 | auto-increment PK | `'serial'` (default for `@PrimaryColumn`) |
 | integer | `'integer'` |
 | text | `'text'` (default for `@Column`) |
