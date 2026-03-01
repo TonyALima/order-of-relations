@@ -1,5 +1,4 @@
-import { Database } from "../../src/core/database"
-import { Container } from "../../src/core/container"
+import { Database, Container } from "../../src"
 import { UserService } from "./services/UserService"
 
 async function main() {

@@ -1,5 +1,4 @@
-import { Service, InjectRepository } from "../../../src/decorators/service"
-import { Repository } from "../../../src/core/repository"
+import { Service, InjectRepository, Repository } from "../../../src"
 import { User } from "../entities/User"
 
 @Service()

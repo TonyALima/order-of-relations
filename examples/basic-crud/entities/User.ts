@@ -1,5 +1,4 @@
-import { Entity } from "../../../src/decorators/entity"
-import { Column, PrimaryColumn } from "../../../src/decorators/column"
+import { Entity, Column, PrimaryColumn } from "../../../src"
 
 @Entity("user")
 export class User {
