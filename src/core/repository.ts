@@ -48,6 +48,18 @@ export class Repository<T, PK extends keyof T = 'id' extends keyof T ? 'id' : ne
     return result[0]![primaryColumn.columnName]!;
   }
 
+  async delete(id: T[PK]): Promise<void> {
+    const meta = metadataStorage.get(this.entity)!;
+    const sql = Database.getConnection();
+    const tableName = sql(meta.tableName);
+    const primaryColumn = meta.columns.find((c) => c.primary)!;
+
+    await sql`
+      DELETE FROM ${tableName}
+      WHERE ${sql(primaryColumn.columnName)} = ${id}
+    `;
+  }
+
   async update(entity: T): Promise<void> {
     const meta = metadataStorage.get(this.entity)!;
     const sql = Database.getConnection();
