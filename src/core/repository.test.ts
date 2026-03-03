@@ -18,6 +18,66 @@ metadataStorage.set(TestEntity, {
   relations: [],
 });
 
+test('Repository.findOne returns the entity when a matching row exists', async () => {
+  const executedQueries: { template: string; values: unknown[] }[] = [];
+  const mockRow = { id: 1, name: 'Alice' };
+
+  const mockSql = ((stringsOrIdentifier: TemplateStringsArray | string, ...values: unknown[]) => {
+    if (typeof stringsOrIdentifier === 'string') {
+      return stringsOrIdentifier;
+    }
+    executedQueries.push({ template: stringsOrIdentifier.join('?'), values });
+    return Promise.resolve([mockRow]);
+  }) as unknown as SQL;
+
+  spyOn(Database, 'getConnection').mockReturnValue(mockSql);
+
+  const repo = new Repository<TestEntity>(TestEntity);
+  const result = await repo.findOne(1);
+
+  expect(executedQueries).toHaveLength(1);
+  expect(executedQueries[0]!.template.toUpperCase()).toContain('SELECT');
+  expect(executedQueries[0]!.values).toContain(1);
+  expect(result).toEqual(mockRow);
+});
+
+test('Repository.findOne returns null when no matching row exists', async () => {
+  const mockSql = ((stringsOrIdentifier: TemplateStringsArray | string) => {
+    if (typeof stringsOrIdentifier === 'string') {
+      return stringsOrIdentifier;
+    }
+    return Promise.resolve([]);
+  }) as unknown as SQL;
+
+  spyOn(Database, 'getConnection').mockReturnValue(mockSql);
+
+  const repo = new Repository<TestEntity>(TestEntity);
+  const result = await repo.findOne(999);
+
+  expect(result).toBeNull();
+});
+
+test('Repository.findAll returns all rows from the table', async () => {
+  const mockRows = [
+    { id: 1, name: 'Alice' },
+    { id: 2, name: 'Bob' },
+  ];
+
+  const mockSql = ((stringsOrIdentifier: TemplateStringsArray | string) => {
+    if (typeof stringsOrIdentifier === 'string') {
+      return stringsOrIdentifier;
+    }
+    return Promise.resolve(mockRows);
+  }) as unknown as SQL;
+
+  spyOn(Database, 'getConnection').mockReturnValue(mockSql);
+
+  const repo = new Repository<TestEntity>(TestEntity);
+  const result = await repo.findAll();
+
+  expect(result).toEqual(mockRows);
+});
+
 test('Repository.create executes INSERT query and returns the generated primary key', async () => {
   const executedQueries: { template: string; values: unknown[] }[] = [];
 
