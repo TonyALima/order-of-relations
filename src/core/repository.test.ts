@@ -1,5 +1,5 @@
 import { test, expect, spyOn } from 'bun:test';
-import type { SQL } from 'bun';
+import { SQL } from 'bun';
 import { Repository } from './repository';
 import { Database } from './database';
 import { metadataStorage } from './metadata';
@@ -18,38 +18,32 @@ metadataStorage.set(TestEntity, {
   relations: [],
 });
 
+// Create a fresh in-memory SQLite database with the test schema.
+async function setupDb(): Promise<SQL> {
+  const sql = new SQL({ url: 'sqlite://:memory:' });
+  await sql`CREATE TABLE test_entity (
+    id   INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL
+  )`;
+  return sql;
+}
+
 test('Repository.findOne returns the entity when a matching row exists', async () => {
-  const executedQueries: { template: string; values: unknown[] }[] = [];
-  const mockRow = { id: 1, name: 'Alice' };
+  const sql = await setupDb();
+  await sql`INSERT INTO test_entity (name) VALUES ('Alice')`;
 
-  const mockSql = ((stringsOrIdentifier: TemplateStringsArray | string, ...values: unknown[]) => {
-    if (typeof stringsOrIdentifier === 'string') {
-      return stringsOrIdentifier;
-    }
-    executedQueries.push({ template: stringsOrIdentifier.join('?'), values });
-    return Promise.resolve([mockRow]);
-  }) as unknown as SQL;
-
-  spyOn(Database, 'getConnection').mockReturnValue(mockSql);
+  spyOn(Database, 'getConnection').mockReturnValue(sql);
 
   const repo = new Repository<TestEntity>(TestEntity);
   const result = await repo.findOne(1);
 
-  expect(executedQueries).toHaveLength(1);
-  expect(executedQueries[0]!.template.toUpperCase()).toContain('SELECT');
-  expect(executedQueries[0]!.values).toContain(1);
-  expect(result).toEqual(mockRow);
+  expect(result).toEqual({ id: 1, name: 'Alice' });
 });
 
 test('Repository.findOne returns null when no matching row exists', async () => {
-  const mockSql = ((stringsOrIdentifier: TemplateStringsArray | string) => {
-    if (typeof stringsOrIdentifier === 'string') {
-      return stringsOrIdentifier;
-    }
-    return Promise.resolve([]);
-  }) as unknown as SQL;
+  const sql = await setupDb();
 
-  spyOn(Database, 'getConnection').mockReturnValue(mockSql);
+  spyOn(Database, 'getConnection').mockReturnValue(sql);
 
   const repo = new Repository<TestEntity>(TestEntity);
   const result = await repo.findOne(999);
@@ -58,94 +52,57 @@ test('Repository.findOne returns null when no matching row exists', async () => 
 });
 
 test('Repository.findAll returns all rows from the table', async () => {
-  const mockRows = [
-    { id: 1, name: 'Alice' },
-    { id: 2, name: 'Bob' },
-  ];
+  const sql = await setupDb();
+  await sql`INSERT INTO test_entity (name) VALUES ('Alice')`;
+  await sql`INSERT INTO test_entity (name) VALUES ('Bob')`;
 
-  const mockSql = ((stringsOrIdentifier: TemplateStringsArray | string) => {
-    if (typeof stringsOrIdentifier === 'string') {
-      return stringsOrIdentifier;
-    }
-    return Promise.resolve(mockRows);
-  }) as unknown as SQL;
-
-  spyOn(Database, 'getConnection').mockReturnValue(mockSql);
+  spyOn(Database, 'getConnection').mockReturnValue(sql);
 
   const repo = new Repository<TestEntity>(TestEntity);
   const result = await repo.findAll();
 
-  expect(result).toEqual(mockRows);
+  expect(result).toEqual([
+    { id: 1, name: 'Alice' },
+    { id: 2, name: 'Bob' },
+  ]);
 });
 
-test('Repository.create executes INSERT query and returns the generated primary key', async () => {
-  const executedQueries: { template: string; values: unknown[] }[] = [];
+test('Repository.create inserts a row and returns the generated primary key', async () => {
+  const sql = await setupDb();
 
-  const mockSql = ((
-    stringsOrIdentifier: TemplateStringsArray | string | Record<string, unknown>,
-    ...values: unknown[]
-  ) => {
-    if (!Array.isArray(stringsOrIdentifier)) {
-      return stringsOrIdentifier;
-    }
-    executedQueries.push({ template: stringsOrIdentifier.join('?'), values });
-    return Promise.resolve([{ id: 99 }]);
-  }) as unknown as SQL;
-
-  spyOn(Database, 'getConnection').mockReturnValue(mockSql);
+  spyOn(Database, 'getConnection').mockReturnValue(sql);
 
   const repo = new Repository<TestEntity>(TestEntity);
   const newId = await repo.create({ name: 'Alice' });
 
-  expect(executedQueries).toHaveLength(1);
-  expect(executedQueries[0]!.template.toUpperCase()).toContain('INSERT');
-  expect(newId).toBe(99);
+  expect(newId).toBe(1);
+
+  const [row] = await sql`SELECT * FROM test_entity WHERE id = ${newId}`;
+  expect(row).toEqual({ id: 1, name: 'Alice' });
 });
 
-test('Repository.update executes UPDATE query using the entity primary key', async () => {
-  const executedQueries: { template: string; values: unknown[] }[] = [];
+test('Repository.update changes the row identified by the primary key', async () => {
+  const sql = await setupDb();
+  await sql`INSERT INTO test_entity (name) VALUES ('Alice')`;
 
-  const mockSql = ((
-    stringsOrIdentifier: TemplateStringsArray | string | Record<string, unknown>,
-    ...values: unknown[]
-  ) => {
-    if (!Array.isArray(stringsOrIdentifier)) {
-      return stringsOrIdentifier;
-    }
-    executedQueries.push({ template: stringsOrIdentifier.join('?'), values });
-    return Promise.resolve([]);
-  }) as unknown as SQL;
-
-  spyOn(Database, 'getConnection').mockReturnValue(mockSql);
+  spyOn(Database, 'getConnection').mockReturnValue(sql);
 
   const repo = new Repository<TestEntity>(TestEntity);
-  await repo.update({ id: 5, name: 'Bob' });
+  await repo.update({ id: 1, name: 'Bob' });
 
-  expect(executedQueries).toHaveLength(1);
-  expect(executedQueries[0]!.template.toUpperCase()).toContain('UPDATE');
-  expect(executedQueries[0]!.values).toContain(5);
+  const [row] = await sql`SELECT * FROM test_entity WHERE id = 1`;
+  expect(row).toEqual({ id: 1, name: 'Bob' });
 });
 
-test('Repository.delete executes DELETE WHERE query for the given id', async () => {
-  const executedQueries: { template: string; values: unknown[] }[] = [];
+test('Repository.delete removes the row with the given id', async () => {
+  const sql = await setupDb();
+  await sql`INSERT INTO test_entity (name) VALUES ('Alice')`;
 
-  const mockSql = ((stringsOrIdentifier: TemplateStringsArray | string, ...values: unknown[]) => {
-    if (typeof stringsOrIdentifier === 'string') {
-      return stringsOrIdentifier;
-    }
-    executedQueries.push({
-      template: stringsOrIdentifier.join('?'),
-      values,
-    });
-    return Promise.resolve([]);
-  }) as unknown as SQL;
-
-  spyOn(Database, 'getConnection').mockReturnValue(mockSql);
+  spyOn(Database, 'getConnection').mockReturnValue(sql);
 
   const repo = new Repository<TestEntity>(TestEntity);
-  await repo.delete(42);
+  await repo.delete(1);
 
-  expect(executedQueries).toHaveLength(1);
-  expect(executedQueries[0]!.template.toUpperCase()).toContain('DELETE');
-  expect(executedQueries[0]!.values).toContain(42);
+  const remaining = await sql`SELECT * FROM test_entity`;
+  expect(remaining).toHaveLength(0);
 });
