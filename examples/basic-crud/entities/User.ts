@@ -1,13 +1,14 @@
 import { Entity, Column, PrimaryColumn } from '../../../src';
+import { COLUMN_TYPE } from '../../../src/core/sql-types';
 
 @Entity('user')
 export class User {
-  @PrimaryColumn()
+  @PrimaryColumn({ type: COLUMN_TYPE.SERIAL })
   id!: number;
 
-  @Column()
+  @Column({ type: COLUMN_TYPE.TEXT })
   name!: string;
 
-  @Column()
+  @Column({ type: COLUMN_TYPE.TEXT })
   email!: string;
 }
