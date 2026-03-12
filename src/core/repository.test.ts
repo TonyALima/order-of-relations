@@ -3,6 +3,7 @@ import { SQL } from 'bun';
 import { Repository } from './repository';
 import { Database } from './database';
 import { metadataStorage } from './metadata';
+import { COLUMN_TYPE } from './sql-types';
 
 class TestEntity {
   id!: number;
@@ -12,8 +13,8 @@ class TestEntity {
 metadataStorage.set(TestEntity, {
   tableName: 'test_entity',
   columns: [
-    { propertyName: 'id', columnName: 'id', type: 'serial', primary: true },
-    { propertyName: 'name', columnName: 'name', type: 'text' },
+    { propertyName: 'id', columnName: 'id', type: COLUMN_TYPE.SERIAL, primary: true },
+    { propertyName: 'name', columnName: 'name', type: COLUMN_TYPE.TEXT },
   ],
   relations: [],
 });

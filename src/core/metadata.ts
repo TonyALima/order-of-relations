@@ -1,7 +1,9 @@
+import type { COLUMN_TYPE } from './sql-types';
+
 export interface ColumnMetadata {
   propertyName: string;
   columnName: string;
-  type?: string;
+  type: COLUMN_TYPE;
   primary?: boolean;
 }
 
