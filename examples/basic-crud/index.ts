@@ -15,8 +15,10 @@ async function main() {
 
   const userId = await userService.createUser('Maria', 'maria@email.com');
   console.log('Created user with ID:', userId);
+
   const user = await userService.findOne(userId);
   console.log('Created user:', user);
+  
   const users = await userService.listUsers();
   console.log('All users:', users);
 }
