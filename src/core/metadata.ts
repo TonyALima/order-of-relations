@@ -24,4 +24,31 @@ export interface EntityMetadata {
   relations: RelationMetadata[];
 }
 
-export const metadataStorage = new Map<Constructor, EntityMetadata>();
+export class MetadataStorage implements Iterable<[Constructor, EntityMetadata]> {
+  private storage = new Map<Constructor, EntityMetadata>();
+  private isResolved = false;
+
+  private resolve() {}
+
+  private ensureResolved() {
+    if (this.isResolved) return;
+    this.resolve();
+    this.isResolved = true;
+  }
+
+  set(target: Constructor, metadata: EntityMetadata) {
+    this.storage.set(target, metadata);
+  }
+
+  get(target: Constructor): EntityMetadata | undefined {
+    this.ensureResolved();
+    return this.storage.get(target);
+  }
+
+  [Symbol.iterator](): IterableIterator<[Constructor, EntityMetadata]> {
+    this.ensureResolved();
+    return this.storage[Symbol.iterator]();
+  }
+}
+
+export const metadataStorage = new MetadataStorage();
