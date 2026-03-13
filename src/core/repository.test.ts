@@ -33,7 +33,8 @@ test('Repository.findOne returns the entity when a matching row exists', async (
   const sql = await setupDb();
   await sql`INSERT INTO test_entity (name) VALUES ('Alice')`;
 
-  spyOn(Database, 'getConnection').mockReturnValue(sql);
+  const db = Database.getInstance();
+  spyOn(db, 'getConnection').mockReturnValue(sql);
 
   const repo = new Repository<TestEntity>(TestEntity);
   const result = await repo.findOne(1);
@@ -44,7 +45,8 @@ test('Repository.findOne returns the entity when a matching row exists', async (
 test('Repository.findOne returns null when no matching row exists', async () => {
   const sql = await setupDb();
 
-  spyOn(Database, 'getConnection').mockReturnValue(sql);
+  const db = Database.getInstance();
+  spyOn(db, 'getConnection').mockReturnValue(sql);
 
   const repo = new Repository<TestEntity>(TestEntity);
   const result = await repo.findOne(999);
@@ -57,7 +59,8 @@ test('Repository.findAll returns all rows from the table', async () => {
   await sql`INSERT INTO test_entity (name) VALUES ('Alice')`;
   await sql`INSERT INTO test_entity (name) VALUES ('Bob')`;
 
-  spyOn(Database, 'getConnection').mockReturnValue(sql);
+  const db = Database.getInstance();
+  spyOn(db, 'getConnection').mockReturnValue(sql);
 
   const repo = new Repository<TestEntity>(TestEntity);
   const result = await repo.findAll();
@@ -71,7 +74,8 @@ test('Repository.findAll returns all rows from the table', async () => {
 test('Repository.create inserts a row and returns the generated primary key', async () => {
   const sql = await setupDb();
 
-  spyOn(Database, 'getConnection').mockReturnValue(sql);
+  const db = Database.getInstance();
+  spyOn(db, 'getConnection').mockReturnValue(sql);
 
   const repo = new Repository<TestEntity>(TestEntity);
   const newId = await repo.create({ name: 'Alice' });
@@ -86,7 +90,8 @@ test('Repository.update changes the row identified by the primary key', async ()
   const sql = await setupDb();
   await sql`INSERT INTO test_entity (name) VALUES ('Alice')`;
 
-  spyOn(Database, 'getConnection').mockReturnValue(sql);
+  const db = Database.getInstance();
+  spyOn(db, 'getConnection').mockReturnValue(sql);
 
   const repo = new Repository<TestEntity>(TestEntity);
   await repo.update({ id: 1, name: 'Bob' });
@@ -99,7 +104,8 @@ test('Repository.delete removes the row with the given id', async () => {
   const sql = await setupDb();
   await sql`INSERT INTO test_entity (name) VALUES ('Alice')`;
 
-  spyOn(Database, 'getConnection').mockReturnValue(sql);
+  const db = Database.getInstance();
+  spyOn(db, 'getConnection').mockReturnValue(sql);
 
   const repo = new Repository<TestEntity>(TestEntity);
   await repo.delete(1);

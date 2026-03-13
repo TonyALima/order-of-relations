@@ -9,9 +9,10 @@ declare module 'bun' {
 
 // Connect using DATABASE_URL env var (e.g., postgres://user:pass@host:5432/dbname)
 async function main() {
-  Database.connect();
-  await Database.drop();
-  await Database.create();
+  const db = Database.getInstance();
+  db.connect();
+  await db.drop();
+  await db.create();
 
   const userService = Container.resolve(UserService);
 

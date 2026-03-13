@@ -6,7 +6,8 @@ export class Repository<T, PK extends keyof T = 'id' extends keyof T ? 'id' : ne
 
   async findOne(id: T[PK]): Promise<T | null> {
     const meta = metadataStorage.get(this.entity)!;
-    const sql = Database.getConnection();
+    const db = Database.getInstance();
+    const sql = db.getConnection();
     const tableName = sql(meta.tableName);
     const primaryColumn = meta.columns.find((c) => c.primary)!;
 
@@ -19,7 +20,8 @@ export class Repository<T, PK extends keyof T = 'id' extends keyof T ? 'id' : ne
 
   async findAll(): Promise<T[]> {
     const meta = metadataStorage.get(this.entity)!;
-    const sql = Database.getConnection();
+    const db = Database.getInstance();
+    const sql = db.getConnection();
     const tableName = sql(meta.tableName);
     const rows = await sql<T[]>`SELECT * FROM ${tableName}`;
     return rows;
@@ -27,7 +29,8 @@ export class Repository<T, PK extends keyof T = 'id' extends keyof T ? 'id' : ne
 
   async create(entity: Omit<T, PK>): Promise<T[PK]> {
     const meta = metadataStorage.get(this.entity)!;
-    const sql = Database.getConnection();
+    const db = Database.getInstance();
+    const sql = db.getConnection();
 
     const primaryColumn = meta.columns.find((c) => c.primary)!;
     const columns = meta.columns.filter((c) => !c.primary);
@@ -50,7 +53,8 @@ export class Repository<T, PK extends keyof T = 'id' extends keyof T ? 'id' : ne
 
   async delete(id: T[PK]): Promise<void> {
     const meta = metadataStorage.get(this.entity)!;
-    const sql = Database.getConnection();
+    const db = Database.getInstance();
+    const sql = db.getConnection();
     const tableName = sql(meta.tableName);
     const primaryColumn = meta.columns.find((c) => c.primary)!;
 
@@ -62,7 +66,8 @@ export class Repository<T, PK extends keyof T = 'id' extends keyof T ? 'id' : ne
 
   async update(entity: T): Promise<void> {
     const meta = metadataStorage.get(this.entity)!;
-    const sql = Database.getConnection();
+    const db = Database.getInstance();
+    const sql = db.getConnection();
 
     const primaryColumn = meta.columns.find((c) => c.primary)!;
     const columns = meta.columns.filter((c) => !c.primary);

@@ -3,20 +3,33 @@ import { SQL } from 'bun';
 import { metadataStorage } from './metadata';
 import { getColumnTypeDefinition } from './sql-types';
 export class Database {
-  private static connection: SQL;
+  private static instance: Database;
 
-  static connect(url?: string) {
+  private connection?: SQL;
+
+  private constructor() {}
+
+  static getInstance(): Database {
+    if (!this.instance) {
+      this.instance = new Database();
+    }
+
+    return this.instance;
+  }
+
+  connect(url?: string) {
     this.connection = url ? new SQL(url) : new SQL();
   }
 
-  static getConnection(): SQL {
+  getConnection(): SQL {
     if (!this.connection) {
       throw new Error('Database not connected. Call Database.connect() first.');
     }
+
     return this.connection;
   }
 
-  static async create(): Promise<void> {
+  async create(): Promise<void> {
     const sql = this.getConnection();
 
     for (const [, metadata] of metadataStorage) {
@@ -46,7 +59,7 @@ export class Database {
     }
   }
 
-  static async drop(): Promise<void> {
+  async drop(): Promise<void> {
     const sql = this.getConnection();
 
     for (const [, metadata] of metadataStorage) {

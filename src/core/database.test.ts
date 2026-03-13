@@ -34,11 +34,12 @@ metadataStorage.set(DatabaseTestEntity, {
 });
 
 test('Database.create applies the mapped schema to an in-memory SQLite database', async () => {
-  Database.connect('sqlite://:memory:');
+  const db = Database.getInstance();
+  db.connect('sqlite://:memory:');
 
-  await Database.create();
+  await db.create();
 
-  const sql = Database.getConnection();
+  const sql = db.getConnection();
   const [table] = await sql`
 		SELECT name, sql
 		FROM sqlite_master
@@ -73,12 +74,13 @@ test('Database.create applies the mapped schema to an in-memory SQLite database'
 });
 
 test('Database.drop removes the mapped tables from an in-memory SQLite database', async () => {
-  Database.connect('sqlite://:memory:');
+  const db = Database.getInstance();
+  db.connect('sqlite://:memory:');
 
-  await Database.create();
-  await Database.drop();
+  await db.create();
+  await db.drop();
 
-  const sql = Database.getConnection();
+  const sql = db.getConnection();
   const droppedTables = await sql`
 		SELECT name
 		FROM sqlite_master
