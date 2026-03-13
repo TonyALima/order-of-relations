@@ -11,9 +11,6 @@ export function Entity(mapTableName?: string) {
     context: ClassDecoratorContext<T>,
   ) {
     const tableName = mapTableName ?? String(context.name);
-
-    
-
     const columns = (context.metadata[COLUMNS_KEY] as ColumnMetadata[]) ?? [];
     const relations = (context.metadata[RELATIONS_KEY] as RelationMetadata[]) ?? [];
     metadataStorage.set(value, { tableName, columns, relations });
