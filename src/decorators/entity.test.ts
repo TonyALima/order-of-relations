@@ -1,5 +1,5 @@
 import { expect, test } from 'bun:test';
-import { metadataStorage } from '../core/metadata';
+import { Database } from '../core/database';
 import { COLUMN_TYPE } from '../core/sql-types';
 import { Column, PrimaryColumn } from './column';
 import { Entity } from './entity';
@@ -14,7 +14,7 @@ test('Entity stores table, column, and relation metadata for the decorated class
     name!: string;
   }
 
-  expect(metadataStorage.get(User)).toEqual({
+  expect(Database.getInstance().getMetadata().get(User)).toEqual({
     tableName: 'user',
     columns: [
       {

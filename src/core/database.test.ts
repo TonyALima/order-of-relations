@@ -1,7 +1,6 @@
 import { test, expect } from 'bun:test';
 
 import { Database } from './database';
-import { metadataStorage } from './metadata';
 import { COLUMN_TYPE } from './sql-types';
 
 class DatabaseTestEntity {
@@ -10,7 +9,7 @@ class DatabaseTestEntity {
   isActive!: boolean;
 }
 
-metadataStorage.set(DatabaseTestEntity, {
+Database.getInstance().getMetadata().set(DatabaseTestEntity, {
   tableName: 'database_test_entity',
   columns: [
     {

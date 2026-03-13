@@ -1,12 +1,11 @@
 import { Database } from './database';
-import { metadataStorage } from './metadata';
 
 export class Repository<T, PK extends keyof T = 'id' extends keyof T ? 'id' : never> {
   constructor(private entity: new () => T) {}
 
   async findOne(id: T[PK]): Promise<T | null> {
-    const meta = metadataStorage.get(this.entity)!;
     const db = Database.getInstance();
+    const meta = db.getMetadata().get(this.entity)!;
     const sql = db.getConnection();
     const tableName = sql(meta.tableName);
     const primaryColumn = meta.columns.find((c) => c.primary)!;
@@ -19,8 +18,8 @@ export class Repository<T, PK extends keyof T = 'id' extends keyof T ? 'id' : ne
   }
 
   async findAll(): Promise<T[]> {
-    const meta = metadataStorage.get(this.entity)!;
     const db = Database.getInstance();
+    const meta = db.getMetadata().get(this.entity)!;
     const sql = db.getConnection();
     const tableName = sql(meta.tableName);
     const rows = await sql<T[]>`SELECT * FROM ${tableName}`;
@@ -28,8 +27,8 @@ export class Repository<T, PK extends keyof T = 'id' extends keyof T ? 'id' : ne
   }
 
   async create(entity: Omit<T, PK>): Promise<T[PK]> {
-    const meta = metadataStorage.get(this.entity)!;
     const db = Database.getInstance();
+    const meta = db.getMetadata().get(this.entity)!;
     const sql = db.getConnection();
 
     const primaryColumn = meta.columns.find((c) => c.primary)!;
@@ -52,8 +51,8 @@ export class Repository<T, PK extends keyof T = 'id' extends keyof T ? 'id' : ne
   }
 
   async delete(id: T[PK]): Promise<void> {
-    const meta = metadataStorage.get(this.entity)!;
     const db = Database.getInstance();
+    const meta = db.getMetadata().get(this.entity)!;
     const sql = db.getConnection();
     const tableName = sql(meta.tableName);
     const primaryColumn = meta.columns.find((c) => c.primary)!;
@@ -65,8 +64,8 @@ export class Repository<T, PK extends keyof T = 'id' extends keyof T ? 'id' : ne
   }
 
   async update(entity: T): Promise<void> {
-    const meta = metadataStorage.get(this.entity)!;
     const db = Database.getInstance();
+    const meta = db.getMetadata().get(this.entity)!;
     const sql = db.getConnection();
 
     const primaryColumn = meta.columns.find((c) => c.primary)!;

@@ -50,5 +50,3 @@ export class MetadataStorage implements Iterable<[Constructor, EntityMetadata]> 
     return this.storage[Symbol.iterator]();
   }
 }
-
-export const metadataStorage = new MetadataStorage();

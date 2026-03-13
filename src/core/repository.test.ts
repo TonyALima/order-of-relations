@@ -2,7 +2,6 @@ import { test, expect, spyOn } from 'bun:test';
 import { SQL } from 'bun';
 import { Repository } from './repository';
 import { Database } from './database';
-import { metadataStorage } from './metadata';
 import { COLUMN_TYPE } from './sql-types';
 
 class TestEntity {
@@ -10,7 +9,7 @@ class TestEntity {
   name!: string;
 }
 
-metadataStorage.set(TestEntity, {
+Database.getInstance().getMetadata().set(TestEntity, {
   tableName: 'test_entity',
   columns: [
     { propertyName: 'id', columnName: 'id', type: COLUMN_TYPE.SERIAL, primary: true },
