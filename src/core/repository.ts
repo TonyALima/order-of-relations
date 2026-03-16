@@ -35,7 +35,9 @@ export class Repository<T, PK extends keyof T = 'id' extends keyof T ? 'id' : ne
     const columns = meta.columns.filter((c) => !c.primary);
     const tableName = sql(meta.tableName);
 
-    const objectToInsert: Record<string, unknown> = {};
+    const objectToInsert: Record<string, unknown> = {
+      discriminator: meta.discriminator,
+    };
 
     columns.forEach((col) => {
       const columnName = col.columnName;

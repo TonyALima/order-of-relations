@@ -43,6 +43,8 @@ export class Database {
     for (const [, metadata] of this.metadata) {
       if (metadata.columns.length === 0) continue;
 
+      if (metadata.discriminator && metadata.discriminator !== metadata.tableName) continue;
+
       const primaryColumn = metadata.columns.find((c) => c.primary);
       if (!primaryColumn) {
         throw new Error(`Entity ${metadata.tableName} must have a primary column.`);
@@ -53,6 +55,15 @@ export class Database {
         CREATE TABLE ${sql(metadata.tableName)}
         (${sql(primaryColumn.columnName)} ${primaryColumnType} PRIMARY KEY)
       `;
+
+      const hasDiscriminator = metadata.discriminator !== undefined;
+
+      if (hasDiscriminator) {
+        await sql`
+          ALTER TABLE ${sql(metadata.tableName)} 
+          ADD COLUMN discriminator TEXT NOT NULL
+        `;
+      }
 
       for (const column of metadata.columns) {
         if (column.primary) continue;
