@@ -73,6 +73,8 @@ bunx eslint .
 
 **Critical rule — `@typescript-eslint/no-explicit-any`**: The use of `any` is **forbidden**. Always use proper types, generics, or `unknown` instead. This is strictly enforced and must never be suppressed with `// eslint-disable` comments without a very strong justification.
 
+**Critical rule — `sql.unsafe`**: Never use `sql.unsafe` anywhere in this repository. All SQL must go through parameterized queries to prevent SQL injection. Use the query builder or parameterized `sql` tagged template literals instead.
+
 ## Key Architecture Decisions
 
 - **Decorator metadata**: ECMAScript Stage-3 decorators with a custom `metadataStorage` Map. No `reflect-metadata` dependency.
