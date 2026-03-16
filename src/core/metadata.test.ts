@@ -1,0 +1,145 @@
+import { expect, test } from 'bun:test';
+import { MetadataStorage } from './metadata';
+import { COLUMN_TYPE } from './sql-types';
+
+// --- Basic set / get ---
+
+test('MetadataStorage.get returns metadata previously stored with set', () => {
+  const storage = new MetadataStorage();
+  class User {}
+
+  storage.set(User, {
+    tableName: 'users',
+    columns: [{ propertyName: 'id', columnName: 'id', type: COLUMN_TYPE.SERIAL, primary: true }],
+    relations: [],
+  });
+
+  expect(storage.get(User)).toEqual({
+    tableName: 'users',
+    columns: [{ propertyName: 'id', columnName: 'id', type: COLUMN_TYPE.SERIAL, primary: true }],
+    relations: [],
+    discriminator: undefined,
+  });
+});
+
+test('MetadataStorage.get returns undefined for an unregistered constructor', () => {
+  const storage = new MetadataStorage();
+  class Unknown {}
+
+  expect(storage.get(Unknown)).toBeUndefined();
+});
+
+test('MetadataStorage.set overwrites existing metadata for the same constructor', () => {
+  const storage = new MetadataStorage();
+  class User {}
+
+  storage.set(User, { tableName: 'old_users', columns: [], relations: [] });
+  storage.set(User, { tableName: 'users', columns: [], relations: [] });
+
+  expect(storage.get(User)?.tableName).toBe('users');
+});
+
+// --- Iterator ---
+
+test('MetadataStorage[Symbol.iterator] yields all stored entries', () => {
+  const storage = new MetadataStorage();
+  class User {}
+  class Post {}
+
+  storage.set(User, { tableName: 'users', columns: [], relations: [] });
+  storage.set(Post, { tableName: 'posts', columns: [], relations: [] });
+
+  const entries = [...storage];
+
+  expect(entries).toHaveLength(2);
+  const keys = entries.map(([ctor]) => ctor);
+  expect(keys).toContain(User);
+  expect(keys).toContain(Post);
+});
+
+// --- Inheritance resolution ---
+
+test('MetadataStorage resolves single-table inheritance: child uses parent table name', () => {
+  const storage = new MetadataStorage();
+  class User {}
+  class AdminUser extends User {}
+
+  storage.set(User, { tableName: 'users', columns: [], relations: [] });
+  storage.set(AdminUser, { tableName: 'admin_users', columns: [], relations: [] });
+
+  const userMeta = storage.get(User);
+  const adminMeta = storage.get(AdminUser);
+
+  expect(userMeta?.tableName).toBe('users');
+  expect(adminMeta?.tableName).toBe('users');
+
+  expect(userMeta?.discriminator).toBe('users');
+  expect(adminMeta?.discriminator).toBe('admin_users');
+});
+
+test('MetadataStorage does not set discriminator when no inheritance is detected', () => {
+  const storage = new MetadataStorage();
+  class User {}
+
+  storage.set(User, { tableName: 'users', columns: [], relations: [] });
+
+  const meta = storage.get(User);
+
+  expect(meta?.tableName).toBe('users');
+  expect(meta?.discriminator).toBeUndefined();
+});
+
+test('MetadataStorage resolves multi-level inheritance: grandchild uses grandparent table name', () => {
+  const storage = new MetadataStorage();
+  class Base {}
+  class User extends Base {}
+  class AdminUser extends User {}
+
+  storage.set(Base, { tableName: 'base_entities', columns: [], relations: [] });
+  storage.set(User, { tableName: 'users', columns: [], relations: [] });
+  storage.set(AdminUser, { tableName: 'admin_users', columns: [], relations: [] });
+
+  const baseMeta = storage.get(Base);
+  const userMeta = storage.get(User);
+  const adminMeta = storage.get(AdminUser);
+
+  expect(baseMeta?.tableName).toBe('base_entities');
+  expect(userMeta?.tableName).toBe('base_entities');
+  expect(adminMeta?.tableName).toBe('base_entities');
+
+  expect(baseMeta?.discriminator).toBe('base_entities');
+  expect(userMeta?.discriminator).toBe('users');
+  expect(adminMeta?.discriminator).toBe('admin_users');
+});
+
+test('MetadataStorage resolves inheritance only once (lazy evaluation)', () => {
+  const storage = new MetadataStorage();
+  class User {}
+
+  storage.set(User, { tableName: 'users', columns: [], relations: [] });
+
+  const first = storage.get(User);
+  const second = storage.get(User);
+
+  expect(first).toEqual(second);
+  expect(first?.discriminator).toBeUndefined();
+});
+
+test('MetadataStorage iterator triggers inheritance resolution', () => {
+  const storage = new MetadataStorage();
+  class User {}
+  class AdminUser extends User {}
+
+  storage.set(User, { tableName: 'users', columns: [], relations: [] });
+  storage.set(AdminUser, { tableName: 'admin_users', columns: [], relations: [] });
+
+  const entries = [...storage];
+
+  const userEntry = entries.find(([ctor]) => ctor === User);
+  const adminEntry = entries.find(([ctor]) => ctor === AdminUser);
+
+  expect(userEntry?.[1].tableName).toBe('users');
+  expect(userEntry?.[1].discriminator).toBe('users');
+  expect(adminEntry?.[1].tableName).toBe('users');
+  expect(adminEntry?.[1].discriminator).toBe('admin_users');
+});
