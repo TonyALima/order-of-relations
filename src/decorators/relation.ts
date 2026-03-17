@@ -1,4 +1,5 @@
-import type { RelationMetadata, Constructor } from '../core/metadata';
+import type { RelationMetadata } from '../core/metadata';
+import type { Constructor } from '../core/utils';
 import { RELATIONS_KEY } from './entity';
 
 export function ManyToOne(target: Constructor) {

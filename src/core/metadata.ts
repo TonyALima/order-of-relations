@@ -1,4 +1,5 @@
 import type { COLUMN_TYPE } from './sql-types';
+import type { Constructor } from './utils';
 
 export interface ColumnMetadata {
   propertyName: string;
@@ -6,10 +7,6 @@ export interface ColumnMetadata {
   type: COLUMN_TYPE;
   primary?: boolean;
 }
-
-export type Constructor<T = unknown> =
-  | (new (...args: unknown[]) => T)
-  | (abstract new (...args: unknown[]) => T);
 
 export interface RelationMetadata {
   propertyName: string;
