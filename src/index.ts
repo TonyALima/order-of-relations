@@ -11,3 +11,4 @@ export { Container } from './core/container';
 
 // Types
 export type { EntityMetadata, ColumnMetadata, RelationMetadata } from './core/metadata';
+export type { Condition, FieldConditionBuilder, Conditions, FindOptions } from './query-builder/types';

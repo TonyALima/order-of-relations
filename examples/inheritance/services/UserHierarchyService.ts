@@ -19,10 +19,10 @@ export class UserHierarchyService {
   }
 
   async listUsers() {
-    return this.userRepository.findAll();
+    return this.userRepository.findMany();
   }
 
   async listAdmins() {
-    return this.adminRepository.findAll();
+    return this.adminRepository.findMany();
   }
 }

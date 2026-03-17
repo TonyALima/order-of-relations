@@ -11,10 +11,10 @@ export class UserService {
   }
 
   async listUsers() {
-    return this.userRepository.findAll();
+    return this.userRepository.findMany();
   }
 
   async findOne(id: User['id']) {
-    return this.userRepository.findOne(id);
+    return this.userRepository.findById(id);
   }
 }

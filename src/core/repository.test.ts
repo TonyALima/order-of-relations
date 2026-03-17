@@ -9,14 +9,16 @@ class TestEntity {
   name!: string;
 }
 
-Database.getInstance().getMetadata().set(TestEntity, {
-  tableName: 'test_entity',
-  columns: [
-    { propertyName: 'id', columnName: 'id', type: COLUMN_TYPE.SERIAL, primary: true },
-    { propertyName: 'name', columnName: 'name', type: COLUMN_TYPE.TEXT },
-  ],
-  relations: [],
-});
+Database.getInstance()
+  .getMetadata()
+  .set(TestEntity, {
+    tableName: 'test_entity',
+    columns: [
+      { propertyName: 'id', columnName: 'id', type: COLUMN_TYPE.SERIAL, primary: true },
+      { propertyName: 'name', columnName: 'name', type: COLUMN_TYPE.TEXT },
+    ],
+    relations: [],
+  });
 
 // Create a fresh in-memory SQLite database with the test schema.
 async function setupDb(): Promise<SQL> {
@@ -36,7 +38,7 @@ test('Repository.findOne returns the entity when a matching row exists', async (
   spyOn(db, 'getConnection').mockReturnValue(sql);
 
   const repo = new Repository<TestEntity>(TestEntity);
-  const result = await repo.findOne(1);
+  const result = await repo.findById(1);
 
   expect(result).toEqual({ id: 1, name: 'Alice' });
 });
@@ -48,12 +50,12 @@ test('Repository.findOne returns null when no matching row exists', async () => 
   spyOn(db, 'getConnection').mockReturnValue(sql);
 
   const repo = new Repository<TestEntity>(TestEntity);
-  const result = await repo.findOne(999);
+  const result = await repo.findById(999);
 
   expect(result).toBeNull();
 });
 
-test('Repository.findAll returns all rows from the table', async () => {
+test('Repository.findMany returns all rows from the table', async () => {
   const sql = await setupDb();
   await sql`INSERT INTO test_entity (name) VALUES ('Alice')`;
   await sql`INSERT INTO test_entity (name) VALUES ('Bob')`;
@@ -62,7 +64,7 @@ test('Repository.findAll returns all rows from the table', async () => {
   spyOn(db, 'getConnection').mockReturnValue(sql);
 
   const repo = new Repository<TestEntity>(TestEntity);
-  const result = await repo.findAll();
+  const result = await repo.findMany();
 
   expect(result).toEqual([
     { id: 1, name: 'Alice' },

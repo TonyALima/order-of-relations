@@ -1,29 +1,24 @@
 import { Database } from './database';
+import { QueryBuilder } from '../query-builder/query-builder';
+import type { FindOptions } from '../query-builder/types';
 
 export class Repository<T, PK extends keyof T = 'id' extends keyof T ? 'id' : never> {
   constructor(private entity: new () => T) {}
 
-  async findOne(id: T[PK]): Promise<T | null> {
-    const db = Database.getInstance();
-    const meta = db.getMetadata().get(this.entity)!;
-    const sql = db.getConnection();
-    const tableName = sql(meta.tableName);
-    const primaryColumn = meta.columns.find((c) => c.primary)!;
-
-    const row = await sql<T[]>`
-      SELECT * FROM ${tableName} 
-      WHERE ${sql(primaryColumn.columnName)} = ${id}
-    `;
-    return row[0] || null;
+  async findMany(options?: FindOptions<T>): Promise<T[]> {
+    return new QueryBuilder<T>(this.entity).applyOptions(options).getMany();
   }
 
-  async findAll(): Promise<T[]> {
-    const db = Database.getInstance();
-    const meta = db.getMetadata().get(this.entity)!;
-    const sql = db.getConnection();
-    const tableName = sql(meta.tableName);
-    const rows = await sql<T[]>`SELECT * FROM ${tableName}`;
-    return rows;
+  async findOne(options?: FindOptions<T>): Promise<T | null> {
+    return new QueryBuilder<T>(this.entity).applyOptions(options).getOne();
+  }
+
+  async findById(id: T[PK]): Promise<T | null> {
+    const meta = Database.getInstance().getMetadata().get(this.entity)!;
+    const primaryProp = meta.columns.find((c) => c.primary)!.propertyName as keyof T;
+    return new QueryBuilder<T>(this.entity)
+      .applyOptions({ where: (u) => [u[primaryProp]?.eq(id)] })
+      .getOne();
   }
 
   async create(entity: Omit<T, PK>): Promise<T[PK]> {
