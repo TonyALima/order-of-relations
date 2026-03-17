@@ -4,7 +4,7 @@ import { QueryBuilder } from './query-builder';
 import { Repository } from '../core/repository';
 import { Database } from '../core/database';
 import { COLUMN_TYPE } from '../core/sql-types';
-import type { Condition } from './types';
+import type { Condition, Conditions } from './types';
 
 // ── Test entity registered directly in metadata (no DB connection needed) ────
 
@@ -42,78 +42,76 @@ async function setupDb(): Promise<SQL> {
 // ── Condition proxy unit tests (no DB required) ───────────────────────────────
 
 describe('QueryBuilder - conditions proxy', () => {
-  test('buildConditionsProxyForTest returns keys matching entity properties', () => {
-    const db = Database.getInstance();
-    const sql = new SQL({ url: 'sqlite://:memory:' });
-    spyOn(db, 'getConnection').mockReturnValue(sql);
-
+  test('conditions proxy has keys matching entity properties', () => {
     const qb = new QueryBuilder(QbUser);
-    const proxy = qb.buildConditionsProxyForTest();
-    expect(proxy).toHaveProperty('id');
-    expect(proxy).toHaveProperty('name');
-    expect(proxy).toHaveProperty('age');
+    let capturedProxy!: Conditions<QbUser>;
+    qb.applyOptions({ where: (u) => { capturedProxy = u; return []; } });
+    expect(capturedProxy).toHaveProperty('id');
+    expect(capturedProxy).toHaveProperty('name');
+    expect(capturedProxy).toHaveProperty('age');
   });
 
   test('eq returns correct Condition', () => {
     const qb = new QueryBuilder(QbUser);
-    const proxy = qb.buildConditionsProxyForTest();
-    const condition: Condition | undefined = proxy.name?.eq('Alice');
-    expect(condition).toEqual({ columnName: 'name', op: '=', value: 'Alice' });
+    let captured!: Condition;
+    qb.applyOptions({ where: (u) => { captured = u.name!.eq('Alice'); return [captured]; } });
+    expect(captured).toEqual({ columnName: 'name', op: '=', value: 'Alice' });
   });
 
   test('ne returns correct Condition', () => {
     const qb = new QueryBuilder(QbUser);
-    const proxy = qb.buildConditionsProxyForTest();
-    const condition: Condition | undefined = proxy.name?.ne('Alice');
-    expect(condition).toEqual({ columnName: 'name', op: '!=', value: 'Alice' });
+    let captured!: Condition;
+    qb.applyOptions({ where: (u) => { captured = u.name!.ne('Alice'); return [captured]; } });
+    expect(captured).toEqual({ columnName: 'name', op: '!=', value: 'Alice' });
   });
 
   test('gt returns correct Condition', () => {
     const qb = new QueryBuilder(QbUser);
-    const proxy = qb.buildConditionsProxyForTest();
-    const condition: Condition | undefined = proxy.age?.gt(18);
-    expect(condition).toEqual({ columnName: 'age', op: '>', value: 18 });
+    let captured!: Condition;
+    qb.applyOptions({ where: (u) => { captured = u.age!.gt(18); return [captured]; } });
+    expect(captured).toEqual({ columnName: 'age', op: '>', value: 18 });
   });
 
   test('gte returns correct Condition', () => {
     const qb = new QueryBuilder(QbUser);
-    const proxy = qb.buildConditionsProxyForTest();
-    const condition: Condition | undefined = proxy.age?.gte(18);
-    expect(condition).toEqual({ columnName: 'age', op: '>=', value: 18 });
+    let captured!: Condition;
+    qb.applyOptions({ where: (u) => { captured = u.age!.gte(18); return [captured]; } });
+    expect(captured).toEqual({ columnName: 'age', op: '>=', value: 18 });
   });
 
   test('lt returns correct Condition', () => {
     const qb = new QueryBuilder(QbUser);
-    const proxy = qb.buildConditionsProxyForTest();
-    const condition: Condition | undefined = proxy.age?.lt(65);
-    expect(condition).toEqual({ columnName: 'age', op: '<', value: 65 });
+    let captured!: Condition;
+    qb.applyOptions({ where: (u) => { captured = u.age!.lt(65); return [captured]; } });
+    expect(captured).toEqual({ columnName: 'age', op: '<', value: 65 });
   });
 
   test('lte returns correct Condition', () => {
     const qb = new QueryBuilder(QbUser);
-    const proxy = qb.buildConditionsProxyForTest();
-    const condition: Condition | undefined = proxy.age?.lte(65);
-    expect(condition).toEqual({ columnName: 'age', op: '<=', value: 65 });
+    let captured!: Condition;
+    qb.applyOptions({ where: (u) => { captured = u.age!.lte(65); return [captured]; } });
+    expect(captured).toEqual({ columnName: 'age', op: '<=', value: 65 });
   });
 
   test('isNull returns Condition without value', () => {
     const qb = new QueryBuilder(QbUser);
-    const proxy = qb.buildConditionsProxyForTest();
-    const condition: Condition | undefined = proxy.name?.isNull();
-    expect(condition).toEqual({ columnName: 'name', op: 'IS NULL' });
+    let captured!: Condition;
+    qb.applyOptions({ where: (u) => { captured = u.name!.isNull(); return [captured]; } });
+    expect(captured).toEqual({ columnName: 'name', op: 'IS NULL' });
   });
 
   test('isNotNull returns Condition without value', () => {
     const qb = new QueryBuilder(QbUser);
-    const proxy = qb.buildConditionsProxyForTest();
-    const condition: Condition | undefined = proxy.name?.isNotNull();
-    expect(condition).toEqual({ columnName: 'name', op: 'IS NOT NULL' });
+    let captured!: Condition;
+    qb.applyOptions({ where: (u) => { captured = u.name!.isNotNull(); return [captured]; } });
+    expect(captured).toEqual({ columnName: 'name', op: 'IS NOT NULL' });
   });
 
   test('applyOptions accumulates conditions from where callback', () => {
     const qb = new QueryBuilder(QbUser);
     qb.applyOptions({ where: (u) => [u.name?.eq('Alice'), u.age?.gte(18)] });
-    expect(qb.getConditionsForTest()).toEqual([
+    const conditionsSpy = qb['conditions'];
+    expect(conditionsSpy).toEqual([
       { columnName: 'name', op: '=', value: 'Alice' },
       { columnName: 'age', op: '>=', value: 18 },
     ]);
@@ -122,14 +120,15 @@ describe('QueryBuilder - conditions proxy', () => {
   test('applyOptions with no options leaves conditions empty', () => {
     const qb = new QueryBuilder(QbUser);
     qb.applyOptions();
-    expect(qb.getConditionsForTest()).toEqual([]);
+    const conditionsSpy = qb['conditions'];
+    expect(conditionsSpy).toEqual([]);
   });
 
   test('applyOptions throws when a condition entry is undefined (non-column field access)', () => {
     const qb = new QueryBuilder(QbUser);
-    expect(() =>
-      qb.applyOptions({ where: (u) => [u.name?.eq('Alice'), undefined] }),
-    ).toThrow('where() condition at index 1 is undefined');
+    expect(() => qb.applyOptions({ where: (u) => [u.name?.eq('Alice'), undefined] })).toThrow(
+      'where() condition at index 1 is undefined',
+    );
   });
 
   test('applyOptions throws when the only condition is undefined', () => {

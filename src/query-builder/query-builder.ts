@@ -62,14 +62,6 @@ export class QueryBuilder<T> {
     return rows[0] ?? null;
   }
 
-  buildConditionsProxyForTest(): Conditions<T> {
-    return this.buildConditionsProxy();
-  }
-
-  getConditionsForTest(): Condition[] {
-    return this.conditions;
-  }
-
   private buildConditionsProxy(): Conditions<T> {
     const db = Database.getInstance();
     const meta = db.getMetadata().get(this.entity)!;
