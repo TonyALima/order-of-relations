@@ -1,4 +1,4 @@
-import { describe, test, expect, spyOn } from 'bun:test';
+import { describe, test, expect, spyOn, beforeEach } from 'bun:test';
 import { SQL } from 'bun';
 import { QueryBuilder } from './query-builder';
 import { Repository } from '../core/repository';
@@ -39,10 +39,10 @@ async function setupDb(): Promise<SQL> {
   return sql;
 }
 
-// ── Condition proxy unit tests (no DB required) ───────────────────────────────
+// ── Condition proxy unit tests ────────────────────────────────────────────────
 
 describe('QueryBuilder - conditions proxy', () => {
-  test('conditions proxy has keys matching entity properties', () => {
+  test('proxy has keys matching every entity property', () => {
     const qb = new QueryBuilder(QbUser);
     let capturedProxy!: Conditions<QbUser>;
     qb.applyOptions({ where: (u) => { capturedProxy = u; return []; } });
@@ -51,67 +51,40 @@ describe('QueryBuilder - conditions proxy', () => {
     expect(capturedProxy).toHaveProperty('age');
   });
 
-  test('eq returns correct Condition', () => {
+  // Comparison operators — parametrized with test.each
+  const comparisonCases: Array<[string, (u: Conditions<QbUser>) => Condition, Condition]> = [
+    ['eq',  (u) => u.name!.eq('Alice'),  { columnName: 'name', op: '=',  value: 'Alice' }],
+    ['ne',  (u) => u.name!.ne('Alice'),  { columnName: 'name', op: '!=', value: 'Alice' }],
+    ['gt',  (u) => u.age!.gt(18),        { columnName: 'age',  op: '>',  value: 18 }],
+    ['gte', (u) => u.age!.gte(18),       { columnName: 'age',  op: '>=', value: 18 }],
+    ['lt',  (u) => u.age!.lt(65),        { columnName: 'age',  op: '<',  value: 65 }],
+    ['lte', (u) => u.age!.lte(65),       { columnName: 'age',  op: '<=', value: 65 }],
+  ];
+
+  test.each(comparisonCases)('%s returns the correct Condition', (_op, build, expected) => {
     const qb = new QueryBuilder(QbUser);
     let captured!: Condition;
-    qb.applyOptions({ where: (u) => { captured = u.name!.eq('Alice'); return [captured]; } });
-    expect(captured).toEqual({ columnName: 'name', op: '=', value: 'Alice' });
+    qb.applyOptions({ where: (u) => { captured = build(u); return [captured]; } });
+    expect(captured).toEqual(expected);
   });
 
-  test('ne returns correct Condition', () => {
+  // Null-check operators
+  const nullCases: Array<[string, (u: Conditions<QbUser>) => Condition, Condition]> = [
+    ['isNull',    (u) => u.name!.isNull(),    { columnName: 'name', op: 'IS NULL' }],
+    ['isNotNull', (u) => u.name!.isNotNull(), { columnName: 'name', op: 'IS NOT NULL' }],
+  ];
+
+  test.each(nullCases)('%s returns a Condition without value', (_op, build, expected) => {
     const qb = new QueryBuilder(QbUser);
     let captured!: Condition;
-    qb.applyOptions({ where: (u) => { captured = u.name!.ne('Alice'); return [captured]; } });
-    expect(captured).toEqual({ columnName: 'name', op: '!=', value: 'Alice' });
+    qb.applyOptions({ where: (u) => { captured = build(u); return [captured]; } });
+    expect(captured).toEqual(expected);
   });
 
-  test('gt returns correct Condition', () => {
-    const qb = new QueryBuilder(QbUser);
-    let captured!: Condition;
-    qb.applyOptions({ where: (u) => { captured = u.age!.gt(18); return [captured]; } });
-    expect(captured).toEqual({ columnName: 'age', op: '>', value: 18 });
-  });
-
-  test('gte returns correct Condition', () => {
-    const qb = new QueryBuilder(QbUser);
-    let captured!: Condition;
-    qb.applyOptions({ where: (u) => { captured = u.age!.gte(18); return [captured]; } });
-    expect(captured).toEqual({ columnName: 'age', op: '>=', value: 18 });
-  });
-
-  test('lt returns correct Condition', () => {
-    const qb = new QueryBuilder(QbUser);
-    let captured!: Condition;
-    qb.applyOptions({ where: (u) => { captured = u.age!.lt(65); return [captured]; } });
-    expect(captured).toEqual({ columnName: 'age', op: '<', value: 65 });
-  });
-
-  test('lte returns correct Condition', () => {
-    const qb = new QueryBuilder(QbUser);
-    let captured!: Condition;
-    qb.applyOptions({ where: (u) => { captured = u.age!.lte(65); return [captured]; } });
-    expect(captured).toEqual({ columnName: 'age', op: '<=', value: 65 });
-  });
-
-  test('isNull returns Condition without value', () => {
-    const qb = new QueryBuilder(QbUser);
-    let captured!: Condition;
-    qb.applyOptions({ where: (u) => { captured = u.name!.isNull(); return [captured]; } });
-    expect(captured).toEqual({ columnName: 'name', op: 'IS NULL' });
-  });
-
-  test('isNotNull returns Condition without value', () => {
-    const qb = new QueryBuilder(QbUser);
-    let captured!: Condition;
-    qb.applyOptions({ where: (u) => { captured = u.name!.isNotNull(); return [captured]; } });
-    expect(captured).toEqual({ columnName: 'name', op: 'IS NOT NULL' });
-  });
-
-  test('applyOptions accumulates conditions from where callback', () => {
+  test('applyOptions accumulates all conditions from the where callback', () => {
     const qb = new QueryBuilder(QbUser);
     qb.applyOptions({ where: (u) => [u.name?.eq('Alice'), u.age?.gte(18)] });
-    const conditionsSpy = qb['conditions'];
-    expect(conditionsSpy).toEqual([
+    expect(qb['conditions']).toEqual([
       { columnName: 'name', op: '=', value: 'Alice' },
       { columnName: 'age', op: '>=', value: 18 },
     ]);
@@ -120,8 +93,7 @@ describe('QueryBuilder - conditions proxy', () => {
   test('applyOptions with no options leaves conditions empty', () => {
     const qb = new QueryBuilder(QbUser);
     qb.applyOptions();
-    const conditionsSpy = qb['conditions'];
-    expect(conditionsSpy).toEqual([]);
+    expect(qb['conditions']).toEqual([]);
   });
 
   test('applyOptions throws when a condition entry is undefined (non-column field access)', () => {
@@ -139,85 +111,93 @@ describe('QueryBuilder - conditions proxy', () => {
   });
 });
 
-// ── Repository integration tests ─────────────────────────────────────────────
+// ── Repository integration tests ──────────────────────────────────────────────
 
 describe('Repository - findMany', () => {
-  test('findMany with no options returns all rows', async () => {
+  let repo: Repository<QbUser>;
+
+  beforeEach(async () => {
     const sql = await setupDb();
     spyOn(Database.getInstance(), 'getConnection').mockReturnValue(sql);
-
-    const repo = new Repository(QbUser);
-    const users = await repo.findMany();
-    expect(users.length).toBe(3);
+    repo = new Repository(QbUser);
   });
 
-  test('findMany with where eq filters correctly', async () => {
-    const sql = await setupDb();
-    spyOn(Database.getInstance(), 'getConnection').mockReturnValue(sql);
+  const cases = [
+    {
+      label: 'no options returns all rows',
+      options: undefined,
+      expectedCount: 3,
+      expectedFirstName: undefined,
+    },
+    {
+      label: 'where eq filters correctly',
+      options: { where: (u: Conditions<QbUser>) => [u.name?.eq('Alice')] },
+      expectedCount: 1,
+      expectedFirstName: 'Alice',
+    },
+    {
+      label: 'multiple AND conditions filters correctly',
+      options: { where: (u: Conditions<QbUser>) => [u.age?.eq(30), u.name?.ne('Alice')] },
+      expectedCount: 1,
+      expectedFirstName: 'Carol',
+    },
+    {
+      label: 'gte filters correctly',
+      options: { where: (u: Conditions<QbUser>) => [u.age?.gte(18)] },
+      expectedCount: 2,
+      expectedFirstName: undefined,
+    },
+    {
+      label: 'returns empty array when no rows match',
+      options: { where: (u: Conditions<QbUser>) => [u.name?.eq('Nobody')] },
+      expectedCount: 0,
+      expectedFirstName: undefined,
+    },
+  ];
 
-    const repo = new Repository(QbUser);
-    const users = await repo.findMany({ where: (u) => [u.name?.eq('Alice')] });
-    expect(users.length).toBe(1);
-    expect(users[0]!.name).toBe('Alice');
-  });
-
-  test('findMany with multiple AND conditions filters correctly', async () => {
-    const sql = await setupDb();
-    spyOn(Database.getInstance(), 'getConnection').mockReturnValue(sql);
-
-    const repo = new Repository(QbUser);
-    const users = await repo.findMany({
-      where: (u) => [u.age?.eq(30), u.name?.ne('Alice')],
-    });
-    expect(users.length).toBe(1);
-    expect(users[0]!.name).toBe('Carol');
-  });
-
-  test('findMany with gte filters correctly', async () => {
-    const sql = await setupDb();
-    spyOn(Database.getInstance(), 'getConnection').mockReturnValue(sql);
-
-    const repo = new Repository(QbUser);
-    const users = await repo.findMany({ where: (u) => [u.age?.gte(18)] });
-    expect(users.length).toBe(2);
-  });
-
-  test('findMany returns empty array when no rows match', async () => {
-    const sql = await setupDb();
-    spyOn(Database.getInstance(), 'getConnection').mockReturnValue(sql);
-
-    const repo = new Repository(QbUser);
-    const users = await repo.findMany({ where: (u) => [u.name?.eq('Nobody')] });
-    expect(users).toEqual([]);
+  test.each(cases)('$label', async ({ options, expectedCount, expectedFirstName }) => {
+    const users = await repo.findMany(options);
+    expect(users).toHaveLength(expectedCount);
+    if (expectedFirstName !== undefined) {
+      expect(users[0]!.name).toBe(expectedFirstName);
+    }
   });
 });
 
 describe('Repository - findOne', () => {
-  test('findOne returns first matching row', async () => {
+  let repo: Repository<QbUser>;
+
+  beforeEach(async () => {
     const sql = await setupDb();
     spyOn(Database.getInstance(), 'getConnection').mockReturnValue(sql);
-
-    const repo = new Repository(QbUser);
-    const user = await repo.findOne({ where: (u) => [u.name?.eq('Bob')] });
-    expect(user).not.toBeNull();
-    expect(user!.name).toBe('Bob');
+    repo = new Repository(QbUser);
   });
 
-  test('findOne returns null when no row matches', async () => {
-    const sql = await setupDb();
-    spyOn(Database.getInstance(), 'getConnection').mockReturnValue(sql);
+  const cases = [
+    {
+      label: 'returns first matching row',
+      options: { where: (u: Conditions<QbUser>) => [u.name?.eq('Bob')] },
+      expectedName: 'Bob' as string | null,
+    },
+    {
+      label: 'returns null when no row matches',
+      options: { where: (u: Conditions<QbUser>) => [u.name?.eq('Nobody')] },
+      expectedName: null,
+    },
+    {
+      label: 'with no options returns first row',
+      options: undefined,
+      expectedName: 'Alice' as string | null,
+    },
+  ];
 
-    const repo = new Repository(QbUser);
-    const user = await repo.findOne({ where: (u) => [u.name?.eq('Nobody')] });
-    expect(user).toBeNull();
-  });
-
-  test('findOne with no options returns first row', async () => {
-    const sql = await setupDb();
-    spyOn(Database.getInstance(), 'getConnection').mockReturnValue(sql);
-
-    const repo = new Repository(QbUser);
-    const user = await repo.findOne();
-    expect(user).not.toBeNull();
+  test.each(cases)('$label', async ({ options, expectedName }) => {
+    const user = await repo.findOne(options);
+    if (expectedName === null) {
+      expect(user).toBeNull();
+    } else {
+      expect(user).not.toBeNull();
+      expect(user!.name).toBe(expectedName);
+    }
   });
 });
