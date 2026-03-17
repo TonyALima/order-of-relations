@@ -1,4 +1,4 @@
-import { test, expect, spyOn } from 'bun:test';
+import { test, expect, spyOn, describe, beforeEach } from 'bun:test';
 import { SQL } from 'bun';
 import { Repository } from './repository';
 import { Database } from './database';
@@ -20,8 +20,7 @@ Database.getInstance()
     relations: [],
   });
 
-// Create a fresh in-memory SQLite database with the test schema.
-async function setupDb(): Promise<SQL> {
+async function createFreshDb(): Promise<SQL> {
   const sql = new SQL({ url: 'sqlite://:memory:' });
   await sql`CREATE TABLE test_entity (
     id   INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -30,87 +29,68 @@ async function setupDb(): Promise<SQL> {
   return sql;
 }
 
-test('Repository.findOne returns the entity when a matching row exists', async () => {
-  const sql = await setupDb();
-  await sql`INSERT INTO test_entity (name) VALUES ('Alice')`;
+describe('Repository', () => {
+  let sql: SQL;
+  let repo: Repository<TestEntity>;
 
-  const db = Database.getInstance();
-  spyOn(db, 'getConnection').mockReturnValue(sql);
+  beforeEach(async () => {
+    sql = await createFreshDb();
+    spyOn(Database.getInstance(), 'getConnection').mockReturnValue(sql);
+    repo = new Repository<TestEntity>(TestEntity);
+  });
 
-  const repo = new Repository<TestEntity>(TestEntity);
-  const result = await repo.findById(1);
+  describe('findById()', () => {
+    test('returns the entity when a matching row exists', async () => {
+      await sql`INSERT INTO test_entity (name) VALUES ('Alice')`;
+      const result = await repo.findById(1);
+      expect(result).toEqual({ id: 1, name: 'Alice' });
+    });
 
-  expect(result).toEqual({ id: 1, name: 'Alice' });
-});
+    test('returns null when no matching row exists', async () => {
+      const result = await repo.findById(999);
+      expect(result).toBeNull();
+    });
+  });
 
-test('Repository.findOne returns null when no matching row exists', async () => {
-  const sql = await setupDb();
+  describe('findMany()', () => {
+    test('returns all rows from the table', async () => {
+      await sql`INSERT INTO test_entity (name) VALUES ('Alice')`;
+      await sql`INSERT INTO test_entity (name) VALUES ('Bob')`;
+      const result = await repo.findMany();
+      expect(result).toEqual([
+        { id: 1, name: 'Alice' },
+        { id: 2, name: 'Bob' },
+      ]);
+    });
+  });
 
-  const db = Database.getInstance();
-  spyOn(db, 'getConnection').mockReturnValue(sql);
+  describe('create()', () => {
+    test('inserts a row and returns the generated primary key', async () => {
+      const newId = await repo.create({ name: 'Alice' });
+      expect(newId).toBe(1);
 
-  const repo = new Repository<TestEntity>(TestEntity);
-  const result = await repo.findById(999);
+      const [row] = await sql`SELECT * FROM test_entity WHERE id = ${newId}`;
+      expect(row).toEqual({ id: 1, name: 'Alice' });
+    });
+  });
 
-  expect(result).toBeNull();
-});
+  describe('update()', () => {
+    test('changes the row identified by the primary key', async () => {
+      await sql`INSERT INTO test_entity (name) VALUES ('Alice')`;
+      await repo.update({ id: 1, name: 'Bob' });
 
-test('Repository.findMany returns all rows from the table', async () => {
-  const sql = await setupDb();
-  await sql`INSERT INTO test_entity (name) VALUES ('Alice')`;
-  await sql`INSERT INTO test_entity (name) VALUES ('Bob')`;
+      const [row] = await sql`SELECT * FROM test_entity WHERE id = 1`;
+      expect(row).toEqual({ id: 1, name: 'Bob' });
+    });
+  });
 
-  const db = Database.getInstance();
-  spyOn(db, 'getConnection').mockReturnValue(sql);
+  describe('delete()', () => {
+    test('removes the row with the given id', async () => {
+      await sql`INSERT INTO test_entity (name) VALUES ('Alice')`;
+      await repo.delete(1);
 
-  const repo = new Repository<TestEntity>(TestEntity);
-  const result = await repo.findMany();
-
-  expect(result).toEqual([
-    { id: 1, name: 'Alice' },
-    { id: 2, name: 'Bob' },
-  ]);
-});
-
-test('Repository.create inserts a row and returns the generated primary key', async () => {
-  const sql = await setupDb();
-
-  const db = Database.getInstance();
-  spyOn(db, 'getConnection').mockReturnValue(sql);
-
-  const repo = new Repository<TestEntity>(TestEntity);
-  const newId = await repo.create({ name: 'Alice' });
-
-  expect(newId).toBe(1);
-
-  const [row] = await sql`SELECT * FROM test_entity WHERE id = ${newId}`;
-  expect(row).toEqual({ id: 1, name: 'Alice' });
-});
-
-test('Repository.update changes the row identified by the primary key', async () => {
-  const sql = await setupDb();
-  await sql`INSERT INTO test_entity (name) VALUES ('Alice')`;
-
-  const db = Database.getInstance();
-  spyOn(db, 'getConnection').mockReturnValue(sql);
-
-  const repo = new Repository<TestEntity>(TestEntity);
-  await repo.update({ id: 1, name: 'Bob' });
-
-  const [row] = await sql`SELECT * FROM test_entity WHERE id = 1`;
-  expect(row).toEqual({ id: 1, name: 'Bob' });
-});
-
-test('Repository.delete removes the row with the given id', async () => {
-  const sql = await setupDb();
-  await sql`INSERT INTO test_entity (name) VALUES ('Alice')`;
-
-  const db = Database.getInstance();
-  spyOn(db, 'getConnection').mockReturnValue(sql);
-
-  const repo = new Repository<TestEntity>(TestEntity);
-  await repo.delete(1);
-
-  const remaining = await sql`SELECT * FROM test_entity`;
-  expect(remaining).toHaveLength(0);
+      const remaining = await sql`SELECT * FROM test_entity`;
+      expect(remaining).toHaveLength(0);
+    });
+  });
 });
