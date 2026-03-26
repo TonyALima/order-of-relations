@@ -51,30 +51,33 @@ export class Database {
       }
       const primaryColumnType = getColumnTypeDefinition(sql, primaryColumn.type);
 
-      await sql`
+      await sql.begin(async (tx) => {
+        await tx`
         CREATE TABLE ${sql(metadata.tableName)}
         (${sql(primaryColumn.columnName)} ${primaryColumnType} PRIMARY KEY)
       `;
 
-      const hasDiscriminator = metadata.discriminator !== undefined;
+        const hasDiscriminator = metadata.discriminator !== undefined;
 
-      if (hasDiscriminator) {
-        await sql`
+        if (hasDiscriminator) {
+          await tx`
           ALTER TABLE ${sql(metadata.tableName)} 
-          ADD COLUMN discriminator TEXT NOT NULL
-        `;
-      }
+          ADD COLUMN discriminator TEXT NOT NULL;
+          CREATE INDEX idx_discriminator ON ${sql(metadata.tableName)}(discriminator);
+        `.simple();
+        }
 
-      for (const column of metadata.columns) {
-        if (column.primary) continue;
+        for (const column of metadata.columns) {
+          if (column.primary) continue;
 
-        const columnType = getColumnTypeDefinition(sql, column.type);
+          const columnType = getColumnTypeDefinition(sql, column.type);
 
-        await sql`
+          await tx`
           ALTER TABLE ${sql(metadata.tableName)} 
           ADD COLUMN ${sql(column.columnName)} ${columnType}
         `;
-      }
+        }
+      });
     }
   }
 
