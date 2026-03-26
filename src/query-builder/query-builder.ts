@@ -7,6 +7,20 @@ export class QueryBuilder<T> {
 
   constructor(private entity: Constructor<T>) {}
 
+  setAbstractClassDiscriminator() {}
+
+  setConcreteClassDiscriminator() {
+    const db = Database.getInstance();
+    const meta = db.getMetadata().get(this.entity)!;
+    if (meta.discriminator) {
+      this.conditions.push({
+        columnName: 'discriminator',
+        op: '=',
+        value: meta.discriminator,
+      });
+    }
+  }
+
   applyOptions(options?: FindOptions<T>): this {
     if (options?.where) {
       const results = options.where(this.buildConditionsProxy());
@@ -18,6 +32,11 @@ export class QueryBuilder<T> {
         );
       }
       this.conditions = results as Condition[];
+    }
+    if (options?.inheritance === 'ALL') {
+      this.setAbstractClassDiscriminator();
+    } else {
+      this.setConcreteClassDiscriminator();
     }
     return this;
   }

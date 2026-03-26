@@ -19,6 +19,12 @@ export type Conditions<T> = {
   [K in keyof T]?: FieldConditionBuilder<T[K]>;
 };
 
+export enum InheritanceFind {
+  ALL = 'ALL',
+  ONLY = 'ONLY',
+}
+
 export interface FindOptions<T> {
   where?: (conditions: Conditions<T>) => (Condition | undefined)[];
+  inheritance?: InheritanceFind;
 }
