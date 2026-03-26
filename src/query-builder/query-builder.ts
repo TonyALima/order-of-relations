@@ -1,12 +1,7 @@
 import { Database } from '../core/database';
 import type { EntityMetadata } from '../core/metadata';
 import type { Constructor } from '../core/utils';
-import {
-  INHERITANCE_SEARCH_TYPE,
-  type Condition,
-  type Conditions,
-  type FindOptions,
-} from './types';
+import { InheritanceSearchType, type Condition, type Conditions, type FindOptions } from './types';
 
 export class QueryBuilder<T> {
   private conditions: Condition[] = [];
@@ -59,9 +54,9 @@ export class QueryBuilder<T> {
       }
       this.conditions = results as Condition[];
     }
-    if (options?.inheritance === INHERITANCE_SEARCH_TYPE.SUBCLASSES) {
+    if (options?.inheritance === InheritanceSearchType.SUBCLASSES) {
       this.setSubClassesDiscriminator();
-    } else if (options?.inheritance === INHERITANCE_SEARCH_TYPE.ONLY) {
+    } else if (options?.inheritance === InheritanceSearchType.ONLY) {
       this.setConcreteClassDiscriminator();
     }
     return this;

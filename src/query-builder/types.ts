@@ -20,7 +20,7 @@ export type Conditions<T> = {
   [K in keyof T]?: FieldConditionBuilder<T[K]>;
 };
 
-export enum INHERITANCE_SEARCH_TYPE {
+export enum InheritanceSearchType {
   ALL = 'ALL',
   ONLY = 'ONLY',
   SUBCLASSES = 'SUBCLASSES',
@@ -28,5 +28,5 @@ export enum INHERITANCE_SEARCH_TYPE {
 
 export interface FindOptions<T> {
   where?: (conditions: Conditions<T>) => (Condition | undefined)[];
-  inheritance?: INHERITANCE_SEARCH_TYPE;
+  inheritance?: InheritanceSearchType;
 }

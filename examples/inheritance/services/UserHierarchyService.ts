@@ -1,7 +1,7 @@
 import { Service, InjectRepository, Repository } from '../../../src';
 import { User } from '../entities/User';
 import { AdminUser } from '../entities/AdminUser';
-import { INHERITANCE_SEARCH_TYPE } from '../../../src/query-builder/types';
+import { InheritanceSearchType } from '../../../src/query-builder/types';
 
 @Service()
 export class UserHierarchyService {
@@ -24,7 +24,7 @@ export class UserHierarchyService {
   }
 
   async listSubClassUsers() {
-    return this.userRepository.findMany({ inheritance: INHERITANCE_SEARCH_TYPE.SUBCLASSES });
+    return this.userRepository.findMany({ inheritance: InheritanceSearchType.SUBCLASSES });
   }
 
   async listAdmins() {
@@ -32,6 +32,6 @@ export class UserHierarchyService {
   }
 
   async listSubClassAdmins() {
-    return this.adminRepository.findMany({ inheritance: INHERITANCE_SEARCH_TYPE.SUBCLASSES });
+    return this.adminRepository.findMany({ inheritance: InheritanceSearchType.SUBCLASSES });
   }
 }
