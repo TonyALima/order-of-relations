@@ -26,6 +26,12 @@ async function main() {
 
   console.log('All users from users table:', users);
   console.log('All admins from users table:', admins);
+
+  const allSubClassUsers = await userService.listSubClassUsers();
+  const allSubClassAdmins = await userService.listSubClassAdmins();
+
+  console.log('All users sub classes from users table:', allSubClassUsers);
+  console.log('All admins sub classes from users table:', allSubClassAdmins);
 }
 
 main();
