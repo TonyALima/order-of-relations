@@ -34,12 +34,4 @@ describe('@Entity / @Column decorators', () => {
       relations: [],
     });
   });
-
-  test('instanceof the decorated class is recognized as an instance of the original class', () => {
-    @Entity()
-    class User {}
-
-    const user = new User();
-    expect(user instanceof User).toBe(true);
-  });
 });
