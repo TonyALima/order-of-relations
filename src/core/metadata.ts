@@ -9,15 +9,15 @@ export interface ColumnMetadata {
 }
 
 export enum RelationType {
-  MANY_TO_ONE = 'many-to-one',
-  ONE_TO_MANY = 'one-to-many',
+  TO_ONE = 'to-one',
+  TO_MANY = 'to-many',
 }
 
 export interface RelationMetadata {
   propertyName: string;
+  columnName: string;
   type: RelationType;
-  target: Constructor;
-  inverseSide?: string;
+  getTarget: () => Constructor;
 }
 
 export interface EntityMetadata {

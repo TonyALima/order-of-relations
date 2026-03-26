@@ -3,8 +3,7 @@ import {
   Entity,
   Column,
   PrimaryColumn,
-  ManyToOne,
-  OneToMany,
+  ToOne,
   Service,
   Inject,
   InjectRepository,
@@ -18,8 +17,7 @@ describe('public API exports', () => {
     expect(Entity).toBeFunction();
     expect(Column).toBeFunction();
     expect(PrimaryColumn).toBeFunction();
-    expect(ManyToOne).toBeFunction();
-    expect(OneToMany).toBeFunction();
+    expect(ToOne).toBeFunction();
     expect(Service).toBeFunction();
     expect(Inject).toBeFunction();
     expect(InjectRepository).toBeFunction();

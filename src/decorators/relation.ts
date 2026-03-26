@@ -2,29 +2,25 @@ import { RelationType, type RelationMetadata } from '../core/metadata';
 import type { Constructor } from '../core/utils';
 import { RELATIONS_KEY } from './entity';
 
-export function ManyToOne(target: Constructor) {
-  return function (_value: undefined, context: ClassFieldDecoratorContext) {
-    const relations: RelationMetadata[] = ((context.metadata[
-      RELATIONS_KEY
-    ] as RelationMetadata[]) ??= []);
-    relations.push({
-      propertyName: String(context.name),
-      type: RelationType.MANY_TO_ONE,
-      target,
-    });
-  };
+export interface OneToOneOptions<TType> {
+  attribute: string;
+  target: () => Constructor<TType>;
 }
 
-export function OneToMany(target: Constructor, inverseSide: string) {
-  return function (_value: undefined, context: ClassFieldDecoratorContext) {
+export function ToOne<TType>(options: OneToOneOptions<TType>) {
+  return function (
+    _value: undefined,
+    context: ClassFieldDecoratorContext<unknown, TType | undefined>,
+  ) {
     const relations: RelationMetadata[] = ((context.metadata[
       RELATIONS_KEY
     ] as RelationMetadata[]) ??= []);
+
     relations.push({
-      propertyName: String(context.name),
-      type: RelationType.ONE_TO_MANY,
-      target,
-      inverseSide,
+      propertyName: options.attribute,
+      columnName: options.attribute,
+      type: RelationType.TO_ONE,
+      getTarget: options.target,
     });
   };
 }

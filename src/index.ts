@@ -1,7 +1,7 @@
 // Decorators
 export { Entity } from './decorators/entity';
 export { Column, PrimaryColumn } from './decorators/column';
-export { ManyToOne, OneToMany } from './decorators/relation';
+export { ToOne } from './decorators/relation';
 export { Service, Inject, InjectRepository } from './decorators/service';
 
 // Core
@@ -11,4 +11,9 @@ export { Container } from './core/container';
 
 // Types
 export type { EntityMetadata, ColumnMetadata, RelationMetadata } from './core/metadata';
-export type { Condition, FieldConditionBuilder, Conditions, FindOptions } from './query-builder/types';
+export type {
+  Condition,
+  FieldConditionBuilder,
+  Conditions,
+  FindOptions,
+} from './query-builder/types';
