@@ -64,11 +64,16 @@ export class QueryBuilder<T> {
 
     const fragments = this.conditions.map((c) => {
       const col = sql(c.columnName);
-      const op = opFragments[c.op];
       if (c.op === 'IS NULL' || c.op === 'IS NOT NULL') {
-        return sql`${col} ${op}`;
+        return sql`${col} ${opFragments[c.op]}`;
       }
-      return sql`${col} ${op} ${c.value}`;
+      if (c.op === 'IN') {
+        const values = c.value as unknown[];
+        if (values.length === 0) return sql`1 = 0`;
+        const list = values.map((v) => sql`${v}`).reduce((acc, frag) => sql`${acc}, ${frag}`);
+        return sql`${col} IN (${list})`;
+      }
+      return sql`${col} ${opFragments[c.op]} ${c.value}`;
     });
 
     const whereClause = fragments.reduce((acc, frag) => sql`${acc} AND ${frag}`);
@@ -95,6 +100,7 @@ export class QueryBuilder<T> {
         lte: (value) => ({ columnName: col.columnName, op: '<=', value }),
         isNull: () => ({ columnName: col.columnName, op: 'IS NULL' }),
         isNotNull: () => ({ columnName: col.columnName, op: 'IS NOT NULL' }),
+        in: (values) => ({ columnName: col.columnName, op: 'IN', value: values }),
       };
     }
     return proxy;

@@ -1,7 +1,7 @@
 export interface Condition {
   columnName: string;
-  op: '=' | '!=' | '>' | '>=' | '<' | '<=' | 'IS NULL' | 'IS NOT NULL';
-  value?: unknown;
+  op: '=' | '!=' | '>' | '>=' | '<' | '<=' | 'IS NULL' | 'IS NOT NULL' | 'IN';
+  value?: unknown | unknown[];
 }
 
 export interface FieldConditionBuilder<V> {
@@ -13,18 +13,19 @@ export interface FieldConditionBuilder<V> {
   lte(value: V): Condition;
   isNull(): Condition;
   isNotNull(): Condition;
+  in(values: V[]): Condition;
 }
 
 export type Conditions<T> = {
   [K in keyof T]?: FieldConditionBuilder<T[K]>;
 };
 
-export enum InheritanceFind {
+export enum INHERITANCE_SEARCH_TYPE {
   ALL = 'ALL',
   ONLY = 'ONLY',
 }
 
 export interface FindOptions<T> {
   where?: (conditions: Conditions<T>) => (Condition | undefined)[];
-  inheritance?: InheritanceFind;
+  inheritance?: INHERITANCE_SEARCH_TYPE;
 }

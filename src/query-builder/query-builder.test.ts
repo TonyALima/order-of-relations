@@ -45,7 +45,12 @@ describe('QueryBuilder - conditions proxy', () => {
   test('proxy has keys matching every entity property', () => {
     const qb = new QueryBuilder(QbUser);
     let capturedProxy!: Conditions<QbUser>;
-    qb.applyOptions({ where: (u) => { capturedProxy = u; return []; } });
+    qb.applyOptions({
+      where: (u) => {
+        capturedProxy = u;
+        return [];
+      },
+    });
     expect(capturedProxy).toHaveProperty('id');
     expect(capturedProxy).toHaveProperty('name');
     expect(capturedProxy).toHaveProperty('age');
@@ -53,31 +58,46 @@ describe('QueryBuilder - conditions proxy', () => {
 
   // Comparison operators — parametrized with test.each
   const comparisonCases: Array<[string, (u: Conditions<QbUser>) => Condition, Condition]> = [
-    ['eq',  (u) => u.name!.eq('Alice'),  { columnName: 'name', op: '=',  value: 'Alice' }],
-    ['ne',  (u) => u.name!.ne('Alice'),  { columnName: 'name', op: '!=', value: 'Alice' }],
-    ['gt',  (u) => u.age!.gt(18),        { columnName: 'age',  op: '>',  value: 18 }],
-    ['gte', (u) => u.age!.gte(18),       { columnName: 'age',  op: '>=', value: 18 }],
-    ['lt',  (u) => u.age!.lt(65),        { columnName: 'age',  op: '<',  value: 65 }],
-    ['lte', (u) => u.age!.lte(65),       { columnName: 'age',  op: '<=', value: 65 }],
+    ['eq', (u) => u.name!.eq('Alice'), { columnName: 'name', op: '=', value: 'Alice' }],
+    ['ne', (u) => u.name!.ne('Alice'), { columnName: 'name', op: '!=', value: 'Alice' }],
+    ['gt', (u) => u.age!.gt(18), { columnName: 'age', op: '>', value: 18 }],
+    ['gte', (u) => u.age!.gte(18), { columnName: 'age', op: '>=', value: 18 }],
+    ['lt', (u) => u.age!.lt(65), { columnName: 'age', op: '<', value: 65 }],
+    ['lte', (u) => u.age!.lte(65), { columnName: 'age', op: '<=', value: 65 }],
+    [
+      'in',
+      (u) => u.name!.in(['Alice', 'Bob']),
+      { columnName: 'name', op: 'IN', value: ['Alice', 'Bob'] },
+    ],
   ];
 
   test.each(comparisonCases)('%s returns the correct Condition', (_op, build, expected) => {
     const qb = new QueryBuilder(QbUser);
     let captured!: Condition;
-    qb.applyOptions({ where: (u) => { captured = build(u); return [captured]; } });
+    qb.applyOptions({
+      where: (u) => {
+        captured = build(u);
+        return [captured];
+      },
+    });
     expect(captured).toEqual(expected);
   });
 
   // Null-check operators
   const nullCases: Array<[string, (u: Conditions<QbUser>) => Condition, Condition]> = [
-    ['isNull',    (u) => u.name!.isNull(),    { columnName: 'name', op: 'IS NULL' }],
+    ['isNull', (u) => u.name!.isNull(), { columnName: 'name', op: 'IS NULL' }],
     ['isNotNull', (u) => u.name!.isNotNull(), { columnName: 'name', op: 'IS NOT NULL' }],
   ];
 
   test.each(nullCases)('%s returns a Condition without value', (_op, build, expected) => {
     const qb = new QueryBuilder(QbUser);
     let captured!: Condition;
-    qb.applyOptions({ where: (u) => { captured = build(u); return [captured]; } });
+    qb.applyOptions({
+      where: (u) => {
+        captured = build(u);
+        return [captured];
+      },
+    });
     expect(captured).toEqual(expected);
   });
 
@@ -150,6 +170,24 @@ describe('Repository - findMany', () => {
     {
       label: 'returns empty array when no rows match',
       options: { where: (u: Conditions<QbUser>) => [u.name?.eq('Nobody')] },
+      expectedCount: 0,
+      expectedFirstName: undefined,
+    },
+    {
+      label: 'in filters by array of values',
+      options: { where: (u: Conditions<QbUser>) => [u.name?.in(['Alice', 'Bob'])] },
+      expectedCount: 2,
+      expectedFirstName: undefined,
+    },
+    {
+      label: 'in returns empty when no values match',
+      options: { where: (u: Conditions<QbUser>) => [u.name?.in(['Nobody', 'Ghost'])] },
+      expectedCount: 0,
+      expectedFirstName: undefined,
+    },
+    {
+      label: 'in with empty array returns no rows',
+      options: { where: (u: Conditions<QbUser>) => [u.name?.in([])] },
       expectedCount: 0,
       expectedFirstName: undefined,
     },
