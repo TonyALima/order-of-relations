@@ -8,9 +8,14 @@ export interface ColumnMetadata {
   primary?: boolean;
 }
 
+export enum RelationType {
+  MANY_TO_ONE = 'many-to-one',
+  ONE_TO_MANY = 'one-to-many',
+}
+
 export interface RelationMetadata {
   propertyName: string;
-  type: 'many-to-one' | 'one-to-many';
+  type: RelationType;
   target: Constructor;
   inverseSide?: string;
 }
