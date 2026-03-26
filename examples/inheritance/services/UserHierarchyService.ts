@@ -24,7 +24,7 @@ export class UserHierarchyService {
   }
 
   async listSubClassUsers() {
-    return this.userRepository.findMany({ inheritance: INHERITANCE_SEARCH_TYPE.ALL });
+    return this.userRepository.findMany({ inheritance: INHERITANCE_SEARCH_TYPE.SUBCLASSES });
   }
 
   async listAdmins() {
@@ -32,6 +32,6 @@ export class UserHierarchyService {
   }
 
   async listSubClassAdmins() {
-    return this.adminRepository.findMany({ inheritance: INHERITANCE_SEARCH_TYPE.ALL });
+    return this.adminRepository.findMany({ inheritance: INHERITANCE_SEARCH_TYPE.SUBCLASSES });
   }
 }

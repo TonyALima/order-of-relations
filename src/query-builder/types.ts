@@ -23,6 +23,7 @@ export type Conditions<T> = {
 export enum INHERITANCE_SEARCH_TYPE {
   ALL = 'ALL',
   ONLY = 'ONLY',
+  SUBCLASSES = 'SUBCLASSES',
 }
 
 export interface FindOptions<T> {
