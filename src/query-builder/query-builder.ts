@@ -1,4 +1,5 @@
 import { Database } from '../core/database';
+import type { EntityMetadata } from '../core/metadata';
 import type { Constructor } from '../core/utils';
 import type { Condition, Conditions, FindOptions } from './types';
 
@@ -7,7 +8,27 @@ export class QueryBuilder<T> {
 
   constructor(private entity: Constructor<T>) {}
 
-  setAbstractClassDiscriminator() {}
+  setSubClassesDiscriminator() {
+    const db = Database.getInstance();
+    const meta = db.getMetadata().get(this.entity)!;
+    const subclasses: EntityMetadata[] = [];
+    for (const [t, m] of db.getMetadata()) {
+      if (
+        t === this.entity ||
+        Object.prototype.isPrototypeOf.call(this.entity.prototype, t.prototype)
+      ) {
+        subclasses.push(m);
+      }
+    }
+
+    if (meta.discriminator) {
+      this.conditions.push({
+        columnName: 'discriminator',
+        op: 'IN',
+        value: subclasses.map((s) => s.discriminator!),
+      });
+    }
+  }
 
   setConcreteClassDiscriminator() {
     const db = Database.getInstance();
@@ -34,7 +55,7 @@ export class QueryBuilder<T> {
       this.conditions = results as Condition[];
     }
     if (options?.inheritance === 'ALL') {
-      this.setAbstractClassDiscriminator();
+      this.setSubClassesDiscriminator();
     } else {
       this.setConcreteClassDiscriminator();
     }
