@@ -89,10 +89,7 @@ export class QueryBuilder<T> {
         return sql`${col} ${opFragments[c.op]}`;
       }
       if (c.op === 'IN') {
-        const values = c.value as unknown[];
-        if (values.length === 0) return sql`1 = 0`;
-        const list = values.map((v) => sql`${v}`).reduce((acc, frag) => sql`${acc}, ${frag}`);
-        return sql`${col} IN (${list})`;
+        return sql`${col} IN ${sql(c.value)}`;
       }
       return sql`${col} ${opFragments[c.op]} ${c.value}`;
     });
