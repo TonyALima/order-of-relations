@@ -10,7 +10,7 @@ describe('@ToOne decorator', () => {
     class User {
       id!: number;
 
-      @ToOne({ attribute: 'profileId', target: () => Profile })
+      @ToOne({ target: () => Profile })
       profile?: Profile;
     }
 
@@ -18,7 +18,7 @@ describe('@ToOne decorator', () => {
     class Profile {
       id!: number;
 
-      @ToOne({ attribute: 'userId', target: () => User })
+      @ToOne({ target: () => User })
       user!: User;
     }
 
@@ -35,8 +35,8 @@ describe('@ToOne decorator', () => {
     });
     expect(resolvedRelations).toEqual([
       {
-        propertyName: 'userId',
-        columnName: 'userId',
+        propertyName: 'user',
+        columnName: 'unresolved',
         type: RelationType.TO_ONE,
         target: User,
       },

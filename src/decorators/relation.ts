@@ -3,7 +3,6 @@ import type { Constructor } from '../core/utils';
 import { RELATIONS_KEY } from './entity';
 
 export interface OneToOneOptions<TType> {
-  attribute: string;
   target: () => Constructor<TType>;
 }
 
@@ -17,8 +16,8 @@ export function ToOne<TType>(options: OneToOneOptions<TType>) {
     ] as RelationMetadata[]) ??= []);
 
     relations.push({
-      propertyName: options.attribute,
-      columnName: options.attribute,
+      propertyName: context.name.toString(),
+      columnName: 'unresolved',
       type: RelationType.TO_ONE,
       getTarget: options.target,
     });
