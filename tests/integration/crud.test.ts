@@ -1,4 +1,4 @@
-import { describe, beforeEach, afterEach } from 'bun:test';
+import { describe, beforeEach, afterEach, test, expect } from 'bun:test';
 import { Entity, Column, PrimaryColumn, Database, Repository, COLUMN_TYPE } from '../../src';
 
 @Entity()
@@ -22,7 +22,13 @@ describe('Integration: Repository CRUD', () => {
   });
 
   afterEach(async () => {
-    void repo;
     await db.drop();
+  });
+
+  test('create() inserts a row and returns the generated primary key', async () => {
+    await repo.create({ name: 'Alice' });
+    const rows = await repo.findMany();
+    expect(rows.length).toBe(1);
+    expect(rows[0]!.name).toBe('Alice');
   });
 });
