@@ -51,11 +51,15 @@ describe('@ToOne decorator', () => {
   test('uses foreignKey option as column name when provided', () => {
     @Entity()
     class Author {
+      @PrimaryColumn({ type: COLUMN_TYPE.SERIAL })
       id!: number;
     }
 
     @Entity()
     class Book {
+      @PrimaryColumn({ type: COLUMN_TYPE.SERIAL })
+      id!: number;
+
       @ToOne({ target: () => Author, foreignKey: 'author_id' })
       author!: Author;
     }
@@ -74,6 +78,9 @@ describe('@ToOne decorator', () => {
 
     @Entity()
     class Article {
+      @PrimaryColumn({ type: COLUMN_TYPE.SERIAL })
+      id!: number;
+
       @ToOne({ target: () => Category })
       category!: Category;
     }
@@ -93,6 +100,9 @@ describe('@ToOne decorator', () => {
 
     @Entity()
     class Post {
+      @PrimaryColumn({ type: COLUMN_TYPE.SERIAL })
+      id!: number;
+
       @ToOne({ target: () => Tag })
       tag!: Tag;
     }

@@ -13,6 +13,10 @@ export function Entity(mapTableName?: string) {
     const columns = (context.metadata[COLUMNS_KEY] as ColumnMetadata[]) ?? [];
     const relations = (context.metadata[RELATIONS_KEY] as RelationMetadata[]) ?? [];
 
+    if (!columns.some((c) => c.primary)) {
+      throw new Error(`Entity "${context.name}" must have at least one primary column`);
+    }
+
     Database.getInstance().getMetadata().set(value, { tableName, columns, relations });
   };
 }
