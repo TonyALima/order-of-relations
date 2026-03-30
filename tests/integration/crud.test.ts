@@ -11,8 +11,6 @@ class User {
   name!: string;
 }
 
-void User;
-
 describe('Integration: Repository CRUD', () => {
   let db: Database;
   let repo: Repository<User>;
