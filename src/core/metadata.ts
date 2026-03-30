@@ -16,7 +16,8 @@ export enum RelationType {
 export interface RelationMetadata {
   propertyName: string;
   columnName: string;
-  type: RelationType;
+  relationType: RelationType;
+  columnType: COLUMN_TYPE | 'unresolved';
   getTarget: () => Constructor;
 }
 

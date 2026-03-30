@@ -17,8 +17,9 @@ export function ToOne<TType>(options: OneToOneOptions<TType>) {
 
     relations.push({
       propertyName: context.name.toString(),
+      relationType: RelationType.TO_ONE,
       columnName: 'unresolved',
-      type: RelationType.TO_ONE,
+      columnType: 'unresolved',
       getTarget: options.target,
     });
   };

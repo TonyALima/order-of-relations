@@ -36,8 +36,9 @@ describe('@ToOne decorator', () => {
     expect(resolvedRelations).toEqual([
       {
         propertyName: 'user',
+        relationType: RelationType.TO_ONE,
         columnName: 'unresolved',
-        type: RelationType.TO_ONE,
+        columnType: 'unresolved',
         target: User,
       },
     ]);
