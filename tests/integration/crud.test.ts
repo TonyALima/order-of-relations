@@ -1,8 +1,6 @@
 import { describe, beforeEach, afterEach, test, expect } from 'bun:test';
 import { Entity, Column, PrimaryColumn, Database, Repository, COLUMN_TYPE } from '../../src';
 
-// SQLite does not support SERIAL via RETURNING; use INTEGER so that
-// autoincrement PKs are returned correctly on create() and findMany().
 @Entity()
 class User {
   @PrimaryColumn({ type: COLUMN_TYPE.INTEGER })
@@ -35,9 +33,7 @@ describe('Integration: Repository CRUD', () => {
   });
 
   test('findById() returns the entity when a row exists', async () => {
-    await repo.create({ name: 'Alice' });
-    const rows = await repo.findMany();
-    const id = rows[0]!.id;
+    const id = await repo.create({ name: 'Alice' });
     const user = await repo.findById(id);
     expect(user).toEqual({ id, name: 'Alice' });
   });
@@ -52,22 +48,20 @@ describe('Integration: Repository CRUD', () => {
     await repo.create({ name: 'Bob' });
     const users = await repo.findMany();
     expect(users).toHaveLength(2);
-    expect(users.map(u => u.name)).toEqual(['Alice', 'Bob']);
+    expect(users.map((u) => u.name)).toEqual(['Alice', 'Bob']);
   });
 
   test('update() changes the row identified by PK', async () => {
-    await repo.create({ name: 'Alice' });
-    const rows = await repo.findMany();
-    const user = rows[0]!;
+    const id = await repo.create({ name: 'Alice' });
+    const user = await repo.findById(id);
+    if (!user) throw new Error('User not found');
     await repo.update({ ...user, name: 'Bob' });
     const updated = await repo.findById(user.id);
     expect(updated).toEqual({ id: user.id, name: 'Bob' });
   });
 
   test('delete() removes the row with the given id', async () => {
-    await repo.create({ name: 'Alice' });
-    const rows = await repo.findMany();
-    const id = rows[0]!.id;
+    const id = await repo.create({ name: 'Alice' });
     await repo.delete(id);
     const user = await repo.findById(id);
     expect(user).toBeNull();
