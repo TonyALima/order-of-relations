@@ -1,4 +1,4 @@
-import { test, expect, describe } from 'bun:test';
+import { test, expect, describe, spyOn, beforeEach } from 'bun:test';
 
 import { Database } from './database';
 import { DatabaseError, DatabaseNotConnectedError } from './database.errors';
@@ -10,31 +10,6 @@ class DatabaseTestEntity {
   name!: string;
   isActive!: boolean;
 }
-
-Database.getInstance()
-  .getMetadata()
-  .set(DatabaseTestEntity, {
-    tableName: 'database_test_entity',
-    columns: [
-      {
-        propertyName: 'id',
-        columnName: 'id',
-        type: COLUMN_TYPE.SERIAL,
-        primary: true,
-      },
-      {
-        propertyName: 'name',
-        columnName: 'name',
-        type: COLUMN_TYPE.TEXT,
-      },
-      {
-        propertyName: 'isActive',
-        columnName: 'is_active',
-        type: COLUMN_TYPE.BOOLEAN,
-      },
-    ],
-    relations: [],
-  });
 
 describe('DatabaseNotConnectedError', () => {
   test('instanceof chain: OrmError > DatabaseError > DatabaseNotConnectedError', () => {
@@ -52,11 +27,40 @@ describe('DatabaseNotConnectedError', () => {
 });
 
 describe('Database', () => {
+  beforeEach(() => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    spyOn(Database, 'getInstance').mockReturnValue(new (Database as any)());
+
+    Database.getInstance()
+      .getMetadata()
+      .set(DatabaseTestEntity, {
+        tableName: 'database_test_entity',
+        columns: [
+          {
+            propertyName: 'id',
+            columnName: 'id',
+            type: COLUMN_TYPE.SERIAL,
+            primary: true,
+          },
+          {
+            propertyName: 'name',
+            columnName: 'name',
+            type: COLUMN_TYPE.TEXT,
+          },
+          {
+            propertyName: 'isActive',
+            columnName: 'is_active',
+            type: COLUMN_TYPE.BOOLEAN,
+          },
+        ],
+        relations: [],
+      });
+  });
+
   describe('create()', () => {
     test('applies the mapped schema to an in-memory SQLite database', async () => {
       const db = Database.getInstance();
       db.connect('sqlite://:memory:');
-      await db.drop();
 
       await db.create();
 
@@ -97,9 +101,7 @@ describe('Database', () => {
     test('removes the mapped tables from an in-memory SQLite database', async () => {
       const db = Database.getInstance();
       db.connect('sqlite://:memory:');
-      await db.drop();
 
-      await db.create();
       await db.drop();
 
       const sql = db.getConnection();
