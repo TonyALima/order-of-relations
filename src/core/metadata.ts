@@ -80,8 +80,7 @@ export class MetadataStorage implements Iterable<[Constructor, EntityMetadata]> 
             `Relation target "${relation.getTarget().name}" not found for relation "${metadata.tableName}.${relation.propertyName}, ensure the target entity is defined and decorated with @Entity"`,
           );
         }
-        const pk = targetMetadata?.columns.find((c) => c.primary);
-        if (!pk) continue;
+        const pk = targetMetadata.columns.find((c) => c.primary)!;
         if (relation.columnType === 'unresolved') relation.columnType = pk.type;
         if (relation.columnName === null)
           relation.columnName = `${relation.propertyName}_${pk.propertyName}`;

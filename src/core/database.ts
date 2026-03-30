@@ -45,10 +45,7 @@ export class Database {
 
       if (metadata.discriminator && metadata.discriminator !== metadata.tableName) continue;
 
-      const primaryColumn = metadata.columns.find((c) => c.primary);
-      if (!primaryColumn) {
-        throw new Error(`Entity ${metadata.tableName} must have a primary column.`);
-      }
+      const primaryColumn = metadata.columns.find((c) => c.primary)!;
       const primaryColumnType = getColumnTypeDefinition(sql, primaryColumn.type);
 
       await sql.begin(async (tx) => {
