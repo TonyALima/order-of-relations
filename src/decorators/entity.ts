@@ -1,6 +1,12 @@
 import { Database } from '../core/database';
-import { type ColumnMetadata, type RelationMetadata } from '../core/metadata';
+import { MetadataError, type ColumnMetadata, type RelationMetadata } from '../core/metadata';
 import type { Constructor } from '../core/utils';
+
+export class MissingPrimaryColumnError extends MetadataError {
+  constructor(readonly entityName: string) {
+    super(`Entity "${entityName}" must have at least one primary column`);
+  }
+}
 
 const COLUMNS_KEY = Symbol('columns');
 const RELATIONS_KEY = Symbol('relations');
@@ -14,7 +20,7 @@ export function Entity(mapTableName?: string) {
     const relations = (context.metadata[RELATIONS_KEY] as RelationMetadata[]) ?? [];
 
     if (!columns.some((c) => c.primary)) {
-      throw new Error(`Entity "${context.name}" must have at least one primary column`);
+      throw new MissingPrimaryColumnError(String(context.name));
     }
 
     Database.getInstance().getMetadata().set(value, { tableName, columns, relations });

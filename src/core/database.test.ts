@@ -1,6 +1,7 @@
 import { test, expect, describe } from 'bun:test';
 
-import { Database } from './database';
+import { Database, DatabaseError, DatabaseNotConnectedError } from './database';
+import { OrmError } from './orm-error';
 import { COLUMN_TYPE } from './sql-types';
 
 class DatabaseTestEntity {
@@ -30,6 +31,21 @@ Database.getInstance().getMetadata().set(DatabaseTestEntity, {
     },
   ],
   relations: [],
+});
+
+describe('DatabaseNotConnectedError', () => {
+  test('instanceof chain: OrmError > DatabaseError > DatabaseNotConnectedError', () => {
+    const err = new DatabaseNotConnectedError();
+    expect(err).toBeInstanceOf(OrmError);
+    expect(err).toBeInstanceOf(DatabaseError);
+    expect(err).toBeInstanceOf(DatabaseNotConnectedError);
+  });
+
+  test('has correct name and message', () => {
+    const err = new DatabaseNotConnectedError();
+    expect(err.name).toBe('DatabaseNotConnectedError');
+    expect(err.message).toBe('Database not connected. Call Database.connect() first.');
+  });
 });
 
 describe('Database', () => {

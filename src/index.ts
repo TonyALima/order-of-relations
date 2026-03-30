@@ -1,3 +1,6 @@
+// Errors
+export * from './errors';
+
 // Decorators
 export { Entity } from './decorators/entity';
 export { Column, PrimaryColumn } from './decorators/column';

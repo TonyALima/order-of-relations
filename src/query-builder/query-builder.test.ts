@@ -1,6 +1,7 @@
 import { describe, test, expect, spyOn, beforeEach } from 'bun:test';
 import { SQL } from 'bun';
-import { QueryBuilder } from './query-builder';
+import { OrmError } from '../core/orm-error';
+import { QueryBuilder, QueryError, UndefinedWhereConditionError } from './query-builder';
 import { Repository } from '../core/repository';
 import { Database } from '../core/database';
 import { COLUMN_TYPE } from '../core/sql-types';
@@ -116,18 +117,38 @@ describe('QueryBuilder - conditions proxy', () => {
     expect(qb['conditions']).toEqual([]);
   });
 
-  test('applyOptions throws when a condition entry is undefined (non-column field access)', () => {
+  test('applyOptions throws UndefinedWhereConditionError when a condition entry is undefined', () => {
     const qb = new QueryBuilder(QbUser);
     expect(() => qb.applyOptions({ where: (u) => [u.name?.eq('Alice'), undefined] })).toThrow(
-      'where() condition at index 1 is undefined',
+      UndefinedWhereConditionError,
     );
   });
 
-  test('applyOptions throws when the only condition is undefined', () => {
+  test('applyOptions throws UndefinedWhereConditionError when the only condition is undefined', () => {
     const qb = new QueryBuilder(QbUser);
-    expect(() => qb.applyOptions({ where: () => [undefined] })).toThrow(
-      'where() condition at index 0 is undefined',
-    );
+    expect(() => qb.applyOptions({ where: () => [undefined] })).toThrow(UndefinedWhereConditionError);
+  });
+
+  test('UndefinedWhereConditionError instanceof chain and conditionIndex property', () => {
+    const err = new UndefinedWhereConditionError(2);
+    expect(err).toBeInstanceOf(OrmError);
+    expect(err).toBeInstanceOf(QueryError);
+    expect(err).toBeInstanceOf(UndefinedWhereConditionError);
+    expect(err.name).toBe('UndefinedWhereConditionError');
+    expect(err.conditionIndex).toBe(2);
+  });
+
+  test('thrown error carries the correct conditionIndex', () => {
+    const qb = new QueryBuilder(QbUser);
+    let caught: unknown;
+    try {
+      qb.applyOptions({ where: (u) => [u.name?.eq('Alice'), undefined] });
+    } catch (e) {
+      caught = e;
+    }
+    expect(caught).toBeInstanceOf(UndefinedWhereConditionError);
+    if (!(caught instanceof UndefinedWhereConditionError)) throw caught;
+    expect(caught.conditionIndex).toBe(1);
   });
 });
 

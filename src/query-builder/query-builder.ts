@@ -1,7 +1,19 @@
 import { Database } from '../core/database';
 import type { EntityMetadata } from '../core/metadata';
+import { OrmError } from '../core/orm-error';
 import type { Constructor } from '../core/utils';
 import { InheritanceSearchType, type Condition, type Conditions, type FindOptions } from './types';
+
+export abstract class QueryError extends OrmError {}
+
+export class UndefinedWhereConditionError extends QueryError {
+  constructor(readonly conditionIndex: number) {
+    super(
+      `where() condition at index ${conditionIndex} is undefined. ` +
+        'Make sure every field you access in the where callback has a @Column decorator.',
+    );
+  }
+}
 
 export class QueryBuilder<T> {
   private conditions: Condition[] = [];
@@ -47,10 +59,7 @@ export class QueryBuilder<T> {
       const results = options.where(this.buildConditionsProxy());
       const undefinedIndex = results.findIndex((c) => c == null);
       if (undefinedIndex !== -1) {
-        throw new Error(
-          `where() condition at index ${undefinedIndex} is undefined. ` +
-            'Make sure every field you access in the where callback has a @Column decorator.',
-        );
+        throw new UndefinedWhereConditionError(undefinedIndex);
       }
       this.conditions = results as Condition[];
     }

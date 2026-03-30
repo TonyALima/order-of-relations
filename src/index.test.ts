@@ -10,6 +10,16 @@ import {
   Database,
   Repository,
   Container,
+  OrmError,
+  DatabaseError,
+  DatabaseNotConnectedError,
+  MetadataError,
+  RelationTargetNotFoundError,
+  MissingPrimaryColumnError,
+  SchemaError,
+  UnsupportedColumnTypeError,
+  QueryError,
+  UndefinedWhereConditionError,
 } from './index';
 
 describe('public API exports', () => {
@@ -24,5 +34,18 @@ describe('public API exports', () => {
     expect(Database).toBeDefined();
     expect(Repository).toBeFunction();
     expect(Container).toBeDefined();
+  });
+
+  test('all error classes are exported', () => {
+    expect(OrmError).toBeFunction();
+    expect(DatabaseError).toBeFunction();
+    expect(DatabaseNotConnectedError).toBeFunction();
+    expect(MetadataError).toBeFunction();
+    expect(RelationTargetNotFoundError).toBeFunction();
+    expect(MissingPrimaryColumnError).toBeFunction();
+    expect(SchemaError).toBeFunction();
+    expect(UnsupportedColumnTypeError).toBeFunction();
+    expect(QueryError).toBeFunction();
+    expect(UndefinedWhereConditionError).toBeFunction();
   });
 });

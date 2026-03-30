@@ -1,7 +1,17 @@
 import { SQL } from 'bun';
 
 import { MetadataStorage } from './metadata';
+import { OrmError } from './orm-error';
 import { getColumnTypeDefinition } from './sql-types';
+
+export abstract class DatabaseError extends OrmError {}
+
+export class DatabaseNotConnectedError extends DatabaseError {
+  constructor() {
+    super('Database not connected. Call Database.connect() first.');
+  }
+}
+
 export class Database {
   private constructor() {
     this.metadata = new MetadataStorage();
@@ -27,7 +37,7 @@ export class Database {
 
   getConnection(): SQL {
     if (!this.connection) {
-      throw new Error('Database not connected. Call Database.connect() first.');
+      throw new DatabaseNotConnectedError();
     }
 
     return this.connection;

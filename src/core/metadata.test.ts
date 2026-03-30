@@ -1,6 +1,55 @@
 import { expect, test, describe } from 'bun:test';
-import { MetadataStorage, RelationType } from './metadata';
+import { MetadataError, MetadataStorage, RelationTargetNotFoundError, RelationType } from './metadata';
+import { OrmError } from './orm-error';
 import { COLUMN_TYPE } from './sql-types';
+
+describe('RelationTargetNotFoundError', () => {
+  test('instanceof chain: OrmError > MetadataError > RelationTargetNotFoundError', () => {
+    const err = new RelationTargetNotFoundError('User', 'posts.author');
+    expect(err).toBeInstanceOf(OrmError);
+    expect(err).toBeInstanceOf(MetadataError);
+    expect(err).toBeInstanceOf(RelationTargetNotFoundError);
+  });
+
+  test('has correct name, targetName, and relationPath', () => {
+    const err = new RelationTargetNotFoundError('User', 'posts.author');
+    expect(err.name).toBe('RelationTargetNotFoundError');
+    expect(err.targetName).toBe('User');
+    expect(err.relationPath).toBe('posts.author');
+  });
+
+  test('MetadataStorage throws RelationTargetNotFoundError for unregistered relation target', () => {
+    const storage = new MetadataStorage();
+    class Post {}
+    class UnknownTarget {}
+
+    storage.set(Post, {
+      tableName: 'posts',
+      columns: [{ propertyName: 'id', columnName: 'id', type: COLUMN_TYPE.SERIAL, primary: true }],
+      relations: [
+        {
+          propertyName: 'author',
+          columnName: null,
+          relationType: RelationType.TO_ONE,
+          columnType: 'unresolved',
+          getTarget: () => UnknownTarget,
+        },
+      ],
+    });
+
+    let caught: unknown;
+    try {
+      storage.get(Post);
+    } catch (e) {
+      caught = e;
+    }
+
+    expect(caught).toBeInstanceOf(RelationTargetNotFoundError);
+    if (!(caught instanceof RelationTargetNotFoundError)) throw caught;
+    expect(caught.targetName).toBe('UnknownTarget');
+    expect(caught.relationPath).toBe('posts.author');
+  });
+});
 
 describe('MetadataStorage', () => {
   describe('set / get', () => {

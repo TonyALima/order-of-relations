@@ -1,5 +1,15 @@
 import type { SQL } from 'bun';
 
+import { OrmError } from './orm-error';
+
+export abstract class SchemaError extends OrmError {}
+
+export class UnsupportedColumnTypeError extends SchemaError {
+  constructor(readonly columnType: string) {
+    super(`Unsupported column type: ${columnType}`);
+  }
+}
+
 export enum COLUMN_TYPE {
   SMALLINT = 'smallint',
   SERIAL = 'serial',
@@ -147,6 +157,6 @@ export function getColumnTypeDefinition(sql: SQL, type: COLUMN_TYPE) {
     case COLUMN_TYPE.DATERANGE:
       return sql`DATERANGE`;
     default:
-      throw new Error(`Unsupported column type: ${type}`);
+      throw new UnsupportedColumnTypeError(type);
   }
 }

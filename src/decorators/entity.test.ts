@@ -1,19 +1,31 @@
 import { expect, test, describe } from 'bun:test';
 import { Database } from '../core/database';
+import { MetadataError } from '../core/metadata';
+import { OrmError } from '../core/orm-error';
 import { COLUMN_TYPE } from '../core/sql-types';
 import { Column, PrimaryColumn } from './column';
-import { Entity } from './entity';
+import { Entity, MissingPrimaryColumnError } from './entity';
 
 describe('@Entity / @Column decorators', () => {
-  test('throws when entity has no primary column defined', () => {
-    expect(() => {
+  test('throws MissingPrimaryColumnError when entity has no primary column defined', () => {
+    let caught: unknown;
+    try {
       @Entity('no_pk')
       class NoPkEntity {
         @Column({ type: COLUMN_TYPE.TEXT })
         name!: string;
       }
       void NoPkEntity;
-    }).toThrow('Entity "NoPkEntity" must have at least one primary column');
+    } catch (e) {
+      caught = e;
+    }
+
+    expect(caught).toBeInstanceOf(MissingPrimaryColumnError);
+    expect(caught).toBeInstanceOf(MetadataError);
+    expect(caught).toBeInstanceOf(OrmError);
+    if (!(caught instanceof MissingPrimaryColumnError)) throw caught;
+    expect(caught.entityName).toBe('NoPkEntity');
+    expect(caught.message).toBe('Entity "NoPkEntity" must have at least one primary column');
   });
 
   test('stores table, column, and relation metadata for the decorated class', () => {

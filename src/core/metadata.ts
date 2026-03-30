@@ -1,5 +1,19 @@
 import type { COLUMN_TYPE } from './sql-types';
 import type { Constructor } from './utils';
+import { OrmError } from './orm-error';
+
+export abstract class MetadataError extends OrmError {}
+
+export class RelationTargetNotFoundError extends MetadataError {
+  constructor(
+    readonly targetName: string,
+    readonly relationPath: string,
+  ) {
+    super(
+      `Relation target "${targetName}" not found for relation "${relationPath}, ensure the target entity is defined and decorated with @Entity"`,
+    );
+  }
+}
 
 export interface ColumnMetadata {
   propertyName: string;
@@ -76,8 +90,9 @@ export class MetadataStorage implements Iterable<[Constructor, EntityMetadata]> 
       for (const relation of metadata.relations) {
         const targetMetadata = this.storage.get(relation.getTarget());
         if (!targetMetadata) {
-          throw new Error(
-            `Relation target "${relation.getTarget().name}" not found for relation "${metadata.tableName}.${relation.propertyName}, ensure the target entity is defined and decorated with @Entity"`,
+          throw new RelationTargetNotFoundError(
+            relation.getTarget().name,
+            `${metadata.tableName}.${relation.propertyName}`,
           );
         }
         const pk = targetMetadata.columns.find((c) => c.primary)!;
