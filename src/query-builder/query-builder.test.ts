@@ -1,10 +1,10 @@
 import { describe, test, expect, spyOn, beforeEach } from 'bun:test';
 import { SQL } from 'bun';
-import { OrmError } from '../core/orm-error';
+import { OrmError } from '../core/orm-error/orm-error';
 import { QueryBuilder, QueryError, UndefinedWhereConditionError } from './query-builder';
-import { Repository } from '../core/repository';
-import { Database } from '../core/database';
-import { COLUMN_TYPE } from '../core/sql-types';
+import { Repository } from '../core/repository/repository';
+import { Database } from '../core/database/database';
+import { COLUMN_TYPE } from '../core/sql-types/sql-types';
 import type { Condition, Conditions } from './types';
 
 // ── Test entity registered directly in metadata (no DB connection needed) ────

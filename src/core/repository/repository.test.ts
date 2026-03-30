@@ -1,8 +1,8 @@
 import { test, expect, spyOn, describe, beforeEach } from 'bun:test';
 import { SQL } from 'bun';
 import { Repository } from './repository';
-import { Database } from './database';
-import { COLUMN_TYPE } from './sql-types';
+import { Database } from '../database/database';
+import { COLUMN_TYPE } from '../sql-types/sql-types';
 
 class TestEntity {
   id!: number;

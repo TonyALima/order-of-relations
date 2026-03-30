@@ -1,7 +1,7 @@
 import { expect, test, describe } from 'bun:test';
 import { MetadataError, MetadataStorage, RelationTargetNotFoundError, RelationType } from './metadata';
-import { OrmError } from './orm-error';
-import { COLUMN_TYPE } from './sql-types';
+import { OrmError } from '../orm-error/orm-error';
+import { COLUMN_TYPE } from '../sql-types/sql-types';
 
 describe('RelationTargetNotFoundError', () => {
   test('instanceof chain: OrmError > MetadataError > RelationTargetNotFoundError', () => {

@@ -1,9 +1,9 @@
 import { expect, test, describe } from 'bun:test';
-import { RelationType } from '../core/metadata';
-import { Database } from '../core/database';
-import { Entity } from './entity';
-import { PrimaryColumn } from './column';
-import { COLUMN_TYPE } from '../core/sql-types';
+import { RelationType } from '../../core/metadata/metadata';
+import { Database } from '../../core/database/database';
+import { Entity } from '../entity/entity';
+import { PrimaryColumn } from '../column/column';
+import { COLUMN_TYPE } from '../../core/sql-types/sql-types';
 import { ToOne } from './relation';
 
 describe('@ToOne decorator', () => {

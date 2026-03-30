@@ -1,4 +1,4 @@
-import type { ConcreteConstructor } from './utils';
+import type { ConcreteConstructor } from '../utils/utils';
 
 export class Container {
   private static instances = new Map<ConcreteConstructor<unknown>, unknown>();

@@ -1,8 +1,8 @@
 import { SQL } from 'bun';
 
-import { MetadataStorage } from './metadata';
-import { OrmError } from './orm-error';
-import { getColumnTypeDefinition } from './sql-types';
+import { MetadataStorage } from '../metadata/metadata';
+import { OrmError } from '../orm-error/orm-error';
+import { getColumnTypeDefinition } from '../sql-types/sql-types';
 
 export abstract class DatabaseError extends OrmError {}
 

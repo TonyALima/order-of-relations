@@ -1,6 +1,6 @@
 import type { SQL } from 'bun';
 
-import { OrmError } from './orm-error';
+import { OrmError } from '../orm-error/orm-error';
 
 export abstract class SchemaError extends OrmError {}
 

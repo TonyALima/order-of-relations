@@ -1,7 +1,7 @@
 import { test, expect, describe } from 'bun:test';
 import type { SQL } from 'bun';
 
-import { OrmError } from './orm-error';
+import { OrmError } from '../orm-error/orm-error';
 import { COLUMN_TYPE, SchemaError, UnsupportedColumnTypeError, getColumnTypeDefinition } from './sql-types';
 
 const fakeSql = {} as unknown as SQL;

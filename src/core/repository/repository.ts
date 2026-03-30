@@ -1,6 +1,6 @@
-import { Database } from './database';
-import { QueryBuilder } from '../query-builder/query-builder';
-import type { FindOptions } from '../query-builder/types';
+import { Database } from '../database/database';
+import { QueryBuilder } from '../../query-builder/query-builder';
+import type { FindOptions } from '../../query-builder/types';
 
 export class Repository<T, PK extends keyof T = 'id' extends keyof T ? 'id' : never> {
   constructor(private entity: new () => T) {}

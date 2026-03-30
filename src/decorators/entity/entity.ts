@@ -1,6 +1,6 @@
-import { Database } from '../core/database';
-import { MetadataError, type ColumnMetadata, type RelationMetadata } from '../core/metadata';
-import type { Constructor } from '../core/utils';
+import { Database } from '../../core/database/database';
+import { MetadataError, type ColumnMetadata, type RelationMetadata } from '../../core/metadata/metadata';
+import type { Constructor } from '../../core/utils/utils';
 
 export class MissingPrimaryColumnError extends MetadataError {
   constructor(readonly entityName: string) {

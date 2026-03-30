@@ -1,6 +1,6 @@
-import type { ColumnMetadata } from '../core/metadata';
-import { COLUMN_TYPE } from '../core/sql-types';
-import { COLUMNS_KEY } from './entity';
+import type { ColumnMetadata } from '../../core/metadata/metadata';
+import { COLUMN_TYPE } from '../../core/sql-types/sql-types';
+import { COLUMNS_KEY } from '../entity/entity';
 
 type ColumnOptions = { name?: string; type: COLUMN_TYPE };
 

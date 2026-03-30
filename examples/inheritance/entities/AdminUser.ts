@@ -1,5 +1,5 @@
 import { Entity, Column } from '../../../src';
-import { COLUMN_TYPE } from '../../../src/core/sql-types';
+import { COLUMN_TYPE } from '../../../src/core/sql-types/sql-types';
 import { User } from './User';
 
 @Entity()

@@ -1,9 +1,9 @@
 import { expect, test, describe } from 'bun:test';
-import { Database } from '../core/database';
-import { MetadataError } from '../core/metadata';
-import { OrmError } from '../core/orm-error';
-import { COLUMN_TYPE } from '../core/sql-types';
-import { Column, PrimaryColumn } from './column';
+import { Database } from '../../core/database/database';
+import { MetadataError } from '../../core/metadata/metadata';
+import { OrmError } from '../../core/orm-error/orm-error';
+import { COLUMN_TYPE } from '../../core/sql-types/sql-types';
+import { Column, PrimaryColumn } from '../column/column';
 import { Entity, MissingPrimaryColumnError } from './entity';
 
 describe('@Entity / @Column decorators', () => {

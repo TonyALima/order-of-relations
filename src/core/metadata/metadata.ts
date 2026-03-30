@@ -1,6 +1,6 @@
-import type { COLUMN_TYPE } from './sql-types';
-import type { Constructor } from './utils';
-import { OrmError } from './orm-error';
+import type { COLUMN_TYPE } from '../sql-types/sql-types';
+import type { Constructor } from '../utils/utils';
+import { OrmError } from '../orm-error/orm-error';
 
 export abstract class MetadataError extends OrmError {}
 

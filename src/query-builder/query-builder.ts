@@ -1,7 +1,7 @@
-import { Database } from '../core/database';
-import type { EntityMetadata } from '../core/metadata';
-import { OrmError } from '../core/orm-error';
-import type { Constructor } from '../core/utils';
+import { Database } from '../core/database/database';
+import type { EntityMetadata } from '../core/metadata/metadata';
+import { OrmError } from '../core/orm-error/orm-error';
+import type { Constructor } from '../core/utils/utils';
 import { InheritanceSearchType, type Condition, type Conditions, type FindOptions } from './types';
 
 export abstract class QueryError extends OrmError {}

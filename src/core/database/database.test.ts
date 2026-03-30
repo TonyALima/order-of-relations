@@ -1,8 +1,8 @@
 import { test, expect, describe } from 'bun:test';
 
 import { Database, DatabaseError, DatabaseNotConnectedError } from './database';
-import { OrmError } from './orm-error';
-import { COLUMN_TYPE } from './sql-types';
+import { OrmError } from '../orm-error/orm-error';
+import { COLUMN_TYPE } from '../sql-types/sql-types';
 
 class DatabaseTestEntity {
   id!: number;
@@ -10,28 +10,30 @@ class DatabaseTestEntity {
   isActive!: boolean;
 }
 
-Database.getInstance().getMetadata().set(DatabaseTestEntity, {
-  tableName: 'database_test_entity',
-  columns: [
-    {
-      propertyName: 'id',
-      columnName: 'id',
-      type: COLUMN_TYPE.SERIAL,
-      primary: true,
-    },
-    {
-      propertyName: 'name',
-      columnName: 'name',
-      type: COLUMN_TYPE.TEXT,
-    },
-    {
-      propertyName: 'isActive',
-      columnName: 'is_active',
-      type: COLUMN_TYPE.BOOLEAN,
-    },
-  ],
-  relations: [],
-});
+Database.getInstance()
+  .getMetadata()
+  .set(DatabaseTestEntity, {
+    tableName: 'database_test_entity',
+    columns: [
+      {
+        propertyName: 'id',
+        columnName: 'id',
+        type: COLUMN_TYPE.SERIAL,
+        primary: true,
+      },
+      {
+        propertyName: 'name',
+        columnName: 'name',
+        type: COLUMN_TYPE.TEXT,
+      },
+      {
+        propertyName: 'isActive',
+        columnName: 'is_active',
+        type: COLUMN_TYPE.BOOLEAN,
+      },
+    ],
+    relations: [],
+  });
 
 describe('DatabaseNotConnectedError', () => {
   test('instanceof chain: OrmError > DatabaseError > DatabaseNotConnectedError', () => {
@@ -53,6 +55,7 @@ describe('Database', () => {
     test('applies the mapped schema to an in-memory SQLite database', async () => {
       const db = Database.getInstance();
       db.connect('sqlite://:memory:');
+      await db.drop();
 
       await db.create();
 
@@ -93,6 +96,7 @@ describe('Database', () => {
     test('removes the mapped tables from an in-memory SQLite database', async () => {
       const db = Database.getInstance();
       db.connect('sqlite://:memory:');
+      await db.drop();
 
       await db.create();
       await db.drop();

@@ -1,6 +1,6 @@
-import { Container } from '../core/container';
-import { Repository } from '../core/repository';
-import type { ConcreteConstructor } from '../core/utils';
+import { Container } from '../../core/container/container';
+import { Repository } from '../../core/repository/repository';
+import type { ConcreteConstructor } from '../../core/utils/utils';
 
 const INJECTIONS_KEY = Symbol('injections');
 

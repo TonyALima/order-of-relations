@@ -1,6 +1,6 @@
-import { RelationType, type RelationMetadata } from '../core/metadata';
-import type { Constructor } from '../core/utils';
-import { RELATIONS_KEY } from './entity';
+import { RelationType, type RelationMetadata } from '../../core/metadata/metadata';
+import type { Constructor } from '../../core/utils/utils';
+import { RELATIONS_KEY } from '../entity/entity';
 
 export interface OneToOneOptions<TType> {
   target: () => Constructor<TType>;
