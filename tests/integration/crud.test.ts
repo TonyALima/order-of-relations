@@ -63,4 +63,13 @@ describe('Integration: Repository CRUD', () => {
     const updated = await repo.findById(user.id);
     expect(updated).toEqual({ id: user.id, name: 'Bob' });
   });
+
+  test('delete() removes the row with the given id', async () => {
+    await repo.create({ name: 'Alice' });
+    const rows = await repo.findMany();
+    const id = rows[0]!.id;
+    await repo.delete(id);
+    const user = await repo.findById(id);
+    expect(user).toBeNull();
+  });
 });
