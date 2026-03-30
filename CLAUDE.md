@@ -7,32 +7,61 @@ This is both a TCC (undergraduate thesis) project and a publishable npm package.
 ## Project Structure
 
 ```text
-src/                         ← published library
+src/                                  ← published library
   core/
-    database.ts              PostgreSQL connection pool + transaction helper
-    metadata.ts              Entity/column/relation metadata storage
-    container.ts             DI singleton container
-    repository.ts            Generic Repository<T> with find() / save()
+    container/
+      container.ts                    DI singleton container
+    database/
+      database.ts                     Database connection + schema create/drop
+      database.errors.ts              Database-specific errors
+      database.test.ts
+    metadata/
+      metadata.ts                     Entity/column/relation metadata storage
+      metadata.errors.ts              Metadata-specific errors
+      metadata.test.ts
+    orm-error/
+      index.ts                        Base OrmError class
+    repository/
+      repository.ts                   Generic Repository<T>
+      repository.test.ts
+    sql-types/
+      sql-types.ts                    SQL column types + definitions
+      sql-types.errors.ts             SQL type-related errors
+      sql-types.test.ts
+    utils/
+      utils.ts
   decorators/
-    entity.ts                @Entity
-    column.ts                @Column, @PrimaryColumn
-    relation.ts              @ManyToOne, @OneToMany
-    service.ts               @Service, @Inject, @InjectRepository
+    column/
+      column.ts                       @Column, @PrimaryColumn
+    entity/
+      entity.ts                       @Entity
+      entity.errors.ts                Entity decorator errors
+      entity.test.ts
+    relation/
+      relation.ts                     @ToOne
+      relation.test.ts
+    service/
+      service.ts                      @Service, @Inject, @InjectRepository
   query-builder/
-    types.ts                 WhereClause, OrderByClause interfaces
-    query-builder.ts         Fluent QueryBuilder<T>
-  migrations/
-    types.ts                 ColumnType enum
-    schema-generator.ts      Generate CREATE TABLE SQL from entity metadata
-    migration-runner.ts      Run schema sync against live database
-  transaction/
-    transaction-manager.ts   Database.transaction() helper (lives in core)
-  index.ts                   Public API barrel export
+    query-builder.ts                  Fluent QueryBuilder<T>
+    query-builder.errors.ts           Query builder errors
+    query-builder.test.ts
+    types.ts                          Condition/FindOptions interfaces
+  errors.ts                           Public error exports
+  index.ts                            Public API barrel export
+  index.test.ts
 examples/
   basic-crud/
     entities/User.ts
     services/UserService.ts
     index.ts
+  inheritance/
+    entities/User.ts
+    entities/AdminUser.ts
+    services/UserHierarchyService.ts
+    index.ts
+  relations/
+    services/
 ```
 
 ## Bun commands usage
