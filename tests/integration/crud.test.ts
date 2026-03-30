@@ -46,4 +46,12 @@ describe('Integration: Repository CRUD', () => {
     const user = await repo.findById(999);
     expect(user).toBeNull();
   });
+
+  test('findMany() returns all rows', async () => {
+    await repo.create({ name: 'Alice' });
+    await repo.create({ name: 'Bob' });
+    const users = await repo.findMany();
+    expect(users).toHaveLength(2);
+    expect(users.map(u => u.name)).toEqual(['Alice', 'Bob']);
+  });
 });
