@@ -1,10 +1,11 @@
 import { expect, test, describe } from 'bun:test';
 import { Database } from '../../core/database/database';
-import { MetadataError } from '../../core/metadata/metadata';
-import { OrmError } from '../../core/orm-error/orm-error';
+import { MetadataError } from '../../core/metadata/metadata.errors';
+import { OrmError } from '../../core/orm-error';
 import { COLUMN_TYPE } from '../../core/sql-types/sql-types';
 import { Column, PrimaryColumn } from '../column/column';
-import { Entity, MissingPrimaryColumnError } from './entity';
+import { Entity } from './entity';
+import { MissingPrimaryColumnError } from './entity.errors';
 
 describe('@Entity / @Column decorators', () => {
   test('throws MissingPrimaryColumnError when entity has no primary column defined', () => {

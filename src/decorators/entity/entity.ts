@@ -1,12 +1,7 @@
 import { Database } from '../../core/database/database';
-import { MetadataError, type ColumnMetadata, type RelationMetadata } from '../../core/metadata/metadata';
+import type { ColumnMetadata, RelationMetadata } from '../../core/metadata/metadata';
 import type { Constructor } from '../../core/utils/utils';
-
-export class MissingPrimaryColumnError extends MetadataError {
-  constructor(readonly entityName: string) {
-    super(`Entity "${entityName}" must have at least one primary column`);
-  }
-}
+import { MissingPrimaryColumnError } from './entity.errors';
 
 const COLUMNS_KEY = Symbol('columns');
 const RELATIONS_KEY = Symbol('relations');

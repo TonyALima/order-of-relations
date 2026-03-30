@@ -1,6 +1,7 @@
 import { expect, test, describe } from 'bun:test';
-import { MetadataError, MetadataStorage, RelationTargetNotFoundError, RelationType } from './metadata';
-import { OrmError } from '../orm-error/orm-error';
+import { MetadataStorage, RelationType } from './metadata';
+import { MetadataError, RelationTargetNotFoundError } from './metadata.errors';
+import { OrmError } from '../orm-error';
 import { COLUMN_TYPE } from '../sql-types/sql-types';
 
 describe('RelationTargetNotFoundError', () => {

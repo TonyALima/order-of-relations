@@ -1,7 +1,8 @@
 import { describe, test, expect, spyOn, beforeEach } from 'bun:test';
 import { SQL } from 'bun';
-import { OrmError } from '../core/orm-error/orm-error';
-import { QueryBuilder, QueryError, UndefinedWhereConditionError } from './query-builder';
+import { OrmError } from '../core/orm-error';
+import { QueryBuilder } from './query-builder';
+import { QueryError, UndefinedWhereConditionError } from './query-builder.errors';
 import { Repository } from '../core/repository/repository';
 import { Database } from '../core/database/database';
 import { COLUMN_TYPE } from '../core/sql-types/sql-types';
@@ -126,7 +127,9 @@ describe('QueryBuilder - conditions proxy', () => {
 
   test('applyOptions throws UndefinedWhereConditionError when the only condition is undefined', () => {
     const qb = new QueryBuilder(QbUser);
-    expect(() => qb.applyOptions({ where: () => [undefined] })).toThrow(UndefinedWhereConditionError);
+    expect(() => qb.applyOptions({ where: () => [undefined] })).toThrow(
+      UndefinedWhereConditionError,
+    );
   });
 
   test('UndefinedWhereConditionError instanceof chain and conditionIndex property', () => {

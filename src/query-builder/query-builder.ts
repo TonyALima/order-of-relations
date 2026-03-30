@@ -1,19 +1,8 @@
 import { Database } from '../core/database/database';
 import type { EntityMetadata } from '../core/metadata/metadata';
-import { OrmError } from '../core/orm-error/orm-error';
 import type { Constructor } from '../core/utils/utils';
 import { InheritanceSearchType, type Condition, type Conditions, type FindOptions } from './types';
-
-export abstract class QueryError extends OrmError {}
-
-export class UndefinedWhereConditionError extends QueryError {
-  constructor(readonly conditionIndex: number) {
-    super(
-      `where() condition at index ${conditionIndex} is undefined. ` +
-        'Make sure every field you access in the where callback has a @Column decorator.',
-    );
-  }
-}
+import { UndefinedWhereConditionError } from './query-builder.errors';
 
 export class QueryBuilder<T> {
   private conditions: Condition[] = [];

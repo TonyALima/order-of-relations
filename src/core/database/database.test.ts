@@ -1,7 +1,8 @@
 import { test, expect, describe } from 'bun:test';
 
-import { Database, DatabaseError, DatabaseNotConnectedError } from './database';
-import { OrmError } from '../orm-error/orm-error';
+import { Database } from './database';
+import { DatabaseError, DatabaseNotConnectedError } from './database.errors';
+import { OrmError } from '../orm-error';
 import { COLUMN_TYPE } from '../sql-types/sql-types';
 
 class DatabaseTestEntity {

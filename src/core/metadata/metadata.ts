@@ -1,19 +1,6 @@
 import type { COLUMN_TYPE } from '../sql-types/sql-types';
 import type { Constructor } from '../utils/utils';
-import { OrmError } from '../orm-error/orm-error';
-
-export abstract class MetadataError extends OrmError {}
-
-export class RelationTargetNotFoundError extends MetadataError {
-  constructor(
-    readonly targetName: string,
-    readonly relationPath: string,
-  ) {
-    super(
-      `Relation target "${targetName}" not found for relation "${relationPath}, ensure the target entity is defined and decorated with @Entity"`,
-    );
-  }
-}
+import { RelationTargetNotFoundError } from './metadata.errors';
 
 export interface ColumnMetadata {
   propertyName: string;

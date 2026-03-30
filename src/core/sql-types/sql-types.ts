@@ -1,14 +1,6 @@
 import type { SQL } from 'bun';
 
-import { OrmError } from '../orm-error/orm-error';
-
-export abstract class SchemaError extends OrmError {}
-
-export class UnsupportedColumnTypeError extends SchemaError {
-  constructor(readonly columnType: string) {
-    super(`Unsupported column type: ${columnType}`);
-  }
-}
+import { UnsupportedColumnTypeError } from './sql-types.errors';
 
 export enum COLUMN_TYPE {
   SMALLINT = 'smallint',
