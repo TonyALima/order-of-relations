@@ -1,6 +1,5 @@
 import { describe, beforeEach, afterEach } from 'bun:test';
-import { Entity, Column, PrimaryColumn, Database, Repository } from '../../src';
-import { COLUMN_TYPE } from '../../src/core/sql-types/sql-types';
+import { Entity, Column, PrimaryColumn, Database, Repository, COLUMN_TYPE } from '../../src';
 
 @Entity()
 class User {

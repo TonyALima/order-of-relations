@@ -11,6 +11,7 @@ export { Service, Inject, InjectRepository } from './decorators/service/service'
 export { Database } from './core/database/database';
 export { Repository } from './core/repository/repository';
 export { Container } from './core/container/container';
+export { COLUMN_TYPE } from './core/sql-types/sql-types';
 
 // Types
 export type { EntityMetadata, ColumnMetadata, RelationMetadata } from './core/metadata/metadata';
