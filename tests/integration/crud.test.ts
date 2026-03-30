@@ -54,4 +54,13 @@ describe('Integration: Repository CRUD', () => {
     expect(users).toHaveLength(2);
     expect(users.map(u => u.name)).toEqual(['Alice', 'Bob']);
   });
+
+  test('update() changes the row identified by PK', async () => {
+    await repo.create({ name: 'Alice' });
+    const rows = await repo.findMany();
+    const user = rows[0]!;
+    await repo.update({ ...user, name: 'Bob' });
+    const updated = await repo.findById(user.id);
+    expect(updated).toEqual({ id: user.id, name: 'Bob' });
+  });
 });
