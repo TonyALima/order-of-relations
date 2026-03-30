@@ -25,7 +25,7 @@ describe('Integration: Repository CRUD', () => {
     await db.drop();
   });
 
-  test('create() inserts a row and returns the generated primary key', async () => {
+  test('create() inserts a row that can be retrieved', async () => {
     await repo.create({ name: 'Alice' });
     const rows = await repo.findMany();
     expect(rows.length).toBe(1);
