@@ -10,13 +10,17 @@ describe('MetadataStorage', () => {
 
       storage.set(User, {
         tableName: 'users',
-        columns: [{ propertyName: 'id', columnName: 'id', type: COLUMN_TYPE.SERIAL, primary: true }],
+        columns: [
+          { propertyName: 'id', columnName: 'id', type: COLUMN_TYPE.SERIAL, primary: true },
+        ],
         relations: [],
       });
 
       expect(storage.get(User)).toEqual({
         tableName: 'users',
-        columns: [{ propertyName: 'id', columnName: 'id', type: COLUMN_TYPE.SERIAL, primary: true }],
+        columns: [
+          { propertyName: 'id', columnName: 'id', type: COLUMN_TYPE.SERIAL, primary: true },
+        ],
         relations: [],
         discriminator: undefined,
       });
@@ -137,6 +141,24 @@ describe('MetadataStorage', () => {
       expect(first).toEqual(second);
       expect(first?.discriminator).toBeUndefined();
     });
+
+    test('resolveInheritance is idempotent: re-resolving after a new entity is added does not corrupt discriminator', () => {
+      const storage = new MetadataStorage();
+      class Animal {}
+      class Dog extends Animal {}
+
+      storage.set(Animal, { tableName: 'animals', columns: [], relations: [] });
+      storage.set(Dog, { tableName: 'dogs', columns: [], relations: [] });
+
+      const beforeSnapshot = structuredClone(storage.get(Dog));
+
+      class Cat {}
+      storage.set(Cat, { tableName: 'cats', columns: [], relations: [] });
+
+      const afterSnapshot = storage.get(Dog);
+
+      expect(afterSnapshot).toEqual(beforeSnapshot);
+    });
   });
 
   describe('relation resolution', () => {
@@ -147,13 +169,17 @@ describe('MetadataStorage', () => {
 
       storage.set(User, {
         tableName: 'users',
-        columns: [{ propertyName: 'id', columnName: 'id', type: COLUMN_TYPE.SERIAL, primary: true }],
+        columns: [
+          { propertyName: 'id', columnName: 'id', type: COLUMN_TYPE.SERIAL, primary: true },
+        ],
         relations: [],
       });
 
       storage.set(Post, {
         tableName: 'posts',
-        columns: [{ propertyName: 'id', columnName: 'id', type: COLUMN_TYPE.SERIAL, primary: true }],
+        columns: [
+          { propertyName: 'id', columnName: 'id', type: COLUMN_TYPE.SERIAL, primary: true },
+        ],
         relations: [
           {
             propertyName: 'user',
@@ -176,7 +202,14 @@ describe('MetadataStorage', () => {
 
       storage.set(Category, {
         tableName: 'categories',
-        columns: [{ propertyName: 'categoryId', columnName: 'category_id', type: COLUMN_TYPE.SERIAL, primary: true }],
+        columns: [
+          {
+            propertyName: 'categoryId',
+            columnName: 'category_id',
+            type: COLUMN_TYPE.SERIAL,
+            primary: true,
+          },
+        ],
         relations: [],
       });
 
@@ -196,6 +229,51 @@ describe('MetadataStorage', () => {
 
       const articleMeta = storage.get(Article);
       expect(articleMeta?.relations[0]?.columnName).toBe('category_categoryId');
+    });
+
+    test('resolveRelations is idempotent: re-resolving after a new entity is added does not corrupt already-resolved columnName and columnType', () => {
+      const storage = new MetadataStorage();
+      class User {}
+      class Post {}
+
+      storage.set(User, {
+        tableName: 'users',
+        columns: [
+          { propertyName: 'id', columnName: 'id', type: COLUMN_TYPE.SERIAL, primary: true },
+        ],
+        relations: [],
+      });
+
+      storage.set(Post, {
+        tableName: 'posts',
+        columns: [],
+        relations: [
+          {
+            propertyName: 'user',
+            columnName: null,
+            relationType: RelationType.TO_ONE,
+            columnType: 'unresolved',
+            getTarget: () => User,
+          },
+        ],
+      });
+
+      const snapshotRelations = (meta: ReturnType<typeof storage.get>) =>
+        meta?.relations.map(({ propertyName, columnName, columnType, relationType }) => ({
+          propertyName,
+          columnName,
+          columnType,
+          relationType,
+        }));
+
+      const beforeSnapshot = snapshotRelations(storage.get(Post));
+
+      class Tag {}
+      storage.set(Tag, { tableName: 'tags', columns: [], relations: [] });
+
+      const afterSnapshot = snapshotRelations(storage.get(Post));
+
+      expect(afterSnapshot).toEqual(beforeSnapshot);
     });
   });
 });

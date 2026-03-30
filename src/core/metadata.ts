@@ -30,7 +30,7 @@ export interface EntityMetadata {
 
 export class MetadataStorage implements Iterable<[Constructor, EntityMetadata]> {
   private storage = new Map<Constructor, EntityMetadata>();
-  private isInheritanceResolved = false;
+  private isMetadataResolved = false;
 
   private getParentTableName(target: Constructor): string | undefined {
     const parent = Object.getPrototypeOf(target.prototype)?.constructor;
@@ -57,7 +57,7 @@ export class MetadataStorage implements Iterable<[Constructor, EntityMetadata]> 
       this.storage.set(target, {
         ...metadata,
         tableName: tableName,
-        discriminator: metadata.tableName,
+        discriminator: metadata.discriminator ?? metadata.tableName,
       });
     }
 
@@ -78,30 +78,31 @@ export class MetadataStorage implements Iterable<[Constructor, EntityMetadata]> 
         const pk = targetMetadata?.columns.find((c) => c.primary);
         if (!pk) continue;
         if (relation.columnType === 'unresolved') relation.columnType = pk.type;
-        if (relation.columnName === null) relation.columnName = `${relation.propertyName}_${pk.propertyName}`;
+        if (relation.columnName === null)
+          relation.columnName = `${relation.propertyName}_${pk.propertyName}`;
       }
     }
   }
 
-  private ensureInheritanceResolved() {
-    if (this.isInheritanceResolved) return;
+  private ensureMetadataResolved() {
+    if (this.isMetadataResolved) return;
     this.resolveInheritance();
-    this.isInheritanceResolved = true;
+    this.resolveRelations();
+    this.isMetadataResolved = true;
   }
 
   set(target: Constructor, metadata: EntityMetadata) {
     this.storage.set(target, metadata);
+    this.isMetadataResolved = false;
   }
 
   get(target: Constructor): EntityMetadata | undefined {
-    this.ensureInheritanceResolved();
-    this.resolveRelations();
+    this.ensureMetadataResolved();
     return this.storage.get(target);
   }
 
   [Symbol.iterator](): IterableIterator<[Constructor, EntityMetadata]> {
-    this.ensureInheritanceResolved();
-    this.resolveRelations();
+    this.ensureMetadataResolved();
     return this.storage[Symbol.iterator]();
   }
 }
