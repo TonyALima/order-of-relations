@@ -39,7 +39,7 @@ export class Database {
     return this.metadata;
   }
 
-  async create(): Promise<void> {
+  private async createBaseTables(): Promise<void> {
     const sql = this.getConnection();
 
     for (const [, metadata] of this.metadata) {
@@ -78,6 +78,38 @@ export class Database {
         }
       });
     }
+  }
+
+  private async createRelations(): Promise<void> {
+    const sql = this.getConnection();
+
+    for (const [, metadata] of this.metadata) {
+      if (metadata.relations.length === 0) continue;
+
+      if (metadata.discriminator && metadata.discriminator !== metadata.tableName) continue;
+
+      await sql.begin(async (tx) => {
+        for (const relation of metadata.relations) {
+          if (relation.columnType === 'unresolved') throw new Error(); // This should never happen
+          const columnType = getColumnTypeDefinition(sql, relation.columnType);
+
+          const targetMetadata = this.metadata.get(relation.getTarget())!;
+
+          const targetPrimaryColumn = targetMetadata.columns.find((c) => c.primary)!;
+
+          await tx`
+            ALTER TABLE ${sql(metadata.tableName)} 
+            ADD COLUMN ${sql(relation.columnName)} ${columnType} 
+            REFERENCES ${sql(targetMetadata.tableName)}(${sql(targetPrimaryColumn.columnName)})
+          `;
+        }
+      });
+    }
+  }
+
+  async create(): Promise<void> {
+    await this.createBaseTables();
+    await this.createRelations();
   }
 
   async drop(): Promise<void> {
