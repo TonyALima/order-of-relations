@@ -15,7 +15,7 @@ export enum RelationType {
 
 export interface RelationMetadata {
   propertyName: string;
-  columnName: string;
+  columnName: string | null;
   relationType: RelationType;
   columnType: COLUMN_TYPE | 'unresolved';
   getTarget: () => Constructor;
@@ -71,6 +71,18 @@ export class MetadataStorage implements Iterable<[Constructor, EntityMetadata]> 
     }
   }
 
+  private resolveRelations() {
+    for (const [, metadata] of this.storage) {
+      for (const relation of metadata.relations) {
+        const targetMetadata = this.storage.get(relation.getTarget());
+        const pk = targetMetadata?.columns.find((c) => c.primary);
+        if (!pk) continue;
+        if (relation.columnType === 'unresolved') relation.columnType = pk.type;
+        if (relation.columnName === null) relation.columnName = `${relation.propertyName}_${pk.propertyName}`;
+      }
+    }
+  }
+
   private ensureInheritanceResolved() {
     if (this.isInheritanceResolved) return;
     this.resolveInheritance();
@@ -83,11 +95,13 @@ export class MetadataStorage implements Iterable<[Constructor, EntityMetadata]> 
 
   get(target: Constructor): EntityMetadata | undefined {
     this.ensureInheritanceResolved();
+    this.resolveRelations();
     return this.storage.get(target);
   }
 
   [Symbol.iterator](): IterableIterator<[Constructor, EntityMetadata]> {
     this.ensureInheritanceResolved();
+    this.resolveRelations();
     return this.storage[Symbol.iterator]();
   }
 }

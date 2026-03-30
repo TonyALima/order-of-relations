@@ -1,5 +1,5 @@
 import { expect, test, describe } from 'bun:test';
-import { MetadataStorage } from './metadata';
+import { MetadataStorage, RelationType } from './metadata';
 import { COLUMN_TYPE } from './sql-types';
 
 describe('MetadataStorage', () => {
@@ -136,6 +136,66 @@ describe('MetadataStorage', () => {
 
       expect(first).toEqual(second);
       expect(first?.discriminator).toBeUndefined();
+    });
+  });
+
+  describe('relation resolution', () => {
+    test('resolves columnType from target primary column on get()', () => {
+      const storage = new MetadataStorage();
+      class User {}
+      class Post {}
+
+      storage.set(User, {
+        tableName: 'users',
+        columns: [{ propertyName: 'id', columnName: 'id', type: COLUMN_TYPE.SERIAL, primary: true }],
+        relations: [],
+      });
+
+      storage.set(Post, {
+        tableName: 'posts',
+        columns: [{ propertyName: 'id', columnName: 'id', type: COLUMN_TYPE.SERIAL, primary: true }],
+        relations: [
+          {
+            propertyName: 'user',
+            columnName: 'user_id',
+            relationType: RelationType.TO_ONE,
+            columnType: 'unresolved',
+            getTarget: () => User,
+          },
+        ],
+      });
+
+      const postMeta = storage.get(Post);
+      expect(postMeta?.relations[0]?.columnType).toBe(COLUMN_TYPE.SERIAL);
+    });
+
+    test('resolves null columnName from target PK property name on get()', () => {
+      const storage = new MetadataStorage();
+      class Category {}
+      class Article {}
+
+      storage.set(Category, {
+        tableName: 'categories',
+        columns: [{ propertyName: 'categoryId', columnName: 'category_id', type: COLUMN_TYPE.SERIAL, primary: true }],
+        relations: [],
+      });
+
+      storage.set(Article, {
+        tableName: 'articles',
+        columns: [],
+        relations: [
+          {
+            propertyName: 'category',
+            columnName: null,
+            relationType: RelationType.TO_ONE,
+            columnType: 'unresolved',
+            getTarget: () => Category,
+          },
+        ],
+      });
+
+      const articleMeta = storage.get(Article);
+      expect(articleMeta?.relations[0]?.columnName).toBe('category_categoryId');
     });
   });
 });
