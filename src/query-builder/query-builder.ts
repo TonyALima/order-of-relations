@@ -94,7 +94,14 @@ export class QueryBuilder<T> {
 
     const whereClause = fragments.reduce((acc, frag) => sql`${acc} AND ${frag}`);
 
-    return sql<T[]>`SELECT * FROM ${tableName} WHERE ${whereClause}`;
+    const columnNames = meta.columns.map((c) => c.columnName);
+
+    const cols = columnNames.reduce(
+      (acc, col, i) => (i === 0 ? sql`${sql(col)}` : sql`${acc}, ${sql(col)}`),
+      sql``,
+    );
+
+    return sql<T[]>`SELECT ${cols} FROM ${tableName} WHERE ${whereClause}`;
   }
 
   async getOne(): Promise<T | null> {
