@@ -58,6 +58,41 @@ describe('Database', () => {
   });
 
   describe('create()', () => {
+    test('creates a table with a composite primary key', async () => {
+      class OrderItemEntity {
+        orderId!: number;
+        productId!: number;
+        quantity!: number;
+      }
+
+      const compositeDb = new Database();
+      compositeDb.getMetadata().set(OrderItemEntity, {
+        tableName: 'order_items',
+        columns: [
+          { propertyName: 'orderId', columnName: 'order_id', type: COLUMN_TYPE.INTEGER, primary: true },
+          { propertyName: 'productId', columnName: 'product_id', type: COLUMN_TYPE.INTEGER, primary: true },
+          { propertyName: 'quantity', columnName: 'quantity', type: COLUMN_TYPE.INTEGER },
+        ],
+        relations: [],
+      });
+
+      compositeDb.connect('sqlite://:memory:');
+      await compositeDb.create();
+
+      const sql = compositeDb.getConnection();
+      const columns = await sql`PRAGMA table_info(order_items)`;
+      const normalizedColumns = Array.from(columns, (column) => {
+        const c = column as { name: string; type: string; pk: number };
+        return { name: c.name, type: c.type, pk: c.pk };
+      });
+
+      expect(normalizedColumns).toEqual([
+        { name: 'order_id', type: 'INTEGER', pk: 1 },
+        { name: 'product_id', type: 'INTEGER', pk: 2 },
+        { name: 'quantity', type: 'INTEGER', pk: 0 },
+      ]);
+    });
+
     test('applies the mapped schema to an in-memory SQLite database', async () => {
       db.connect('sqlite://:memory:');
 
