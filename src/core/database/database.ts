@@ -37,36 +37,53 @@ export class Database {
 
       if (metadata.discriminator && metadata.discriminator !== metadata.tableName) continue;
 
-      const primaryColumn = metadata.columns.find((c) => c.primary)!;
-      const primaryColumnType = getColumnTypeDefinition(sql, primaryColumn.type);
+      const primaryColumns = metadata.columns
+        .filter((c) => c.primary)
+        .map((c) => {
+          return { ...c, sqlType: getColumnTypeDefinition(sql, c.type) };
+        });
 
-      await sql.begin(async (tx) => {
-        await tx`
-          CREATE TABLE ${sql(metadata.tableName)}
-          (${sql(primaryColumn.columnName)} ${primaryColumnType} PRIMARY KEY)
+      const primaryColumnsDefinitionSqlFragment = primaryColumns.reduce(
+        (acc, col, i) =>
+          i === 0
+            ? sql`${sql(col.columnName)} ${col.sqlType}`
+            : sql`${acc}, ${sql(col.columnName)} ${col.sqlType}`,
+        sql``,
+      );
+
+      const primaryColumnsSqlFragment = primaryColumns.reduce(
+        (acc, col, i) =>
+          i === 0 ? sql`${sql(col.columnName)}` : sql`${acc}, ${sql(col.columnName)}`,
+        sql``,
+      );
+
+      await sql`
+        CREATE TABLE ${sql(metadata.tableName)} (
+          ${primaryColumnsDefinitionSqlFragment}, 
+          PRIMARY KEY (${primaryColumnsSqlFragment})
+        )
+      `;
+
+      const hasDiscriminator = metadata.discriminator !== undefined;
+
+      if (hasDiscriminator) {
+        await sql`
+          ALTER TABLE ${sql(metadata.tableName)} 
+          ADD COLUMN discriminator TEXT NOT NULL;
+          CREATE INDEX idx_discriminator ON ${sql(metadata.tableName)}(discriminator);
+        `.simple();
+      }
+
+      for (const column of metadata.columns) {
+        if (column.primary) continue;
+
+        const columnType = getColumnTypeDefinition(sql, column.type);
+
+        await sql`
+          ALTER TABLE ${sql(metadata.tableName)} 
+          ADD COLUMN ${sql(column.columnName)} ${columnType}
         `;
-
-        const hasDiscriminator = metadata.discriminator !== undefined;
-
-        if (hasDiscriminator) {
-          await tx`
-            ALTER TABLE ${sql(metadata.tableName)} 
-            ADD COLUMN discriminator TEXT NOT NULL;
-            CREATE INDEX idx_discriminator ON ${sql(metadata.tableName)}(discriminator);
-          `.simple();
-        }
-
-        for (const column of metadata.columns) {
-          if (column.primary) continue;
-
-          const columnType = getColumnTypeDefinition(sql, column.type);
-
-          await tx`
-            ALTER TABLE ${sql(metadata.tableName)} 
-            ADD COLUMN ${sql(column.columnName)} ${columnType}
-          `;
-        }
-      });
+      }
     }
   }
 
