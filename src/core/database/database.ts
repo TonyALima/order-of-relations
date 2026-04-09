@@ -2,6 +2,7 @@ import { SQL } from 'bun';
 
 import { MetadataStorage } from '../metadata/metadata';
 import { getColumnTypeDefinition } from '../sql-types/sql-types';
+import { sqlJoin } from '../utils/utils';
 import { DatabaseNotConnectedError } from './database.errors';
 
 export class Database {
@@ -43,18 +44,16 @@ export class Database {
           return { ...c, sqlType: getColumnTypeDefinition(sql, c.type) };
         });
 
-      const primaryColumnsDefinitionSqlFragment = primaryColumns.reduce(
-        (acc, col, i) =>
-          i === 0
-            ? sql`${sql(col.columnName)} ${col.sqlType}`
-            : sql`${acc}, ${sql(col.columnName)} ${col.sqlType}`,
-        sql``,
+      const primaryColumnsDefinitionSqlFragment = sqlJoin(
+        sql,
+        primaryColumns,
+        (col) => sql`${sql(col.columnName)} ${col.sqlType}`,
       );
 
-      const primaryColumnsSqlFragment = primaryColumns.reduce(
-        (acc, col, i) =>
-          i === 0 ? sql`${sql(col.columnName)}` : sql`${acc}, ${sql(col.columnName)}`,
-        sql``,
+      const primaryColumnsSqlFragment = sqlJoin(
+        sql,
+        primaryColumns,
+        (col) => sql`${sql(col.columnName)}`,
       );
 
       await sql`

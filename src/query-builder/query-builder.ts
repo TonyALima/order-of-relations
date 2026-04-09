@@ -1,6 +1,6 @@
 import { Database } from '../core/database/database';
 import type { EntityMetadata } from '../core/metadata/metadata';
-import type { Constructor } from '../core/utils/utils';
+import { sqlJoin, type Constructor } from '../core/utils/utils';
 import { InheritanceSearchType, type Condition, type Conditions, type FindOptions } from './types';
 import { UndefinedWhereConditionError } from './query-builder.errors';
 
@@ -96,10 +96,7 @@ export class QueryBuilder<T> {
 
     const columnNames = meta.columns.map((c) => c.columnName);
 
-    const cols = columnNames.reduce(
-      (acc, col, i) => (i === 0 ? sql`${sql(col)}` : sql`${acc}, ${sql(col)}`),
-      sql``,
-    );
+    const cols = sqlJoin(sql, columnNames, (col) => sql`${sql(col)}`);
 
     return sql<T[]>`SELECT ${cols} FROM ${tableName} WHERE ${whereClause}`;
   }
