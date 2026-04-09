@@ -6,9 +6,11 @@ import { PrimaryColumn } from '../column/column';
 import { COLUMN_TYPE } from '../../core/sql-types/sql-types';
 import { ToOne } from './relation';
 
+const db = new Database();
+
 describe('@ToOne decorator', () => {
   test('stores relation metadata with auto-derived FK column name', () => {
-    @Entity()
+    @Entity(db)
     class User {
       @PrimaryColumn({ type: COLUMN_TYPE.SERIAL })
       id!: number;
@@ -17,7 +19,7 @@ describe('@ToOne decorator', () => {
       profile?: Profile;
     }
 
-    @Entity()
+    @Entity(db)
     class Profile {
       @PrimaryColumn({ type: COLUMN_TYPE.SERIAL })
       id!: number;
@@ -26,7 +28,7 @@ describe('@ToOne decorator', () => {
       user!: User;
     }
 
-    const metadata = Database.getInstance().getMetadata().get(Profile);
+    const metadata = db.getMetadata().get(Profile);
     expect(metadata).toBeDefined();
     const relations = metadata!.relations;
     expect(relations).toBeDefined();
@@ -49,13 +51,13 @@ describe('@ToOne decorator', () => {
   });
 
   test('uses foreignKey option as column name when provided', () => {
-    @Entity()
+    @Entity(db)
     class Author {
       @PrimaryColumn({ type: COLUMN_TYPE.SERIAL })
       id!: number;
     }
 
-    @Entity()
+    @Entity(db)
     class Book {
       @PrimaryColumn({ type: COLUMN_TYPE.SERIAL })
       id!: number;
@@ -64,19 +66,19 @@ describe('@ToOne decorator', () => {
       author!: Author;
     }
 
-    const metadata = Database.getInstance().getMetadata().get(Book)!;
+    const metadata = db.getMetadata().get(Book)!;
     const relation = metadata.relations[0]!;
     expect(relation.columnName).toBe('author_id');
   });
 
   test('resolves columnType from target primary column', () => {
-    @Entity()
+    @Entity(db)
     class Category {
       @PrimaryColumn({ type: COLUMN_TYPE.SERIAL })
       id!: number;
     }
 
-    @Entity()
+    @Entity(db)
     class Article {
       @PrimaryColumn({ type: COLUMN_TYPE.SERIAL })
       id!: number;
@@ -85,20 +87,20 @@ describe('@ToOne decorator', () => {
       category!: Category;
     }
 
-    const metadata = Database.getInstance().getMetadata().get(Article);
+    const metadata = db.getMetadata().get(Article);
     const relation = metadata!.relations[0]!;
     expect(relation.columnName).toBe('category_id');
     expect(relation.columnType).toBe(COLUMN_TYPE.SERIAL);
   });
 
   test('derives FK column name from target PK property name', () => {
-    @Entity()
+    @Entity(db)
     class Tag {
       @PrimaryColumn({ type: COLUMN_TYPE.SERIAL })
       tagId!: number;
     }
 
-    @Entity()
+    @Entity(db)
     class Post {
       @PrimaryColumn({ type: COLUMN_TYPE.SERIAL })
       id!: number;
@@ -107,7 +109,7 @@ describe('@ToOne decorator', () => {
       tag!: Tag;
     }
 
-    const metadata = Database.getInstance().getMetadata().get(Post)!;
+    const metadata = db.getMetadata().get(Post)!;
     const relation = metadata.relations[0]!;
     expect(relation.columnName).toBe('tag_tagId');
   });

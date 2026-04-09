@@ -8,7 +8,7 @@ const RELATIONS_KEY = Symbol('relations');
 
 export { COLUMNS_KEY, RELATIONS_KEY };
 
-export function Entity(mapTableName?: string) {
+export function Entity(db: Database, mapTableName?: string) {
   return function <T extends Constructor>(value: T, context: ClassDecoratorContext<T>) {
     const tableName = mapTableName ?? String(context.name);
     const columns = (context.metadata[COLUMNS_KEY] as ColumnMetadata[]) ?? [];
@@ -18,6 +18,6 @@ export function Entity(mapTableName?: string) {
       throw new MissingPrimaryColumnError(String(context.name));
     }
 
-    Database.getInstance().getMetadata().set(value, { tableName, columns, relations });
+    db.getMetadata().set(value, { tableName, columns, relations });
   };
 }

@@ -5,23 +5,13 @@ import { getColumnTypeDefinition } from '../sql-types/sql-types';
 import { DatabaseNotConnectedError } from './database.errors';
 
 export class Database {
-  private constructor() {
+  constructor() {
     this.metadata = new MetadataStorage();
   }
-
-  private static instance: Database;
 
   private connection?: SQL;
 
   private metadata: MetadataStorage;
-
-  static getInstance(): Database {
-    if (!this.instance) {
-      this.instance = new Database();
-    }
-
-    return this.instance;
-  }
 
   connect(url?: string) {
     this.connection = url ? new SQL(url) : new SQL();

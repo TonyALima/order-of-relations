@@ -7,13 +7,15 @@ import { UndefinedWhereConditionError } from './query-builder.errors';
 export class QueryBuilder<T> {
   private conditions: Condition[] = [];
 
-  constructor(private entity: Constructor<T>) {}
+  constructor(
+    private entity: Constructor<T>,
+    private db: Database,
+  ) {}
 
   setSubClassesDiscriminator() {
-    const db = Database.getInstance();
-    const meta = db.getMetadata().get(this.entity)!;
+    const meta = this.db.getMetadata().get(this.entity)!;
     const subclasses: EntityMetadata[] = [];
-    for (const [t, m] of db.getMetadata()) {
+    for (const [t, m] of this.db.getMetadata()) {
       if (
         t === this.entity ||
         Object.prototype.isPrototypeOf.call(this.entity.prototype, t.prototype)
@@ -32,8 +34,7 @@ export class QueryBuilder<T> {
   }
 
   setConcreteClassDiscriminator() {
-    const db = Database.getInstance();
-    const meta = db.getMetadata().get(this.entity)!;
+    const meta = this.db.getMetadata().get(this.entity)!;
     if (meta.discriminator) {
       this.conditions.push({
         columnName: 'discriminator',
@@ -61,9 +62,8 @@ export class QueryBuilder<T> {
   }
 
   async getMany(): Promise<T[]> {
-    const db = Database.getInstance();
-    const meta = db.getMetadata().get(this.entity)!;
-    const sql = db.getConnection();
+    const meta = this.db.getMetadata().get(this.entity)!;
+    const sql = this.db.getConnection();
     const tableName = sql(meta.tableName);
 
     if (this.conditions.length === 0) {
@@ -110,8 +110,7 @@ export class QueryBuilder<T> {
   }
 
   private buildConditionsProxy(): Conditions<T> {
-    const db = Database.getInstance();
-    const meta = db.getMetadata().get(this.entity)!;
+    const meta = this.db.getMetadata().get(this.entity)!;
     const proxy: Conditions<T> = {};
     for (const col of meta.columns) {
       proxy[col.propertyName as keyof T] = {

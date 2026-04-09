@@ -1,4 +1,4 @@
-import { test, expect, describe, spyOn, beforeEach } from 'bun:test';
+import { test, expect, describe, beforeEach } from 'bun:test';
 
 import { Database } from './database';
 import { DatabaseError, DatabaseNotConnectedError } from './database.errors';
@@ -28,39 +28,37 @@ describe('DatabaseNotConnectedError', () => {
 });
 
 describe('Database', () => {
-  beforeEach(() => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    spyOn(Database, 'getInstance').mockReturnValue(new (Database as any)());
+  let db: Database;
 
-    Database.getInstance()
-      .getMetadata()
-      .set(DatabaseTestEntity, {
-        tableName: 'database_test_entity',
-        columns: [
-          {
-            propertyName: 'id',
-            columnName: 'id',
-            type: COLUMN_TYPE.SERIAL,
-            primary: true,
-          },
-          {
-            propertyName: 'name',
-            columnName: 'name',
-            type: COLUMN_TYPE.TEXT,
-          },
-          {
-            propertyName: 'isActive',
-            columnName: 'is_active',
-            type: COLUMN_TYPE.BOOLEAN,
-          },
-        ],
-        relations: [],
-      });
+  beforeEach(() => {
+    db = new Database();
+
+    db.getMetadata().set(DatabaseTestEntity, {
+      tableName: 'database_test_entity',
+      columns: [
+        {
+          propertyName: 'id',
+          columnName: 'id',
+          type: COLUMN_TYPE.SERIAL,
+          primary: true,
+        },
+        {
+          propertyName: 'name',
+          columnName: 'name',
+          type: COLUMN_TYPE.TEXT,
+        },
+        {
+          propertyName: 'isActive',
+          columnName: 'is_active',
+          type: COLUMN_TYPE.BOOLEAN,
+        },
+      ],
+      relations: [],
+    });
   });
 
   describe('create()', () => {
     test('applies the mapped schema to an in-memory SQLite database', async () => {
-      const db = Database.getInstance();
       db.connect('sqlite://:memory:');
 
       await db.create();
@@ -109,8 +107,6 @@ describe('Database', () => {
     }
 
     beforeEach(() => {
-      const db = Database.getInstance();
-
       db.getMetadata().set(UserEntity, {
         tableName: 'users',
         columns: [
@@ -137,7 +133,6 @@ describe('Database', () => {
     });
 
     test('adds FK column with auto-resolved name (<propertyName>_<pkPropertyName>) to the owning table', async () => {
-      const db = Database.getInstance();
       db.connect('sqlite://:memory:');
       await db.create();
 
@@ -149,7 +144,6 @@ describe('Database', () => {
     });
 
     test('FK column references the correct target table and primary column', async () => {
-      const db = Database.getInstance();
       db.connect('sqlite://:memory:');
       await db.create();
 
@@ -163,8 +157,6 @@ describe('Database', () => {
     });
 
     test('uses custom foreignKey column name when provided', async () => {
-      const db = Database.getInstance();
-
       db.getMetadata().set(PostEntity, {
         tableName: 'posts',
         columns: [
@@ -194,7 +186,6 @@ describe('Database', () => {
 
   describe('drop()', () => {
     test('removes the mapped tables from an in-memory SQLite database', async () => {
-      const db = Database.getInstance();
       db.connect('sqlite://:memory:');
 
       await db.drop();

@@ -9,16 +9,15 @@ class TestEntity {
   name!: string;
 }
 
-Database.getInstance()
-  .getMetadata()
-  .set(TestEntity, {
-    tableName: 'test_entity',
-    columns: [
-      { propertyName: 'id', columnName: 'id', type: COLUMN_TYPE.SERIAL, primary: true },
-      { propertyName: 'name', columnName: 'name', type: COLUMN_TYPE.TEXT },
-    ],
-    relations: [],
-  });
+const db = new Database();
+db.getMetadata().set(TestEntity, {
+  tableName: 'test_entity',
+  columns: [
+    { propertyName: 'id', columnName: 'id', type: COLUMN_TYPE.SERIAL, primary: true },
+    { propertyName: 'name', columnName: 'name', type: COLUMN_TYPE.TEXT },
+  ],
+  relations: [],
+});
 
 async function createFreshDb(): Promise<SQL> {
   const sql = new SQL({ url: 'sqlite://:memory:' });
@@ -35,8 +34,8 @@ describe('Repository', () => {
 
   beforeEach(async () => {
     sql = await createFreshDb();
-    spyOn(Database.getInstance(), 'getConnection').mockReturnValue(sql);
-    repo = new Repository<TestEntity>(TestEntity);
+    spyOn(db, 'getConnection').mockReturnValue(sql);
+    repo = new Repository<TestEntity>(TestEntity, db);
   });
 
   describe('findById()', () => {

@@ -1,11 +1,12 @@
 import { Repository } from '../../../src';
+import { db } from '../db';
 import { User } from '../entities/User';
 
 export class UserService {
   private userRepository!: Repository<User>;
 
   constructor() {
-    this.userRepository = new Repository(User);
+    this.userRepository = new Repository(User, db);
   }
 
   async createUser(name: string, email: string) {

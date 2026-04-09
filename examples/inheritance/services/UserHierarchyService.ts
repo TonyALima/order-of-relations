@@ -2,6 +2,7 @@ import { Repository } from '../../../src';
 import { User } from '../entities/User';
 import { AdminUser } from '../entities/AdminUser';
 import { InheritanceSearchType } from '../../../src/query-builder/types';
+import { db } from '../db';
 
 export class UserHierarchyService {
   private userRepository!: Repository<User>;
@@ -9,8 +10,8 @@ export class UserHierarchyService {
   private adminRepository!: Repository<AdminUser>;
 
   constructor() {
-    this.userRepository = new Repository(User);
-    this.adminRepository = new Repository(AdminUser);
+    this.userRepository = new Repository(User, db);
+    this.adminRepository = new Repository(AdminUser, db);
   }
 
   async createRegularUser(name: string, email: string) {

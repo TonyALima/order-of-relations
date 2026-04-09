@@ -1,7 +1,8 @@
 import { Entity, Column, PrimaryColumn } from '../../../src';
 import { COLUMN_TYPE } from '../../../src/core/sql-types/sql-types';
+import { db } from '../db';
 
-@Entity()
+@Entity(db)
 export class User {
   @PrimaryColumn({ type: COLUMN_TYPE.SERIAL })
   id!: number;

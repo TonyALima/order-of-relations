@@ -7,11 +7,13 @@ import { Column, PrimaryColumn } from '../column/column';
 import { Entity } from './entity';
 import { MissingPrimaryColumnError } from './entity.errors';
 
+const db = new Database();
+
 describe('@Entity / @Column decorators', () => {
   test('throws MissingPrimaryColumnError when entity has no primary column defined', () => {
     let caught: unknown;
     try {
-      @Entity('no_pk')
+      @Entity(db, 'no_pk')
       class NoPkEntity {
         @Column({ type: COLUMN_TYPE.TEXT })
         name!: string;
@@ -30,7 +32,7 @@ describe('@Entity / @Column decorators', () => {
   });
 
   test('stores table, column, and relation metadata for the decorated class', () => {
-    @Entity('user')
+    @Entity(db, 'user')
     class User {
       @PrimaryColumn({ type: COLUMN_TYPE.SERIAL })
       id!: number;
@@ -39,7 +41,7 @@ describe('@Entity / @Column decorators', () => {
       name!: string;
     }
 
-    expect(Database.getInstance().getMetadata().get(User)).toEqual({
+    expect(db.getMetadata().get(User)).toEqual({
       tableName: 'user',
       columns: [
         {

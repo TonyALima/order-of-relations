@@ -1,3 +1,4 @@
+import { db } from './db';
 import { UserHierarchyService } from './services/UserHierarchyService';
 
 declare module 'bun' {
@@ -7,7 +8,6 @@ declare module 'bun' {
 }
 
 async function main() {
-  const db = Database.getInstance();
   db.connect();
   await db.drop();
   await db.create();

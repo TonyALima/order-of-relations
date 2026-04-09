@@ -1,7 +1,9 @@
 import { describe, beforeEach, afterEach, test, expect } from 'bun:test';
 import { Entity, Column, PrimaryColumn, Database, Repository, COLUMN_TYPE, ToOne } from '../src';
 
-@Entity()
+const db = new Database();
+
+@Entity(db)
 class User {
   @PrimaryColumn({ type: COLUMN_TYPE.INTEGER })
   id!: number;
@@ -13,7 +15,7 @@ class User {
   profile?: Profile;
 }
 
-@Entity()
+@Entity(db)
 class Profile {
   @PrimaryColumn({ type: COLUMN_TYPE.INTEGER })
   id!: number;
@@ -23,16 +25,14 @@ class Profile {
 }
 
 describe('Integration: Repository CRUD', () => {
-  let db: Database;
   let userRepo: Repository<User>;
   let profileRepo: Repository<Profile>;
 
   beforeEach(async () => {
-    db = Database.getInstance();
     db.connect('sqlite://:memory:');
     await db.create();
-    userRepo = new Repository(User);
-    profileRepo = new Repository(Profile);
+    userRepo = new Repository(User, db);
+    profileRepo = new Repository(Profile, db);
   });
 
   afterEach(async () => {

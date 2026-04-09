@@ -16,17 +16,16 @@ class QbUser {
   age!: number;
 }
 
-Database.getInstance()
-  .getMetadata()
-  .set(QbUser, {
-    tableName: 'qb_users',
-    columns: [
-      { propertyName: 'id', columnName: 'id', type: COLUMN_TYPE.SERIAL, primary: true },
-      { propertyName: 'name', columnName: 'name', type: COLUMN_TYPE.TEXT },
-      { propertyName: 'age', columnName: 'age', type: COLUMN_TYPE.INTEGER },
-    ],
-    relations: [],
-  });
+const db = new Database();
+db.getMetadata().set(QbUser, {
+  tableName: 'qb_users',
+  columns: [
+    { propertyName: 'id', columnName: 'id', type: COLUMN_TYPE.SERIAL, primary: true },
+    { propertyName: 'name', columnName: 'name', type: COLUMN_TYPE.TEXT },
+    { propertyName: 'age', columnName: 'age', type: COLUMN_TYPE.INTEGER },
+  ],
+  relations: [],
+});
 
 async function setupDb(): Promise<SQL> {
   const sql = new SQL({ url: 'sqlite://:memory:' });
@@ -45,7 +44,7 @@ async function setupDb(): Promise<SQL> {
 
 describe('QueryBuilder - conditions proxy', () => {
   test('proxy has keys matching every entity property', () => {
-    const qb = new QueryBuilder(QbUser);
+    const qb = new QueryBuilder(QbUser, db);
     let capturedProxy!: Conditions<QbUser>;
     qb.applyOptions({
       where: (u) => {
@@ -74,7 +73,7 @@ describe('QueryBuilder - conditions proxy', () => {
   ];
 
   test.each(comparisonCases)('%s returns the correct Condition', (_op, build, expected) => {
-    const qb = new QueryBuilder(QbUser);
+    const qb = new QueryBuilder(QbUser, db);
     let captured!: Condition;
     qb.applyOptions({
       where: (u) => {
@@ -92,7 +91,7 @@ describe('QueryBuilder - conditions proxy', () => {
   ];
 
   test.each(nullCases)('%s returns a Condition without value', (_op, build, expected) => {
-    const qb = new QueryBuilder(QbUser);
+    const qb = new QueryBuilder(QbUser, db);
     let captured!: Condition;
     qb.applyOptions({
       where: (u) => {
@@ -104,7 +103,7 @@ describe('QueryBuilder - conditions proxy', () => {
   });
 
   test('applyOptions accumulates all conditions from the where callback', () => {
-    const qb = new QueryBuilder(QbUser);
+    const qb = new QueryBuilder(QbUser, db);
     qb.applyOptions({ where: (u) => [u.name?.eq('Alice'), u.age?.gte(18)] });
     expect(qb['conditions']).toEqual([
       { columnName: 'name', op: '=', value: 'Alice' },
@@ -113,20 +112,20 @@ describe('QueryBuilder - conditions proxy', () => {
   });
 
   test('applyOptions with no options leaves conditions empty', () => {
-    const qb = new QueryBuilder(QbUser);
+    const qb = new QueryBuilder(QbUser, db);
     qb.applyOptions();
     expect(qb['conditions']).toEqual([]);
   });
 
   test('applyOptions throws UndefinedWhereConditionError when a condition entry is undefined', () => {
-    const qb = new QueryBuilder(QbUser);
+    const qb = new QueryBuilder(QbUser, db);
     expect(() => qb.applyOptions({ where: (u) => [u.name?.eq('Alice'), undefined] })).toThrow(
       UndefinedWhereConditionError,
     );
   });
 
   test('applyOptions throws UndefinedWhereConditionError when the only condition is undefined', () => {
-    const qb = new QueryBuilder(QbUser);
+    const qb = new QueryBuilder(QbUser, db);
     expect(() => qb.applyOptions({ where: () => [undefined] })).toThrow(
       UndefinedWhereConditionError,
     );
@@ -142,7 +141,7 @@ describe('QueryBuilder - conditions proxy', () => {
   });
 
   test('thrown error carries the correct conditionIndex', () => {
-    const qb = new QueryBuilder(QbUser);
+    const qb = new QueryBuilder(QbUser, db);
     let caught: unknown;
     try {
       qb.applyOptions({ where: (u) => [u.name?.eq('Alice'), undefined] });
@@ -162,8 +161,8 @@ describe('Repository - findMany', () => {
 
   beforeEach(async () => {
     const sql = await setupDb();
-    spyOn(Database.getInstance(), 'getConnection').mockReturnValue(sql);
-    repo = new Repository(QbUser);
+    spyOn(db, 'getConnection').mockReturnValue(sql);
+    repo = new Repository(QbUser, db);
   });
 
   const cases = [
@@ -231,8 +230,8 @@ describe('Repository - findOne', () => {
 
   beforeEach(async () => {
     const sql = await setupDb();
-    spyOn(Database.getInstance(), 'getConnection').mockReturnValue(sql);
-    repo = new Repository(QbUser);
+    spyOn(db, 'getConnection').mockReturnValue(sql);
+    repo = new Repository(QbUser, db);
   });
 
   const cases = [

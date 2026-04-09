@@ -3,26 +3,26 @@ import { QueryBuilder } from '../../query-builder/query-builder';
 import type { FindOptions } from '../../query-builder/types';
 
 export class Repository<T, PK extends keyof T = 'id' extends keyof T ? 'id' : never> {
-  constructor(private entity: new () => T) {}
+  constructor(private entity: new () => T, private db: Database) {}
 
   async findMany(options?: FindOptions<T>): Promise<T[]> {
-    return new QueryBuilder<T>(this.entity).applyOptions(options).getMany();
+    return new QueryBuilder<T>(this.entity, this.db).applyOptions(options).getMany();
   }
 
   async findOne(options?: FindOptions<T>): Promise<T | null> {
-    return new QueryBuilder<T>(this.entity).applyOptions(options).getOne();
+    return new QueryBuilder<T>(this.entity, this.db).applyOptions(options).getOne();
   }
 
   async findById(id: T[PK]): Promise<T | null> {
-    const meta = Database.getInstance().getMetadata().get(this.entity)!;
+    const meta = this.db.getMetadata().get(this.entity)!;
     const primaryProp = meta.columns.find((c) => c.primary)!.propertyName as keyof T;
-    return new QueryBuilder<T>(this.entity)
+    return new QueryBuilder<T>(this.entity, this.db)
       .applyOptions({ where: (u) => [u[primaryProp]?.eq(id)] })
       .getOne();
   }
 
   async create(entity: Omit<T, PK>): Promise<T[PK]> {
-    const db = Database.getInstance();
+    const db = this.db;
     const meta = db.getMetadata().get(this.entity)!;
     const sql = db.getConnection();
 
@@ -48,7 +48,7 @@ export class Repository<T, PK extends keyof T = 'id' extends keyof T ? 'id' : ne
   }
 
   async delete(id: T[PK]): Promise<void> {
-    const db = Database.getInstance();
+    const db = this.db;
     const meta = db.getMetadata().get(this.entity)!;
     const sql = db.getConnection();
     const tableName = sql(meta.tableName);
@@ -61,7 +61,7 @@ export class Repository<T, PK extends keyof T = 'id' extends keyof T ? 'id' : ne
   }
 
   async update(entity: T): Promise<void> {
-    const db = Database.getInstance();
+    const db = this.db;
     const meta = db.getMetadata().get(this.entity)!;
     const sql = db.getConnection();
 
