@@ -38,17 +38,17 @@ export class Database {
 
       if (metadata.discriminator && metadata.discriminator !== metadata.tableName) continue;
 
-      const primaryColumns = metadata.columns
-        .filter((c) => c.primary)
-        .map((c) => {
-          return { ...c, sqlType: getColumnTypeDefinition(sql, c.type) };
-        });
+      const columnsWithSqlTypes = metadata.columns.map((c) => {
+        return { ...c, sqlType: getColumnTypeDefinition(sql, c.type) };
+      });
 
-      const primaryColumnsDefinitionSqlFragment = sqlJoin(
+      const columnsDefinitionSqlFragment = sqlJoin(
         sql,
-        primaryColumns,
+        columnsWithSqlTypes,
         (col) => sql`${sql(col.columnName)} ${col.sqlType}`,
       );
+
+      const primaryColumns = metadata.columns.filter((c) => c.primary);
 
       const primaryColumnsSqlFragment = sqlJoin(
         sql,
@@ -58,7 +58,7 @@ export class Database {
 
       await sql`
         CREATE TABLE ${sql(metadata.tableName)} (
-          ${primaryColumnsDefinitionSqlFragment}, 
+          ${columnsDefinitionSqlFragment},
           PRIMARY KEY (${primaryColumnsSqlFragment})
         )
       `;
@@ -71,17 +71,6 @@ export class Database {
           ADD COLUMN discriminator TEXT NOT NULL;
           CREATE INDEX idx_discriminator ON ${sql(metadata.tableName)}(discriminator);
         `.simple();
-      }
-
-      for (const column of metadata.columns) {
-        if (column.primary) continue;
-
-        const columnType = getColumnTypeDefinition(sql, column.type);
-
-        await sql`
-          ALTER TABLE ${sql(metadata.tableName)} 
-          ADD COLUMN ${sql(column.columnName)} ${columnType}
-        `;
       }
     }
   }
