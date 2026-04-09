@@ -1,4 +1,3 @@
-import { Database, Container } from '../../src';
 import { UserService } from './services/UserService';
 
 declare module 'bun' {
@@ -14,7 +13,7 @@ async function main() {
   await db.drop();
   await db.create();
 
-  const userService = Container.resolve(UserService);
+  const userService = new UserService();
 
   const userId = await userService.createUser('Maria', 'maria@email.com');
   console.log('Created user with ID:', userId);

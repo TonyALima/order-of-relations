@@ -4,12 +4,8 @@ import {
   Column,
   PrimaryColumn,
   ToOne,
-  Service,
-  Inject,
-  InjectRepository,
   Database,
   Repository,
-  Container,
   OrmError,
   DatabaseError,
   DatabaseNotConnectedError,
@@ -28,12 +24,8 @@ describe('public API exports', () => {
     expect(Column).toBeFunction();
     expect(PrimaryColumn).toBeFunction();
     expect(ToOne).toBeFunction();
-    expect(Service).toBeFunction();
-    expect(Inject).toBeFunction();
-    expect(InjectRepository).toBeFunction();
     expect(Database).toBeDefined();
     expect(Repository).toBeFunction();
-    expect(Container).toBeDefined();
   });
 
   test('all error classes are exported', () => {

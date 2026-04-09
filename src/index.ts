@@ -5,12 +5,10 @@ export * from './errors';
 export { Entity } from './decorators/entity/entity';
 export { Column, PrimaryColumn } from './decorators/column/column';
 export { ToOne } from './decorators/relation/relation';
-export { Service, Inject, InjectRepository } from './decorators/service/service';
 
 // Core
 export { Database } from './core/database/database';
 export { Repository } from './core/repository/repository';
-export { Container } from './core/container/container';
 export { COLUMN_TYPE } from './core/sql-types/sql-types';
 
 // Types

@@ -1,15 +1,17 @@
-import { Service, InjectRepository, Repository } from '../../../src';
+import { Repository } from '../../../src';
 import { User } from '../entities/User';
 import { AdminUser } from '../entities/AdminUser';
 import { InheritanceSearchType } from '../../../src/query-builder/types';
 
-@Service()
 export class UserHierarchyService {
-  @InjectRepository(User)
   private userRepository!: Repository<User>;
 
-  @InjectRepository(AdminUser)
   private adminRepository!: Repository<AdminUser>;
+
+  constructor() {
+    this.userRepository = new Repository(User);
+    this.adminRepository = new Repository(AdminUser);
+  }
 
   async createRegularUser(name: string, email: string) {
     return this.userRepository.create({ name, email });

@@ -1,10 +1,12 @@
-import { Service, InjectRepository, Repository } from '../../../src';
+import { Repository } from '../../../src';
 import { User } from '../entities/User';
 
-@Service()
 export class UserService {
-  @InjectRepository(User)
   private userRepository!: Repository<User>;
+
+  constructor() {
+    this.userRepository = new Repository(User);
+  }
 
   async createUser(name: string, email: string) {
     return this.userRepository.create({ name, email });

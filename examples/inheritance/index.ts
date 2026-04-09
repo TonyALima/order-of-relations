@@ -1,4 +1,3 @@
-import { Database, Container } from '../../src';
 import { UserHierarchyService } from './services/UserHierarchyService';
 
 declare module 'bun' {
@@ -13,7 +12,7 @@ async function main() {
   await db.drop();
   await db.create();
 
-  const userService = Container.resolve(UserHierarchyService);
+  const userService = new UserHierarchyService();
 
   const userId = await userService.createRegularUser('Alice', 'alice@email.com');
   const adminId = await userService.createAdmin('Maria', 'maria@email.com', 'super-admin');
