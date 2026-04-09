@@ -158,9 +158,9 @@ describe('Database', () => {
         relations: [
           {
             propertyName: 'author',
-            columnName: null, // resolved by MetadataStorage to 'author_id'
+            columnNames: null, // resolved by MetadataStorage to ['author_id']
             relationType: RelationType.TO_ONE,
-            columnType: 'unresolved', // resolved by MetadataStorage to the target PK type
+            columnTypes: null, // resolved by MetadataStorage to the target PK type
             getTarget: () => UserEntity,
           },
         ],
@@ -200,9 +200,9 @@ describe('Database', () => {
         relations: [
           {
             propertyName: 'author',
-            columnName: 'custom_author_fk',
+            columnNames: ['custom_author_fk'],
             relationType: RelationType.TO_ONE,
-            columnType: 'unresolved',
+            columnTypes: null,
             getTarget: () => UserEntity,
           },
         ],

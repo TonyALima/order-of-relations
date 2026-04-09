@@ -16,9 +16,9 @@ export enum RelationType {
 
 export interface RelationMetadata {
   propertyName: string;
-  columnName: string | null;
+  columnNames: string[] | null;
   relationType: RelationType;
-  columnType: COLUMN_TYPE | 'unresolved';
+  columnTypes: COLUMN_TYPE[] | null;
   getTarget: () => Constructor;
 }
 
@@ -82,10 +82,11 @@ export class MetadataStorage implements Iterable<[Constructor, EntityMetadata]> 
             `${metadata.tableName}.${relation.propertyName}`,
           );
         }
-        const pk = targetMetadata.columns.find((c) => c.primary)!;
-        if (relation.columnType === 'unresolved') relation.columnType = pk.type;
-        if (relation.columnName === null)
-          relation.columnName = `${relation.propertyName}_${pk.propertyName}`;
+        const primaryColumns = targetMetadata.columns.filter((c) => c.primary);
+        if (relation.columnTypes === null)
+          relation.columnTypes = primaryColumns.map((pk) => pk.type);
+        if (relation.columnNames === null)
+          relation.columnNames = primaryColumns.map((pk) => `${relation.propertyName}_${pk.propertyName}`);
       }
     }
   }

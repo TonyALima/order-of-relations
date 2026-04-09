@@ -30,9 +30,9 @@ describe('RelationTargetNotFoundError', () => {
       relations: [
         {
           propertyName: 'author',
-          columnName: null,
+          columnNames: null,
           relationType: RelationType.TO_ONE,
-          columnType: 'unresolved',
+          columnTypes: null,
           getTarget: () => UnknownTarget,
         },
       ],
@@ -212,7 +212,7 @@ describe('MetadataStorage', () => {
   });
 
   describe('relation resolution', () => {
-    test('resolves columnType from target primary column on get()', () => {
+    test('resolves columnTypes from target primary column on get()', () => {
       const storage = new MetadataStorage();
       class User {}
       class Post {}
@@ -233,19 +233,19 @@ describe('MetadataStorage', () => {
         relations: [
           {
             propertyName: 'user',
-            columnName: 'user_id',
+            columnNames: ['user_id'],
             relationType: RelationType.TO_ONE,
-            columnType: 'unresolved',
+            columnTypes: null,
             getTarget: () => User,
           },
         ],
       });
 
       const postMeta = storage.get(Post);
-      expect(postMeta?.relations[0]?.columnType).toBe(COLUMN_TYPE.SERIAL);
+      expect(postMeta?.relations[0]?.columnTypes).toEqual([COLUMN_TYPE.SERIAL]);
     });
 
-    test('resolves null columnName from target PK property name on get()', () => {
+    test('resolves null columnNames from target PK property name on get()', () => {
       const storage = new MetadataStorage();
       class Category {}
       class Article {}
@@ -269,19 +269,57 @@ describe('MetadataStorage', () => {
         relations: [
           {
             propertyName: 'category',
-            columnName: null,
+            columnNames: null,
             relationType: RelationType.TO_ONE,
-            columnType: 'unresolved',
+            columnTypes: null,
             getTarget: () => Category,
           },
         ],
       });
 
       const articleMeta = storage.get(Article);
-      expect(articleMeta?.relations[0]?.columnName).toBe('category_categoryId');
+      expect(articleMeta?.relations[0]?.columnNames).toEqual(['category_categoryId']);
     });
 
-    test('resolveRelations is idempotent: re-resolving after a new entity is added does not corrupt already-resolved columnName and columnType', () => {
+    test('resolves columnNames and columnTypes as arrays for composite PK target', () => {
+      const storage = new MetadataStorage();
+
+      class OrderItem {}
+      class Order {}
+
+      storage.set(OrderItem, {
+        tableName: 'order_items',
+        columns: [
+          { propertyName: 'orderId', columnName: 'order_id', type: COLUMN_TYPE.INTEGER, primary: true },
+          { propertyName: 'productId', columnName: 'product_id', type: COLUMN_TYPE.INTEGER, primary: true },
+        ],
+        relations: [],
+      });
+
+      storage.set(Order, {
+        tableName: 'orders',
+        columns: [
+          { propertyName: 'id', columnName: 'id', type: COLUMN_TYPE.SERIAL, primary: true },
+        ],
+        relations: [
+          {
+            propertyName: 'item',
+            columnNames: null,
+            columnTypes: null,
+            relationType: RelationType.TO_ONE,
+            getTarget: () => OrderItem,
+          },
+        ],
+      });
+
+      const metadata = storage.get(Order)!;
+      const relation = metadata.relations[0]!;
+
+      expect(relation.columnNames).toEqual(['item_orderId', 'item_productId']);
+      expect(relation.columnTypes).toEqual([COLUMN_TYPE.INTEGER, COLUMN_TYPE.INTEGER]);
+    });
+
+    test('resolveRelations is idempotent: re-resolving after a new entity is added does not corrupt already-resolved columnNames and columnTypes', () => {
       const storage = new MetadataStorage();
       class User {}
       class Post {}
@@ -300,19 +338,19 @@ describe('MetadataStorage', () => {
         relations: [
           {
             propertyName: 'user',
-            columnName: null,
+            columnNames: null,
             relationType: RelationType.TO_ONE,
-            columnType: 'unresolved',
+            columnTypes: null,
             getTarget: () => User,
           },
         ],
       });
 
       const snapshotRelations = (meta: ReturnType<typeof storage.get>) =>
-        meta?.relations.map(({ propertyName, columnName, columnType, relationType }) => ({
+        meta?.relations.map(({ propertyName, columnNames, columnTypes, relationType }) => ({
           propertyName,
-          columnName,
-          columnType,
+          columnNames,
+          columnTypes,
           relationType,
         }));
 

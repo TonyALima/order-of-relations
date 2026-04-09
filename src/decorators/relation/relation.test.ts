@@ -43,8 +43,8 @@ describe('@ToOne decorator', () => {
       {
         propertyName: 'user',
         relationType: RelationType.TO_ONE,
-        columnName: 'user_id',
-        columnType: COLUMN_TYPE.SERIAL,
+        columnNames: ['user_id'],
+        columnTypes: [COLUMN_TYPE.SERIAL],
         target: User,
       },
     ]);
@@ -68,7 +68,7 @@ describe('@ToOne decorator', () => {
 
     const metadata = db.getMetadata().get(Book)!;
     const relation = metadata.relations[0]!;
-    expect(relation.columnName).toBe('author_id');
+    expect(relation.columnNames).toEqual(['author_id']);
   });
 
   test('resolves columnType from target primary column', () => {
@@ -89,8 +89,8 @@ describe('@ToOne decorator', () => {
 
     const metadata = db.getMetadata().get(Article);
     const relation = metadata!.relations[0]!;
-    expect(relation.columnName).toBe('category_id');
-    expect(relation.columnType).toBe(COLUMN_TYPE.SERIAL);
+    expect(relation.columnNames).toEqual(['category_id']);
+    expect(relation.columnTypes).toEqual([COLUMN_TYPE.SERIAL]);
   });
 
   test('derives FK column name from target PK property name', () => {
@@ -111,6 +111,6 @@ describe('@ToOne decorator', () => {
 
     const metadata = db.getMetadata().get(Post)!;
     const relation = metadata.relations[0]!;
-    expect(relation.columnName).toBe('tag_tagId');
+    expect(relation.columnNames).toEqual(['tag_tagId']);
   });
 });

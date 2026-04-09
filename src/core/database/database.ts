@@ -85,18 +85,22 @@ export class Database {
 
       await sql.begin(async (tx) => {
         for (const relation of metadata.relations) {
-          if (relation.columnType === 'unresolved') throw new Error(); // This should never happen
-          const columnType = getColumnTypeDefinition(sql, relation.columnType);
+          if (relation.columnTypes === null || relation.columnNames === null) throw new Error(); // This should never happen
 
           const targetMetadata = this.metadata.get(relation.getTarget())!;
+          const targetPrimaryColumns = targetMetadata.columns.filter((c) => c.primary);
 
-          const targetPrimaryColumn = targetMetadata.columns.find((c) => c.primary)!;
+          for (let i = 0; i < relation.columnNames.length; i++) {
+            const colName = relation.columnNames[i]!;
+            const colType = getColumnTypeDefinition(sql, relation.columnTypes[i]!);
+            const targetPrimaryColumn = targetPrimaryColumns[i]!;
 
-          await tx`
-            ALTER TABLE ${sql(metadata.tableName)} 
-            ADD COLUMN ${sql(relation.columnName)} ${columnType} 
-            REFERENCES ${sql(targetMetadata.tableName)}(${sql(targetPrimaryColumn.columnName)})
-          `;
+            await tx`
+              ALTER TABLE ${sql(metadata.tableName)}
+              ADD COLUMN ${sql(colName)} ${colType}
+              REFERENCES ${sql(targetMetadata.tableName)}(${sql(targetPrimaryColumn.columnName)})
+            `;
+          }
         }
       });
     }

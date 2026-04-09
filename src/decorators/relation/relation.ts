@@ -17,13 +17,13 @@ export function ToOne<TType>(options: OneToOneOptions<TType>) {
     ] as RelationMetadata[]) ??= []);
 
     const propertyName = context.name.toString();
-    const columnName = options.foreignKey ?? null;
+    const columnNames = options.foreignKey ? [options.foreignKey] : null;
 
     relations.push({
       propertyName,
       relationType: RelationType.TO_ONE,
-      columnName,
-      columnType: 'unresolved',
+      columnNames,
+      columnTypes: null,
       getTarget: options.target,
     });
   };
