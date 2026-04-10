@@ -1,4 +1,4 @@
-import type { COLUMN_TYPE } from '../sql-types/sql-types';
+import { COLUMN_TYPE, toForeignKeyType } from '../sql-types/sql-types';
 import type { Constructor } from '../utils/utils';
 import { RelationTargetNotFoundError } from './metadata.errors';
 
@@ -16,9 +16,13 @@ export enum RelationType {
 
 export interface RelationMetadata {
   propertyName: string;
-  columnNames: string[] | null;
   relationType: RelationType;
-  columnTypes: COLUMN_TYPE[] | null;
+  columns:
+    | {
+        name: string;
+        type: COLUMN_TYPE;
+      }[]
+    | null;
   getTarget: () => Constructor;
 }
 
@@ -83,10 +87,12 @@ export class MetadataStorage implements Iterable<[Constructor, EntityMetadata]> 
           );
         }
         const primaryColumns = targetMetadata.columns.filter((c) => c.primary);
-        if (relation.columnTypes === null)
-          relation.columnTypes = primaryColumns.map((pk) => pk.type);
-        if (relation.columnNames === null)
-          relation.columnNames = primaryColumns.map((pk) => `${relation.propertyName}_${pk.propertyName}`);
+        if (relation.columns === null) {
+          relation.columns = primaryColumns.map((pk) => ({
+            name: `${relation.propertyName}_${pk.propertyName}`,
+            type: toForeignKeyType(pk.type),
+          }));
+        }
       }
     }
   }

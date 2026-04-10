@@ -69,8 +69,18 @@ describe('Database', () => {
       compositeDb.getMetadata().set(OrderItemEntity, {
         tableName: 'order_items',
         columns: [
-          { propertyName: 'orderId', columnName: 'order_id', type: COLUMN_TYPE.INTEGER, primary: true },
-          { propertyName: 'productId', columnName: 'product_id', type: COLUMN_TYPE.INTEGER, primary: true },
+          {
+            propertyName: 'orderId',
+            columnName: 'order_id',
+            type: COLUMN_TYPE.INTEGER,
+            primary: true,
+          },
+          {
+            propertyName: 'productId',
+            columnName: 'product_id',
+            type: COLUMN_TYPE.INTEGER,
+            primary: true,
+          },
           { propertyName: 'quantity', columnName: 'quantity', type: COLUMN_TYPE.INTEGER },
         ],
         relations: [],
@@ -158,9 +168,8 @@ describe('Database', () => {
         relations: [
           {
             propertyName: 'author',
-            columnNames: null, // resolved by MetadataStorage to ['author_id']
+            columns: null, // resolved by MetadataStorage to the target PK columns
             relationType: RelationType.TO_ONE,
-            columnTypes: null, // resolved by MetadataStorage to the target PK type
             getTarget: () => UserEntity,
           },
         ],
@@ -168,27 +177,47 @@ describe('Database', () => {
     });
 
     test('adds FK column with auto-resolved name (<propertyName>_<pkPropertyName>) to the owning table', async () => {
-      db.connect('sqlite://:memory:');
+      db.connect(process.env.DATABASE_URL);
+      await db.drop();
       await db.create();
 
       const sql = db.getConnection();
-      const columns = await sql`PRAGMA table_info(posts)`;
-      const columnNames = columns.map((c: unknown) => (c as { name: string }).name);
+      const columns = await sql`
+        SELECT column_name
+        FROM information_schema.columns
+        WHERE table_name = 'posts' AND table_schema = 'public'
+      `;
+      const columnNames = columns.map((c: unknown) => (c as { column_name: string }).column_name);
 
       expect(columnNames).toContain('author_id');
     });
 
     test('FK column references the correct target table and primary column', async () => {
-      db.connect('sqlite://:memory:');
+      db.connect(process.env.DATABASE_URL);
+      await db.drop();
       await db.create();
 
       const sql = db.getConnection();
-      const [fk] = await sql`PRAGMA foreign_key_list(posts)`;
-      const foreignKey = fk as { table: string; from: string; to: string };
+      const [fk] = await sql`
+        SELECT
+          kcu.column_name AS from_col,
+          ccu.table_name AS to_table,
+          ccu.column_name AS to_col
+        FROM information_schema.table_constraints tc
+        JOIN information_schema.key_column_usage kcu
+          ON tc.constraint_name = kcu.constraint_name
+          AND tc.table_schema = kcu.table_schema
+        JOIN information_schema.constraint_column_usage ccu
+          ON ccu.constraint_name = tc.constraint_name
+        WHERE tc.table_name = 'posts'
+          AND tc.constraint_type = 'FOREIGN KEY'
+          AND tc.table_schema = 'public'
+      `;
+      const foreignKey = fk as { to_table: string; from_col: string; to_col: string };
 
-      expect(foreignKey.table).toBe('users');
-      expect(foreignKey.from).toBe('author_id');
-      expect(foreignKey.to).toBe('id');
+      expect(foreignKey.to_table).toBe('users');
+      expect(foreignKey.from_col).toBe('author_id');
+      expect(foreignKey.to_col).toBe('id');
     });
 
     test('uses custom foreignKey column name when provided', async () => {
@@ -200,22 +229,87 @@ describe('Database', () => {
         relations: [
           {
             propertyName: 'author',
-            columnNames: ['custom_author_fk'],
             relationType: RelationType.TO_ONE,
-            columnTypes: null,
+            columns: [{ name: 'custom_author_fk', type: COLUMN_TYPE.INTEGER }],
             getTarget: () => UserEntity,
           },
         ],
       });
 
-      db.connect('sqlite://:memory:');
+      db.connect(process.env.DATABASE_URL);
+      await db.drop();
       await db.create();
 
       const sql = db.getConnection();
-      const columns = await sql`PRAGMA table_info(posts)`;
-      const columnNames = columns.map((c: unknown) => (c as { name: string }).name);
+      const columns = await sql`
+        SELECT column_name
+        FROM information_schema.columns
+        WHERE table_name = 'posts' AND table_schema = 'public'
+      `;
+      const columnNames = columns.map((c: unknown) => (c as { column_name: string }).column_name);
 
       expect(columnNames).toContain('custom_author_fk');
+    });
+
+    test('adds FK columns for composite primary key relation', async () => {
+      class OrderItemEntity {
+        orderId!: number;
+        productId!: number;
+      }
+
+      class OrderEntity {
+        id!: number;
+        orderItem?: OrderItemEntity;
+      }
+
+      const compositeDb = new Database();
+      compositeDb.getMetadata().set(OrderItemEntity, {
+        tableName: 'order_items',
+        columns: [
+          {
+            propertyName: 'orderId',
+            columnName: 'order_id',
+            type: COLUMN_TYPE.INTEGER,
+            primary: true,
+          },
+          {
+            propertyName: 'productId',
+            columnName: 'product_id',
+            type: COLUMN_TYPE.INTEGER,
+            primary: true,
+          },
+        ],
+        relations: [],
+      });
+      compositeDb.getMetadata().set(OrderEntity, {
+        tableName: 'orders',
+        columns: [
+          { propertyName: 'id', columnName: 'id', type: COLUMN_TYPE.SERIAL, primary: true },
+        ],
+        relations: [
+          {
+            propertyName: 'orderItem',
+            columns: null,
+            relationType: RelationType.TO_ONE,
+            getTarget: () => OrderItemEntity,
+          },
+        ],
+      });
+
+      compositeDb.connect(process.env.DATABASE_URL);
+      await compositeDb.drop();
+      await compositeDb.create();
+
+      const sql = compositeDb.getConnection();
+      const columns = await sql`
+        SELECT column_name
+        FROM information_schema.columns
+        WHERE table_name = 'orders' AND table_schema = 'public'
+      `;
+      const columnNames = columns.map((c: unknown) => (c as { column_name: string }).column_name);
+
+      expect(columnNames).toContain('orderItem_orderId');
+      expect(columnNames).toContain('orderItem_productId');
     });
   });
 

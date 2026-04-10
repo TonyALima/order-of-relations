@@ -52,6 +52,19 @@ export enum COLUMN_TYPE {
   DATERANGE = 'daterange',
 }
 
+export function toForeignKeyType(type: COLUMN_TYPE): COLUMN_TYPE {
+  switch (type) {
+    case COLUMN_TYPE.SERIAL:
+      return COLUMN_TYPE.INTEGER;
+    case COLUMN_TYPE.SMALLSERIAL:
+      return COLUMN_TYPE.SMALLINT;
+    case COLUMN_TYPE.BIGSERIAL:
+      return COLUMN_TYPE.BIGINT;
+    default:
+      return type;
+  }
+}
+
 export function getColumnTypeDefinition(sql: SQL, type: COLUMN_TYPE) {
   switch (type) {
     case COLUMN_TYPE.SMALLINT:

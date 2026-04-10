@@ -4,7 +4,7 @@ import { RELATIONS_KEY } from '../entity/entity';
 
 export interface OneToOneOptions<TType> {
   target: () => Constructor<TType>;
-  foreignKey?: string;
+  foreignKeys?: string[];
 }
 
 export function ToOne<TType>(options: OneToOneOptions<TType>) {
@@ -17,13 +17,11 @@ export function ToOne<TType>(options: OneToOneOptions<TType>) {
     ] as RelationMetadata[]) ??= []);
 
     const propertyName = context.name.toString();
-    const columnNames = options.foreignKey ? [options.foreignKey] : null;
 
     relations.push({
       propertyName,
       relationType: RelationType.TO_ONE,
-      columnNames,
-      columnTypes: null,
+      columns: null,
       getTarget: options.target,
     });
   };

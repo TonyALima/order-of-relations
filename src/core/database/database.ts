@@ -1,6 +1,6 @@
 import { SQL } from 'bun';
 
-import { MetadataStorage } from '../metadata/metadata';
+import { type EntityMetadata, MetadataStorage } from '../metadata/metadata';
 import { getColumnTypeDefinition } from '../sql-types/sql-types';
 import { sqlJoin } from '../utils/utils';
 import { DatabaseNotConnectedError } from './database.errors';
@@ -39,12 +39,20 @@ export class Database {
       if (metadata.discriminator && metadata.discriminator !== metadata.tableName) continue;
 
       const columnsWithSqlTypes = metadata.columns.map((c) => {
-        return { ...c, sqlType: getColumnTypeDefinition(sql, c.type) };
+        return { columnName: c.columnName, sqlType: getColumnTypeDefinition(sql, c.type) };
       });
+
+      const relationsColumns = metadata.relations.flatMap((r) => r.columns ?? []);
+
+      const relationsColumnsWithSqlTypes = relationsColumns.map((c) => {
+        return { columnName: c.name, sqlType: getColumnTypeDefinition(sql, c.type) };
+      });
+
+      const allColumnsWithSqlTypes = [...columnsWithSqlTypes, ...relationsColumnsWithSqlTypes];
 
       const columnsDefinitionSqlFragment = sqlJoin(
         sql,
-        columnsWithSqlTypes,
+        allColumnsWithSqlTypes,
         (col) => sql`${sql(col.columnName)} ${col.sqlType}`,
       );
 
@@ -85,22 +93,28 @@ export class Database {
 
       await sql.begin(async (tx) => {
         for (const relation of metadata.relations) {
-          if (relation.columnTypes === null || relation.columnNames === null) throw new Error(); // This should never happen
+          if (relation.columns === null) throw new Error(); // This should never happen
 
           const targetMetadata = this.metadata.get(relation.getTarget())!;
           const targetPrimaryColumns = targetMetadata.columns.filter((c) => c.primary);
 
-          for (let i = 0; i < relation.columnNames.length; i++) {
-            const colName = relation.columnNames[i]!;
-            const colType = getColumnTypeDefinition(sql, relation.columnTypes[i]!);
-            const targetPrimaryColumn = targetPrimaryColumns[i]!;
+          const targetPrimaryColumnNames = sqlJoin(
+            sql,
+            targetPrimaryColumns,
+            (col) => sql`${sql(col.columnName)}`,
+          );
 
-            await tx`
-              ALTER TABLE ${sql(metadata.tableName)}
-              ADD COLUMN ${sql(colName)} ${colType}
-              REFERENCES ${sql(targetMetadata.tableName)}(${sql(targetPrimaryColumn.columnName)})
-            `;
-          }
+          const currentTableForeignKeyColumnsNames = sqlJoin(
+            sql,
+            relation.columns,
+            (c) => sql`${sql(c.name)}`,
+          );
+
+          await tx`
+            ALTER TABLE ${sql(metadata.tableName)}
+            ADD FOREIGN KEY (${currentTableForeignKeyColumnsNames})
+            REFERENCES ${sql(targetMetadata.tableName)}(${targetPrimaryColumnNames})
+          `;
         }
       });
     }
@@ -114,7 +128,31 @@ export class Database {
   async drop(): Promise<void> {
     const sql = this.getConnection();
 
-    for (const [, metadata] of this.metadata) {
+    const allMetadata = Array.from(this.metadata);
+    const metadataMap = new Map(allMetadata);
+
+    const visited = new Set<object>();
+    const postOrder: EntityMetadata[] = [];
+
+    const dfs = (constructor: object, metadata: EntityMetadata) => {
+      if (visited.has(constructor)) return;
+      visited.add(constructor);
+
+      for (const relation of metadata.relations) {
+        const targetConstructor = relation.getTarget();
+        const targetMetadata = metadataMap.get(targetConstructor);
+        if (targetMetadata) dfs(targetConstructor, targetMetadata);
+      }
+
+      postOrder.push(metadata);
+    };
+
+    for (const [constructor, metadata] of allMetadata) {
+      dfs(constructor, metadata);
+    }
+
+    // Reverse post-order = topological order: each table dropped before its FK targets
+    for (const metadata of postOrder.reverse()) {
       await sql`DROP TABLE IF EXISTS ${sql(metadata.tableName)}`;
     }
   }

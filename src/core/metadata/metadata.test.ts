@@ -30,9 +30,8 @@ describe('RelationTargetNotFoundError', () => {
       relations: [
         {
           propertyName: 'author',
-          columnNames: null,
+          columns: null,
           relationType: RelationType.TO_ONE,
-          columnTypes: null,
           getTarget: () => UnknownTarget,
         },
       ],
@@ -233,16 +232,17 @@ describe('MetadataStorage', () => {
         relations: [
           {
             propertyName: 'user',
-            columnNames: ['user_id'],
+            columns: [{ name: 'user_id', type: COLUMN_TYPE.INTEGER }],
             relationType: RelationType.TO_ONE,
-            columnTypes: null,
             getTarget: () => User,
           },
         ],
       });
 
       const postMeta = storage.get(Post);
-      expect(postMeta?.relations[0]?.columnTypes).toEqual([COLUMN_TYPE.SERIAL]);
+      expect(postMeta?.relations[0]?.columns).toEqual([
+        { name: 'user_id', type: COLUMN_TYPE.INTEGER },
+      ]);
     });
 
     test('resolves null columnNames from target PK property name on get()', () => {
@@ -269,16 +269,17 @@ describe('MetadataStorage', () => {
         relations: [
           {
             propertyName: 'category',
-            columnNames: null,
+            columns: null,
             relationType: RelationType.TO_ONE,
-            columnTypes: null,
             getTarget: () => Category,
           },
         ],
       });
 
       const articleMeta = storage.get(Article);
-      expect(articleMeta?.relations[0]?.columnNames).toEqual(['category_categoryId']);
+      expect(articleMeta?.relations[0]?.columns).toEqual([
+        { name: 'category_categoryId', type: COLUMN_TYPE.INTEGER },
+      ]);
     });
 
     test('resolves columnNames and columnTypes as arrays for composite PK target', () => {
@@ -290,8 +291,18 @@ describe('MetadataStorage', () => {
       storage.set(OrderItem, {
         tableName: 'order_items',
         columns: [
-          { propertyName: 'orderId', columnName: 'order_id', type: COLUMN_TYPE.INTEGER, primary: true },
-          { propertyName: 'productId', columnName: 'product_id', type: COLUMN_TYPE.INTEGER, primary: true },
+          {
+            propertyName: 'orderId',
+            columnName: 'order_id',
+            type: COLUMN_TYPE.INTEGER,
+            primary: true,
+          },
+          {
+            propertyName: 'productId',
+            columnName: 'product_id',
+            type: COLUMN_TYPE.INTEGER,
+            primary: true,
+          },
         ],
         relations: [],
       });
@@ -304,8 +315,7 @@ describe('MetadataStorage', () => {
         relations: [
           {
             propertyName: 'item',
-            columnNames: null,
-            columnTypes: null,
+            columns: null,
             relationType: RelationType.TO_ONE,
             getTarget: () => OrderItem,
           },
@@ -315,8 +325,10 @@ describe('MetadataStorage', () => {
       const metadata = storage.get(Order)!;
       const relation = metadata.relations[0]!;
 
-      expect(relation.columnNames).toEqual(['item_orderId', 'item_productId']);
-      expect(relation.columnTypes).toEqual([COLUMN_TYPE.INTEGER, COLUMN_TYPE.INTEGER]);
+      expect(relation.columns).toEqual([
+        { name: 'item_orderId', type: COLUMN_TYPE.INTEGER },
+        { name: 'item_productId', type: COLUMN_TYPE.INTEGER },
+      ]);
     });
 
     test('resolveRelations is idempotent: re-resolving after a new entity is added does not corrupt already-resolved columnNames and columnTypes', () => {
@@ -338,19 +350,17 @@ describe('MetadataStorage', () => {
         relations: [
           {
             propertyName: 'user',
-            columnNames: null,
+            columns: null,
             relationType: RelationType.TO_ONE,
-            columnTypes: null,
             getTarget: () => User,
           },
         ],
       });
 
       const snapshotRelations = (meta: ReturnType<typeof storage.get>) =>
-        meta?.relations.map(({ propertyName, columnNames, columnTypes, relationType }) => ({
+        meta?.relations.map(({ propertyName, columns, relationType }) => ({
           propertyName,
-          columnNames,
-          columnTypes,
+          columns,
           relationType,
         }));
 

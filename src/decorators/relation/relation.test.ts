@@ -43,14 +43,13 @@ describe('@ToOne decorator', () => {
       {
         propertyName: 'user',
         relationType: RelationType.TO_ONE,
-        columnNames: ['user_id'],
-        columnTypes: [COLUMN_TYPE.SERIAL],
+        columns: [{ name: 'user_id', type: COLUMN_TYPE.INTEGER }],
         target: User,
       },
     ]);
   });
 
-  test('uses foreignKey option as column name when provided', () => {
+  test('uses foreignKeys option as column names when provided', () => {
     @Entity(db)
     class Author {
       @PrimaryColumn({ type: COLUMN_TYPE.SERIAL })
@@ -62,13 +61,13 @@ describe('@ToOne decorator', () => {
       @PrimaryColumn({ type: COLUMN_TYPE.SERIAL })
       id!: number;
 
-      @ToOne({ target: () => Author, foreignKey: 'author_id' })
+      @ToOne({ target: () => Author, foreignKeys: ['author_id'] })
       author!: Author;
     }
 
     const metadata = db.getMetadata().get(Book)!;
     const relation = metadata.relations[0]!;
-    expect(relation.columnNames).toEqual(['author_id']);
+    expect(relation.columns).toEqual([{ name: 'author_id', type: COLUMN_TYPE.INTEGER }]);
   });
 
   test('resolves columnType from target primary column', () => {
@@ -89,8 +88,7 @@ describe('@ToOne decorator', () => {
 
     const metadata = db.getMetadata().get(Article);
     const relation = metadata!.relations[0]!;
-    expect(relation.columnNames).toEqual(['category_id']);
-    expect(relation.columnTypes).toEqual([COLUMN_TYPE.SERIAL]);
+    expect(relation.columns).toEqual([{ name: 'category_id', type: COLUMN_TYPE.INTEGER }]);
   });
 
   test('derives FK column name from target PK property name', () => {
@@ -111,6 +109,33 @@ describe('@ToOne decorator', () => {
 
     const metadata = db.getMetadata().get(Post)!;
     const relation = metadata.relations[0]!;
-    expect(relation.columnNames).toEqual(['tag_tagId']);
+    expect(relation.columns).toEqual([{ name: 'tag_tagId', type: COLUMN_TYPE.INTEGER }]);
+  });
+
+  test('derives FK column names from target composite PK property names', () => {
+    @Entity(db)
+    class OrderItem {
+      @PrimaryColumn({ type: COLUMN_TYPE.INTEGER })
+      orderId!: number;
+
+      @PrimaryColumn({ type: COLUMN_TYPE.INTEGER })
+      productId!: number;
+    }
+
+    @Entity(db)
+    class OrderDetail {
+      @PrimaryColumn({ type: COLUMN_TYPE.SERIAL })
+      id!: number;
+
+      @ToOne({ target: () => OrderItem })
+      orderItem!: OrderItem;
+    }
+
+    const metadata = db.getMetadata().get(OrderDetail)!;
+    const relation = metadata.relations[0]!;
+    expect(relation.columns).toEqual([
+      { name: 'orderItem_orderId', type: COLUMN_TYPE.INTEGER },
+      { name: 'orderItem_productId', type: COLUMN_TYPE.INTEGER },
+    ]);
   });
 });

@@ -5,7 +5,7 @@ const db = new Database();
 
 @Entity(db)
 class User {
-  @PrimaryColumn({ type: COLUMN_TYPE.INTEGER })
+  @PrimaryColumn({ type: COLUMN_TYPE.SERIAL })
   id!: number;
 
   @Column({ type: COLUMN_TYPE.TEXT })
@@ -17,19 +17,20 @@ class User {
 
 @Entity(db)
 class Profile {
-  @PrimaryColumn({ type: COLUMN_TYPE.INTEGER })
+  @PrimaryColumn({ type: COLUMN_TYPE.SERIAL })
   id!: number;
 
   @Column({ type: COLUMN_TYPE.TEXT })
   bio!: string;
 }
 
-describe('Integration: Repository CRUD', () => {
+describe('Integration: Relations CRUD', () => {
   let userRepo: Repository<User>;
   let profileRepo: Repository<Profile>;
 
   beforeEach(async () => {
-    db.connect('sqlite://:memory:');
+    db.connect(process.env.DATABASE_URL);
+    await db.drop();
     await db.create();
     userRepo = new Repository(User, db);
     profileRepo = new Repository(Profile, db);
