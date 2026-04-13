@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryColumn } from '../../../src';
+import { Entity, Column, PrimaryColumn, NotNullable } from '../../../src';
 import { COLUMN_TYPE } from '../../../src/core/sql-types/sql-types';
 import { db } from '../db';
 
@@ -8,8 +8,10 @@ export class User {
   id!: number;
 
   @Column({ type: COLUMN_TYPE.TEXT })
+  @NotNullable
   name!: string;
 
   @Column({ type: COLUMN_TYPE.TEXT })
+  @NotNullable
   email!: string;
 }
