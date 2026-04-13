@@ -13,8 +13,8 @@ const db = new Database();
 db.getMetadata().set(TestEntity, {
   tableName: 'test_entity',
   columns: [
-    { propertyName: 'id', columnName: 'id', type: COLUMN_TYPE.SERIAL, primary: true },
-    { propertyName: 'name', columnName: 'name', type: COLUMN_TYPE.TEXT },
+    { propertyName: 'id', columnName: 'id', type: COLUMN_TYPE.SERIAL, primary: true, nullable: false },
+    { propertyName: 'name', columnName: 'name', type: COLUMN_TYPE.TEXT, nullable: false },
   ],
   relations: [],
 });

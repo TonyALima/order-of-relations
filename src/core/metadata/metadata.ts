@@ -7,6 +7,7 @@ export interface ColumnMetadata {
   columnName: string;
   type: COLUMN_TYPE;
   primary?: boolean;
+  nullable: boolean;
 }
 
 export enum RelationType {

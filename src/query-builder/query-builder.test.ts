@@ -20,9 +20,9 @@ const db = new Database();
 db.getMetadata().set(QbUser, {
   tableName: 'qb_users',
   columns: [
-    { propertyName: 'id', columnName: 'id', type: COLUMN_TYPE.SERIAL, primary: true },
-    { propertyName: 'name', columnName: 'name', type: COLUMN_TYPE.TEXT },
-    { propertyName: 'age', columnName: 'age', type: COLUMN_TYPE.INTEGER },
+    { propertyName: 'id', columnName: 'id', type: COLUMN_TYPE.SERIAL, primary: true, nullable: false },
+    { propertyName: 'name', columnName: 'name', type: COLUMN_TYPE.TEXT, nullable: false },
+    { propertyName: 'age', columnName: 'age', type: COLUMN_TYPE.INTEGER, nullable: false },
   ],
   relations: [],
 });

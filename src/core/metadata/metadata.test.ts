@@ -26,7 +26,7 @@ describe('RelationTargetNotFoundError', () => {
 
     storage.set(Post, {
       tableName: 'posts',
-      columns: [{ propertyName: 'id', columnName: 'id', type: COLUMN_TYPE.SERIAL, primary: true }],
+      columns: [{ propertyName: 'id', columnName: 'id', type: COLUMN_TYPE.SERIAL, primary: true, nullable: false }],
       relations: [
         {
           propertyName: 'author',
@@ -60,7 +60,7 @@ describe('MetadataStorage', () => {
       storage.set(User, {
         tableName: 'users',
         columns: [
-          { propertyName: 'id', columnName: 'id', type: COLUMN_TYPE.SERIAL, primary: true },
+          { propertyName: 'id', columnName: 'id', type: COLUMN_TYPE.SERIAL, primary: true, nullable: false },
         ],
         relations: [],
       });
@@ -68,7 +68,7 @@ describe('MetadataStorage', () => {
       expect(storage.get(User)).toEqual({
         tableName: 'users',
         columns: [
-          { propertyName: 'id', columnName: 'id', type: COLUMN_TYPE.SERIAL, primary: true },
+          { propertyName: 'id', columnName: 'id', type: COLUMN_TYPE.SERIAL, primary: true, nullable: false },
         ],
         relations: [],
         discriminator: undefined,
@@ -219,7 +219,7 @@ describe('MetadataStorage', () => {
       storage.set(User, {
         tableName: 'users',
         columns: [
-          { propertyName: 'id', columnName: 'id', type: COLUMN_TYPE.SERIAL, primary: true },
+          { propertyName: 'id', columnName: 'id', type: COLUMN_TYPE.SERIAL, primary: true, nullable: false },
         ],
         relations: [],
       });
@@ -227,7 +227,7 @@ describe('MetadataStorage', () => {
       storage.set(Post, {
         tableName: 'posts',
         columns: [
-          { propertyName: 'id', columnName: 'id', type: COLUMN_TYPE.SERIAL, primary: true },
+          { propertyName: 'id', columnName: 'id', type: COLUMN_TYPE.SERIAL, primary: true, nullable: false },
         ],
         relations: [
           {
@@ -258,6 +258,7 @@ describe('MetadataStorage', () => {
             columnName: 'category_id',
             type: COLUMN_TYPE.SERIAL,
             primary: true,
+            nullable: false,
           },
         ],
         relations: [],
@@ -296,12 +297,14 @@ describe('MetadataStorage', () => {
             columnName: 'order_id',
             type: COLUMN_TYPE.INTEGER,
             primary: true,
+            nullable: false,
           },
           {
             propertyName: 'productId',
             columnName: 'product_id',
             type: COLUMN_TYPE.INTEGER,
             primary: true,
+            nullable: false,
           },
         ],
         relations: [],
@@ -310,7 +313,7 @@ describe('MetadataStorage', () => {
       storage.set(Order, {
         tableName: 'orders',
         columns: [
-          { propertyName: 'id', columnName: 'id', type: COLUMN_TYPE.SERIAL, primary: true },
+          { propertyName: 'id', columnName: 'id', type: COLUMN_TYPE.SERIAL, primary: true, nullable: false },
         ],
         relations: [
           {
@@ -339,7 +342,7 @@ describe('MetadataStorage', () => {
       storage.set(User, {
         tableName: 'users',
         columns: [
-          { propertyName: 'id', columnName: 'id', type: COLUMN_TYPE.SERIAL, primary: true },
+          { propertyName: 'id', columnName: 'id', type: COLUMN_TYPE.SERIAL, primary: true, nullable: false },
         ],
         relations: [],
       });

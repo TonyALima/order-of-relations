@@ -1,6 +1,7 @@
 import type { ColumnMetadata } from '../../core/metadata/metadata';
 import { COLUMN_TYPE } from '../../core/sql-types/sql-types';
 import { COLUMNS_KEY } from '../entity/entity';
+import { MissingNullabilityDecoratorError } from './column.errors';
 
 type ColumnOptions = { name?: string; type: COLUMN_TYPE };
 
@@ -27,11 +28,21 @@ export function NotNullable<This, Value>(
 function createColumnDecorator(options: ColumnOptions, primary?: boolean) {
   return function (_value: undefined, context: ClassFieldDecoratorContext) {
     const columns: ColumnMetadata[] = ((context.metadata[COLUMNS_KEY] as ColumnMetadata[]) ??= []);
+
+    const nullableMap = context.metadata[NULLABLE_KEY] as Map<string, boolean> | undefined;
+    const propertyName = String(context.name);
+    const nullableEntry = nullableMap?.get(propertyName);
+
+    if (!primary && nullableEntry === undefined) {
+      throw new MissingNullabilityDecoratorError(propertyName);
+    }
+
     columns.push({
-      propertyName: String(context.name),
-      columnName: options?.name ?? String(context.name),
+      propertyName,
+      columnName: options?.name ?? propertyName,
       type: options.type,
       primary,
+      nullable: primary ? false : nullableEntry!,
     });
   };
 }

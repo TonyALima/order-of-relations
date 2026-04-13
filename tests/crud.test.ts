@@ -1,5 +1,5 @@
 import { describe, beforeEach, afterEach, test, expect } from 'bun:test';
-import { Entity, Column, PrimaryColumn, Database, Repository, COLUMN_TYPE } from '../src';
+import { Entity, Column, PrimaryColumn, Database, Repository, COLUMN_TYPE, NotNullable } from '../src';
 
 const db = new Database();
 
@@ -9,6 +9,7 @@ class User {
   id!: number;
 
   @Column({ type: COLUMN_TYPE.TEXT })
+  @NotNullable
   name!: string;
 }
 

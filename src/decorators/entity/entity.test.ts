@@ -3,7 +3,7 @@ import { Database } from '../../core/database/database';
 import { MetadataError } from '../../core/metadata/metadata.errors';
 import { OrmError } from '../../core/orm-error';
 import { COLUMN_TYPE } from '../../core/sql-types/sql-types';
-import { Column, PrimaryColumn } from '../column/column';
+import { Column, PrimaryColumn, NotNullable } from '../column/column';
 import { Entity } from './entity';
 import { MissingPrimaryColumnError } from './entity.errors';
 
@@ -16,6 +16,7 @@ describe('@Entity / @Column decorators', () => {
       @Entity(db, 'no_pk')
       class NoPkEntity {
         @Column({ type: COLUMN_TYPE.TEXT })
+        @NotNullable
         name!: string;
       }
       void NoPkEntity;
@@ -38,6 +39,7 @@ describe('@Entity / @Column decorators', () => {
       id!: number;
 
       @Column({ type: COLUMN_TYPE.TEXT })
+      @NotNullable
       name!: string;
     }
 
@@ -49,12 +51,14 @@ describe('@Entity / @Column decorators', () => {
           columnName: 'id',
           type: COLUMN_TYPE.SERIAL,
           primary: true,
+          nullable: false,
         },
         {
           propertyName: 'name',
           columnName: 'name',
           type: COLUMN_TYPE.TEXT,
           primary: undefined,
+          nullable: false,
         },
       ],
       relations: [],

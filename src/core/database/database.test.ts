@@ -41,16 +41,19 @@ describe('Database', () => {
           columnName: 'id',
           type: COLUMN_TYPE.SERIAL,
           primary: true,
+          nullable: false,
         },
         {
           propertyName: 'name',
           columnName: 'name',
           type: COLUMN_TYPE.TEXT,
+          nullable: false,
         },
         {
           propertyName: 'isActive',
           columnName: 'is_active',
           type: COLUMN_TYPE.BOOLEAN,
+          nullable: false,
         },
       ],
       relations: [],
@@ -74,14 +77,16 @@ describe('Database', () => {
             columnName: 'order_id',
             type: COLUMN_TYPE.INTEGER,
             primary: true,
+            nullable: false,
           },
           {
             propertyName: 'productId',
             columnName: 'product_id',
             type: COLUMN_TYPE.INTEGER,
             primary: true,
+            nullable: false,
           },
-          { propertyName: 'quantity', columnName: 'quantity', type: COLUMN_TYPE.INTEGER },
+          { propertyName: 'quantity', columnName: 'quantity', type: COLUMN_TYPE.INTEGER, nullable: false },
         ],
         relations: [],
       });
@@ -155,7 +160,7 @@ describe('Database', () => {
       db.getMetadata().set(UserEntity, {
         tableName: 'users',
         columns: [
-          { propertyName: 'id', columnName: 'id', type: COLUMN_TYPE.SERIAL, primary: true },
+          { propertyName: 'id', columnName: 'id', type: COLUMN_TYPE.SERIAL, primary: true, nullable: false },
         ],
         relations: [],
       });
@@ -163,7 +168,7 @@ describe('Database', () => {
       db.getMetadata().set(PostEntity, {
         tableName: 'posts',
         columns: [
-          { propertyName: 'id', columnName: 'id', type: COLUMN_TYPE.SERIAL, primary: true },
+          { propertyName: 'id', columnName: 'id', type: COLUMN_TYPE.SERIAL, primary: true, nullable: false },
         ],
         relations: [
           {
@@ -224,7 +229,7 @@ describe('Database', () => {
       db.getMetadata().set(PostEntity, {
         tableName: 'posts',
         columns: [
-          { propertyName: 'id', columnName: 'id', type: COLUMN_TYPE.SERIAL, primary: true },
+          { propertyName: 'id', columnName: 'id', type: COLUMN_TYPE.SERIAL, primary: true, nullable: false },
         ],
         relations: [
           {
@@ -271,12 +276,14 @@ describe('Database', () => {
             columnName: 'order_id',
             type: COLUMN_TYPE.INTEGER,
             primary: true,
+            nullable: false,
           },
           {
             propertyName: 'productId',
             columnName: 'product_id',
             type: COLUMN_TYPE.INTEGER,
             primary: true,
+            nullable: false,
           },
         ],
         relations: [],
@@ -284,7 +291,7 @@ describe('Database', () => {
       compositeDb.getMetadata().set(OrderEntity, {
         tableName: 'orders',
         columns: [
-          { propertyName: 'id', columnName: 'id', type: COLUMN_TYPE.SERIAL, primary: true },
+          { propertyName: 'id', columnName: 'id', type: COLUMN_TYPE.SERIAL, primary: true, nullable: false },
         ],
         relations: [
           {
