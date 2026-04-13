@@ -108,6 +108,57 @@ describe('Database', () => {
       ]);
     });
 
+    test('emits NOT NULL for non-nullable columns and omits it for nullable columns', async () => {
+      class NullTestEntity {
+        id!: number;
+        requiredName!: string;
+        optionalBio?: string;
+      }
+
+      const nullDb = new Database();
+      nullDb.getMetadata().set(NullTestEntity, {
+        tableName: 'null_test',
+        columns: [
+          {
+            propertyName: 'id',
+            columnName: 'id',
+            type: COLUMN_TYPE.SERIAL,
+            primary: true,
+            nullable: false,
+          },
+          {
+            propertyName: 'requiredName',
+            columnName: 'required_name',
+            type: COLUMN_TYPE.TEXT,
+            nullable: false,
+          },
+          {
+            propertyName: 'optionalBio',
+            columnName: 'optional_bio',
+            type: COLUMN_TYPE.TEXT,
+            nullable: true,
+          },
+        ],
+        relations: [],
+      });
+
+      nullDb.connect('sqlite://:memory:');
+      await nullDb.create();
+
+      const sql = nullDb.getConnection();
+      const columns = await sql`PRAGMA table_info(null_test)`;
+      const normalizedColumns = Array.from(columns, (column) => {
+        const c = column as { name: string; notnull: number; pk: number };
+        return { name: c.name, notnull: c.notnull, pk: c.pk };
+      });
+
+      expect(normalizedColumns).toEqual([
+        { name: 'id', notnull: 0, pk: 1 },
+        { name: 'required_name', notnull: 1, pk: 0 },
+        { name: 'optional_bio', notnull: 0, pk: 0 },
+      ]);
+    });
+
     test('applies the mapped schema to an in-memory SQLite database', async () => {
       db.connect('sqlite://:memory:');
 

@@ -39,7 +39,11 @@ export class Database {
       if (metadata.discriminator && metadata.discriminator !== metadata.tableName) continue;
 
       const columnsWithSqlTypes = metadata.columns.map((c) => {
-        return { columnName: c.columnName, sqlType: getColumnTypeDefinition(sql, c.type) };
+        return {
+          columnName: c.columnName,
+          sqlType: getColumnTypeDefinition(sql, c.type),
+          notNull: !c.nullable && !c.primary,
+        };
       });
 
       const relationsColumns = metadata.relations.flatMap((r) => r.columns ?? []);
@@ -53,7 +57,10 @@ export class Database {
       const columnsDefinitionSqlFragment = sqlJoin(
         sql,
         allColumnsWithSqlTypes,
-        (col) => sql`${sql(col.columnName)} ${col.sqlType}`,
+        (col) =>
+          'notNull' in col && col.notNull
+            ? sql`${sql(col.columnName)} ${col.sqlType} NOT NULL`
+            : sql`${sql(col.columnName)} ${col.sqlType}`,
       );
 
       const primaryColumns = metadata.columns.filter((c) => c.primary);
