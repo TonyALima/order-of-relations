@@ -1,5 +1,13 @@
 import { describe, beforeEach, afterEach, test, expect } from 'bun:test';
-import { Entity, Column, PrimaryColumn, Database, Repository, COLUMN_TYPE, NotNullable } from '../src';
+import {
+  Entity,
+  Column,
+  PrimaryColumn,
+  Database,
+  Repository,
+  COLUMN_TYPE,
+  NotNullable,
+} from '../src';
 
 const db = new Database();
 
