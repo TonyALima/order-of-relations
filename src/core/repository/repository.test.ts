@@ -150,5 +150,12 @@ describe('Repository', () => {
       const [row] = await relSql`SELECT * FROM user_with_profile WHERE id = ${newId}`;
       expect(row).toEqual({ id: newId, name: 'Alice', profile_id: 7 });
     });
+
+    test('writes NULL FK when relation property is omitted', async () => {
+      const newId = await userRepo.create({ name: 'Alice' } as Omit<UserWithProfile, 'id'>);
+
+      const [row] = await relSql`SELECT * FROM user_with_profile WHERE id = ${newId}`;
+      expect(row).toEqual({ id: newId, name: 'Alice', profile_id: null });
+    });
   });
 });
