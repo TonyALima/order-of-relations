@@ -87,6 +87,17 @@ export class Repository<T, PK extends keyof T = 'id' extends keyof T ? 'id' : ne
       objectToUpdate[columnName] = entity[propertyName];
     });
 
+    meta.relations.forEach((relation) => {
+      const related = (entity as Record<string, unknown>)[relation.propertyName] as
+        | Record<string, unknown>
+        | null
+        | undefined;
+
+      relation.columns!.forEach((fk) => {
+        objectToUpdate[fk.name] = related == null ? null : related[fk.referencedProperty];
+      });
+    });
+
     const primaryKeyValue = entity[primaryColumn.propertyName as PK];
 
     await sql`
