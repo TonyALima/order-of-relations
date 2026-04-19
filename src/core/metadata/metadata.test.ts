@@ -232,7 +232,7 @@ describe('MetadataStorage', () => {
         relations: [
           {
             propertyName: 'user',
-            columns: [{ name: 'user_id', type: COLUMN_TYPE.INTEGER }],
+            columns: [{ name: 'user_id', type: COLUMN_TYPE.INTEGER, referencedProperty: 'id' }],
             relationType: RelationType.TO_ONE,
             getTarget: () => User,
           },
@@ -241,7 +241,7 @@ describe('MetadataStorage', () => {
 
       const postMeta = storage.get(Post);
       expect(postMeta?.relations[0]?.columns).toEqual([
-        { name: 'user_id', type: COLUMN_TYPE.INTEGER },
+        { name: 'user_id', type: COLUMN_TYPE.INTEGER, referencedProperty: 'id' },
       ]);
     });
 
@@ -279,7 +279,7 @@ describe('MetadataStorage', () => {
 
       const articleMeta = storage.get(Article);
       expect(articleMeta?.relations[0]?.columns).toEqual([
-        { name: 'category_categoryId', type: COLUMN_TYPE.INTEGER },
+        { name: 'category_categoryId', type: COLUMN_TYPE.INTEGER, referencedProperty: 'categoryId' },
       ]);
     });
 
@@ -329,8 +329,8 @@ describe('MetadataStorage', () => {
       const relation = metadata.relations[0]!;
 
       expect(relation.columns).toEqual([
-        { name: 'item_orderId', type: COLUMN_TYPE.INTEGER },
-        { name: 'item_productId', type: COLUMN_TYPE.INTEGER },
+        { name: 'item_orderId', type: COLUMN_TYPE.INTEGER, referencedProperty: 'orderId' },
+        { name: 'item_productId', type: COLUMN_TYPE.INTEGER, referencedProperty: 'productId' },
       ]);
     });
 

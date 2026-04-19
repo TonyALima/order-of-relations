@@ -22,6 +22,7 @@ export interface RelationMetadata {
     | {
         name: string;
         type: COLUMN_TYPE;
+        referencedProperty: string;
       }[]
     | null;
   getTarget: () => Constructor;
@@ -92,6 +93,7 @@ export class MetadataStorage implements Iterable<[Constructor, EntityMetadata]> 
           relation.columns = primaryColumns.map((pk) => ({
             name: `${relation.propertyName}_${pk.propertyName}`,
             type: toForeignKeyType(pk.type),
+            referencedProperty: pk.propertyName,
           }));
         }
       }

@@ -3,6 +3,7 @@ import { SQL } from 'bun';
 import { Repository } from './repository';
 import { Database } from '../database/database';
 import { COLUMN_TYPE } from '../sql-types/sql-types';
+import { RelationType } from '../metadata/metadata';
 
 class TestEntity {
   id!: number;
@@ -90,6 +91,64 @@ describe('Repository', () => {
 
       const remaining = await sql`SELECT * FROM test_entity`;
       expect(remaining).toHaveLength(0);
+    });
+  });
+
+  describe('create() with relations', () => {
+    class Profile {
+      id!: number;
+    }
+    class UserWithProfile {
+      id!: number;
+      name!: string;
+      profile?: Profile;
+    }
+
+    const relDb = new Database();
+    relDb.getMetadata().set(Profile, {
+      tableName: 'profile',
+      columns: [
+        { propertyName: 'id', columnName: 'id', type: COLUMN_TYPE.SERIAL, primary: true, nullable: false },
+      ],
+      relations: [],
+    });
+    relDb.getMetadata().set(UserWithProfile, {
+      tableName: 'user_with_profile',
+      columns: [
+        { propertyName: 'id', columnName: 'id', type: COLUMN_TYPE.SERIAL, primary: true, nullable: false },
+        { propertyName: 'name', columnName: 'name', type: COLUMN_TYPE.TEXT, nullable: false },
+      ],
+      relations: [
+        {
+          propertyName: 'profile',
+          relationType: RelationType.TO_ONE,
+          columns: [{ name: 'profile_id', type: COLUMN_TYPE.INTEGER, referencedProperty: 'id' }],
+          getTarget: () => Profile,
+        },
+      ],
+    });
+
+    let relSql: SQL;
+    let userRepo: Repository<UserWithProfile>;
+
+    beforeEach(async () => {
+      relSql = new SQL({ url: 'sqlite://:memory:' });
+      await relSql`CREATE TABLE profile (id INTEGER PRIMARY KEY AUTOINCREMENT)`;
+      await relSql`CREATE TABLE user_with_profile (
+        id         INTEGER PRIMARY KEY AUTOINCREMENT,
+        name       TEXT NOT NULL,
+        profile_id INTEGER
+      )`;
+      spyOn(relDb, 'getConnection').mockReturnValue(relSql);
+      userRepo = new Repository<UserWithProfile>(UserWithProfile, relDb);
+    });
+
+    test('writes FK column from a related object with a PK', async () => {
+      await relSql`INSERT INTO profile (id) VALUES (7)`;
+      const newId = await userRepo.create({ name: 'Alice', profile: { id: 7 } });
+
+      const [row] = await relSql`SELECT * FROM user_with_profile WHERE id = ${newId}`;
+      expect(row).toEqual({ id: newId, name: 'Alice', profile_id: 7 });
     });
   });
 });

@@ -286,7 +286,7 @@ describe('Database', () => {
           {
             propertyName: 'author',
             relationType: RelationType.TO_ONE,
-            columns: [{ name: 'custom_author_fk', type: COLUMN_TYPE.INTEGER }],
+            columns: [{ name: 'custom_author_fk', type: COLUMN_TYPE.INTEGER, referencedProperty: 'id' }],
             getTarget: () => UserEntity,
           },
         ],

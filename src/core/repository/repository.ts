@@ -40,6 +40,22 @@ export class Repository<T, PK extends keyof T = 'id' extends keyof T ? 'id' : ne
       objectToInsert[columnName] = entity[propertyName];
     });
 
+    meta.relations.forEach((relation) => {
+      const related = (entity as Record<string, unknown>)[relation.propertyName];
+      const fkColumns = relation.columns!;
+
+      if (related === null || related === undefined) {
+        fkColumns.forEach((fk) => {
+          objectToInsert[fk.name] = null;
+        });
+        return;
+      }
+
+      fkColumns.forEach((fk) => {
+        objectToInsert[fk.name] = (related as Record<string, unknown>)[fk.referencedProperty];
+      });
+    });
+
     const result = await sql<Record<string, T[PK]>[]>`
       INSERT INTO ${tableName} ${sql(objectToInsert)}
       RETURNING ${sql(primaryColumn.columnName)}

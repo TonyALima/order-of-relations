@@ -43,7 +43,7 @@ describe('@ToOne decorator', () => {
       {
         propertyName: 'user',
         relationType: RelationType.TO_ONE,
-        columns: [{ name: 'user_id', type: COLUMN_TYPE.INTEGER }],
+        columns: [{ name: 'user_id', type: COLUMN_TYPE.INTEGER, referencedProperty: 'id' }],
         target: User,
       },
     ]);
@@ -67,7 +67,7 @@ describe('@ToOne decorator', () => {
 
     const metadata = db.getMetadata().get(Book)!;
     const relation = metadata.relations[0]!;
-    expect(relation.columns).toEqual([{ name: 'author_id', type: COLUMN_TYPE.INTEGER }]);
+    expect(relation.columns).toEqual([{ name: 'author_id', type: COLUMN_TYPE.INTEGER, referencedProperty: 'id' }]);
   });
 
   test('resolves columnType from target primary column', () => {
@@ -88,7 +88,7 @@ describe('@ToOne decorator', () => {
 
     const metadata = db.getMetadata().get(Article);
     const relation = metadata!.relations[0]!;
-    expect(relation.columns).toEqual([{ name: 'category_id', type: COLUMN_TYPE.INTEGER }]);
+    expect(relation.columns).toEqual([{ name: 'category_id', type: COLUMN_TYPE.INTEGER, referencedProperty: 'id' }]);
   });
 
   test('derives FK column name from target PK property name', () => {
@@ -109,7 +109,7 @@ describe('@ToOne decorator', () => {
 
     const metadata = db.getMetadata().get(Post)!;
     const relation = metadata.relations[0]!;
-    expect(relation.columns).toEqual([{ name: 'tag_tagId', type: COLUMN_TYPE.INTEGER }]);
+    expect(relation.columns).toEqual([{ name: 'tag_tagId', type: COLUMN_TYPE.INTEGER, referencedProperty: 'tagId' }]);
   });
 
   test('derives FK column names from target composite PK property names', () => {
@@ -134,8 +134,8 @@ describe('@ToOne decorator', () => {
     const metadata = db.getMetadata().get(OrderDetail)!;
     const relation = metadata.relations[0]!;
     expect(relation.columns).toEqual([
-      { name: 'orderItem_orderId', type: COLUMN_TYPE.INTEGER },
-      { name: 'orderItem_productId', type: COLUMN_TYPE.INTEGER },
+      { name: 'orderItem_orderId', type: COLUMN_TYPE.INTEGER, referencedProperty: 'orderId' },
+      { name: 'orderItem_productId', type: COLUMN_TYPE.INTEGER, referencedProperty: 'productId' },
     ]);
   });
 });
