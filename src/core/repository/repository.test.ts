@@ -14,7 +14,13 @@ const db = new Database();
 db.getMetadata().set(TestEntity, {
   tableName: 'test_entity',
   columns: [
-    { propertyName: 'id', columnName: 'id', type: COLUMN_TYPE.SERIAL, primary: true, nullable: false },
+    {
+      propertyName: 'id',
+      columnName: 'id',
+      type: COLUMN_TYPE.SERIAL,
+      primary: true,
+      nullable: false,
+    },
     { propertyName: 'name', columnName: 'name', type: COLUMN_TYPE.TEXT, nullable: false },
   ],
   relations: [],
@@ -108,14 +114,26 @@ describe('Repository', () => {
     relDb.getMetadata().set(Profile, {
       tableName: 'profile',
       columns: [
-        { propertyName: 'id', columnName: 'id', type: COLUMN_TYPE.SERIAL, primary: true, nullable: false },
+        {
+          propertyName: 'id',
+          columnName: 'id',
+          type: COLUMN_TYPE.SERIAL,
+          primary: true,
+          nullable: false,
+        },
       ],
       relations: [],
     });
     relDb.getMetadata().set(UserWithProfile, {
       tableName: 'user_with_profile',
       columns: [
-        { propertyName: 'id', columnName: 'id', type: COLUMN_TYPE.SERIAL, primary: true, nullable: false },
+        {
+          propertyName: 'id',
+          columnName: 'id',
+          type: COLUMN_TYPE.SERIAL,
+          primary: true,
+          nullable: false,
+        },
         { propertyName: 'name', columnName: 'name', type: COLUMN_TYPE.TEXT, nullable: false },
       ],
       relations: [
@@ -153,6 +171,16 @@ describe('Repository', () => {
 
     test('writes NULL FK when relation property is omitted', async () => {
       const newId = await userRepo.create({ name: 'Alice' } as Omit<UserWithProfile, 'id'>);
+
+      const [row] = await relSql`SELECT * FROM user_with_profile WHERE id = ${newId}`;
+      expect(row).toEqual({ id: newId, name: 'Alice', profile_id: null });
+    });
+
+    test('writes NULL FK when relation property is explicitly undefined', async () => {
+      const newId = await userRepo.create({
+        name: 'Alice',
+        profile: undefined,
+      });
 
       const [row] = await relSql`SELECT * FROM user_with_profile WHERE id = ${newId}`;
       expect(row).toEqual({ id: newId, name: 'Alice', profile_id: null });
