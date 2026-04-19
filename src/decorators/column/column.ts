@@ -1,29 +1,10 @@
 import type { ColumnMetadata } from '../../core/metadata/metadata';
 import { COLUMN_TYPE } from '../../core/sql-types/sql-types';
 import { COLUMNS_KEY } from '../entity/entity';
-import { MissingNullabilityDecoratorError } from './column.errors';
+import { MissingNullabilityDecoratorError } from '../nullable/nullable.errors';
+import { NULLABLE_KEY } from '../nullable/nullable';
 
 type ColumnOptions = { name?: string; type: COLUMN_TYPE };
-
-export const NULLABLE_KEY = Symbol('nullable');
-
-export function Nullable<This, Value>(
-  _value: undefined,
-  context: ClassFieldDecoratorContext<This, Value & (undefined extends Value ? Value : never)>,
-): void {
-  const map: Map<string, boolean> = ((context.metadata[NULLABLE_KEY] as Map<string, boolean>) ??=
-    new Map());
-  map.set(String(context.name), true);
-}
-
-export function NotNullable<This, Value>(
-  _value: undefined,
-  context: ClassFieldDecoratorContext<This, Value & (undefined extends Value ? never : Value)>,
-): void {
-  const map: Map<string, boolean> = ((context.metadata[NULLABLE_KEY] as Map<string, boolean>) ??=
-    new Map());
-  map.set(String(context.name), false);
-}
 
 function registerColumn(
   options: ColumnOptions,
@@ -37,7 +18,7 @@ function registerColumn(
   const nullableEntry = nullableMap?.get(propertyName);
 
   if (!primary && nullableEntry === undefined) {
-    throw new MissingNullabilityDecoratorError(propertyName);
+    throw new MissingNullabilityDecoratorError('Column', propertyName);
   }
 
   columns.push({

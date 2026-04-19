@@ -1,5 +1,5 @@
 import { describe, beforeEach, afterEach, test, expect } from 'bun:test';
-import { Entity, Column, PrimaryColumn, Database, Repository, COLUMN_TYPE, ToOne, NotNullable } from '../src';
+import { Entity, Column, PrimaryColumn, Database, Repository, COLUMN_TYPE, ToOne, NotNullable, Nullable } from '../src';
 
 const db = new Database();
 
@@ -13,6 +13,7 @@ class User {
   name!: string;
 
   @ToOne({ target: () => Profile })
+  @Nullable
   profile?: Profile;
 }
 

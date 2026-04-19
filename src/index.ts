@@ -3,7 +3,8 @@ export * from './errors';
 
 // Decorators
 export { Entity } from './decorators/entity/entity';
-export { Column, PrimaryColumn, Nullable, NotNullable, NULLABLE_KEY } from './decorators/column/column';
+export { Column, PrimaryColumn } from './decorators/column/column';
+export { Nullable, NotNullable, NULLABLE_KEY } from './decorators/nullable/nullable';
 export { ToOne } from './decorators/relation/relation';
 
 // Core

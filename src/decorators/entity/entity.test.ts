@@ -3,7 +3,8 @@ import { Database } from '../../core/database/database';
 import { MetadataError } from '../../core/metadata/metadata.errors';
 import { OrmError } from '../../core/orm-error';
 import { COLUMN_TYPE } from '../../core/sql-types/sql-types';
-import { Column, PrimaryColumn, NotNullable } from '../column/column';
+import { Column, PrimaryColumn } from '../column/column';
+import { NotNullable } from '../nullable/nullable';
 import { Entity } from './entity';
 import { MissingPrimaryColumnError } from './entity.errors';
 
