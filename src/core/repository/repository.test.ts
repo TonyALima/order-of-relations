@@ -186,4 +186,73 @@ describe('Repository', () => {
       expect(row).toEqual({ id: newId, name: 'Alice', profile_id: null });
     });
   });
+
+  describe('create() with composite-FK relations', () => {
+    class OrderItem {
+      orderId!: number;
+      productId!: number;
+    }
+    class OrderDetail {
+      id!: number;
+      orderItem?: OrderItem;
+    }
+
+    const compDb = new Database();
+    compDb.getMetadata().set(OrderItem, {
+      tableName: 'order_item',
+      columns: [
+        { propertyName: 'orderId', columnName: 'orderId', type: COLUMN_TYPE.INTEGER, primary: true, nullable: false },
+        { propertyName: 'productId', columnName: 'productId', type: COLUMN_TYPE.INTEGER, primary: true, nullable: false },
+      ],
+      relations: [],
+    });
+    compDb.getMetadata().set(OrderDetail, {
+      tableName: 'order_detail',
+      columns: [
+        { propertyName: 'id', columnName: 'id', type: COLUMN_TYPE.SERIAL, primary: true, nullable: false },
+      ],
+      relations: [
+        {
+          propertyName: 'orderItem',
+          relationType: RelationType.TO_ONE,
+          columns: [
+            { name: 'orderItem_orderId', type: COLUMN_TYPE.INTEGER, referencedProperty: 'orderId' },
+            { name: 'orderItem_productId', type: COLUMN_TYPE.INTEGER, referencedProperty: 'productId' },
+          ],
+          getTarget: () => OrderItem,
+        },
+      ],
+    });
+
+    let compSql: SQL;
+    let detailRepo: Repository<OrderDetail>;
+
+    beforeEach(async () => {
+      compSql = new SQL({ url: 'sqlite://:memory:' });
+      await compSql`CREATE TABLE order_item (
+        orderId   INTEGER NOT NULL,
+        productId INTEGER NOT NULL,
+        PRIMARY KEY (orderId, productId)
+      )`;
+      await compSql`CREATE TABLE order_detail (
+        id                   INTEGER PRIMARY KEY AUTOINCREMENT,
+        orderItem_orderId    INTEGER,
+        orderItem_productId  INTEGER
+      )`;
+      spyOn(compDb, 'getConnection').mockReturnValue(compSql);
+      detailRepo = new Repository<OrderDetail>(OrderDetail, compDb);
+    });
+
+    test('writes both FK columns from a composite-PK related object', async () => {
+      await compSql`INSERT INTO order_item (orderId, productId) VALUES (1, 2)`;
+      const newId = await detailRepo.create({ orderItem: { orderId: 1, productId: 2 } });
+
+      const [row] = await compSql`SELECT * FROM order_detail WHERE id = ${newId}`;
+      expect(row).toEqual({
+        id: newId,
+        orderItem_orderId: 1,
+        orderItem_productId: 2,
+      });
+    });
+  });
 });
