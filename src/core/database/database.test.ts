@@ -226,6 +226,7 @@ describe('Database', () => {
             propertyName: 'author',
             columns: null, // resolved by MetadataStorage to the target PK columns
             relationType: RelationType.TO_ONE,
+            nullable: false,
             getTarget: () => UserEntity,
           },
         ],
@@ -286,6 +287,7 @@ describe('Database', () => {
           {
             propertyName: 'author',
             relationType: RelationType.TO_ONE,
+            nullable: false,
             columns: [{ name: 'custom_author_fk', type: COLUMN_TYPE.INTEGER, referencedProperty: 'id' }],
             getTarget: () => UserEntity,
           },
@@ -349,6 +351,7 @@ describe('Database', () => {
             propertyName: 'orderItem',
             columns: null,
             relationType: RelationType.TO_ONE,
+            nullable: false,
             getTarget: () => OrderItemEntity,
           },
         ],

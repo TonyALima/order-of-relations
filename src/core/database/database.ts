@@ -46,11 +46,13 @@ export class Database {
         };
       });
 
-      const relationsColumns = metadata.relations.flatMap((r) => r.columns ?? []);
-
-      const relationsColumnsWithSqlTypes = relationsColumns.map((c) => {
-        return { columnName: c.name, sqlType: getColumnTypeDefinition(sql, c.type) };
-      });
+      const relationsColumnsWithSqlTypes = metadata.relations.flatMap((r) =>
+        (r.columns ?? []).map((c) => ({
+          columnName: c.name,
+          sqlType: getColumnTypeDefinition(sql, c.type),
+          notNull: !r.nullable,
+        })),
+      );
 
       const allColumnsWithSqlTypes = [...columnsWithSqlTypes, ...relationsColumnsWithSqlTypes];
 
@@ -58,7 +60,7 @@ export class Database {
         sql,
         allColumnsWithSqlTypes,
         (col) =>
-          'notNull' in col && col.notNull
+          col.notNull
             ? sql`${sql(col.columnName)} ${col.sqlType} NOT NULL`
             : sql`${sql(col.columnName)} ${col.sqlType}`,
       );

@@ -47,10 +47,53 @@ describe('@ToOne decorator', () => {
       {
         propertyName: 'user',
         relationType: RelationType.TO_ONE,
+        nullable: false,
         columns: [{ name: 'user_id', type: COLUMN_TYPE.INTEGER, referencedProperty: 'id' }],
         target: User,
       },
     ]);
+  });
+
+  test('stores nullable: true on the relation when @Nullable is applied', () => {
+    @Entity(db)
+    class Owner {
+      @PrimaryColumn({ type: COLUMN_TYPE.SERIAL })
+      id!: number;
+    }
+
+    @Entity(db)
+    class Pet {
+      @PrimaryColumn({ type: COLUMN_TYPE.SERIAL })
+      id!: number;
+
+      @ToOne({ target: () => Owner })
+      @Nullable
+      owner?: Owner;
+    }
+
+    const relation = db.getMetadata().get(Pet)!.relations[0]!;
+    expect(relation.nullable).toBe(true);
+  });
+
+  test('stores nullable: false on the relation when @NotNullable is applied', () => {
+    @Entity(db)
+    class Country {
+      @PrimaryColumn({ type: COLUMN_TYPE.SERIAL })
+      id!: number;
+    }
+
+    @Entity(db)
+    class City {
+      @PrimaryColumn({ type: COLUMN_TYPE.SERIAL })
+      id!: number;
+
+      @ToOne({ target: () => Country })
+      @NotNullable
+      country!: Country;
+    }
+
+    const relation = db.getMetadata().get(City)!.relations[0]!;
+    expect(relation.nullable).toBe(false);
   });
 
   test('uses foreignKeys option as column names when provided', () => {

@@ -21,13 +21,15 @@ export function ToOne<TType>(options: OneToOneOptions<TType>) {
     const propertyName = context.name.toString();
 
     const nullableMap = context.metadata[NULLABLE_KEY] as Map<string, boolean> | undefined;
-    if (nullableMap?.get(propertyName) === undefined) {
+    const nullable = nullableMap?.get(propertyName);
+    if (nullable === undefined) {
       throw new MissingNullabilityDecoratorError('ToOne', propertyName);
     }
 
     relations.push({
       propertyName,
       relationType: RelationType.TO_ONE,
+      nullable,
       columns: null,
       getTarget: options.target,
     });

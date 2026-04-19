@@ -18,6 +18,7 @@ export enum RelationType {
 export interface RelationMetadata {
   propertyName: string;
   relationType: RelationType;
+  nullable: boolean;
   columns:
     | {
         name: string;

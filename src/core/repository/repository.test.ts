@@ -140,6 +140,7 @@ describe('Repository', () => {
         {
           propertyName: 'profile',
           relationType: RelationType.TO_ONE,
+          nullable: false,
           columns: [{ name: 'profile_id', type: COLUMN_TYPE.INTEGER, referencedProperty: 'id' }],
           getTarget: () => Profile,
         },
@@ -215,6 +216,7 @@ describe('Repository', () => {
         {
           propertyName: 'orderItem',
           relationType: RelationType.TO_ONE,
+          nullable: false,
           columns: [
             { name: 'orderItem_orderId', type: COLUMN_TYPE.INTEGER, referencedProperty: 'orderId' },
             { name: 'orderItem_productId', type: COLUMN_TYPE.INTEGER, referencedProperty: 'productId' },
