@@ -43,12 +43,12 @@ describe('Integration: Repository CRUD', () => {
 
   test('findById() returns the entity when a row exists', async () => {
     const id = await repo.create({ name: 'Alice' });
-    const user = await repo.findById(id);
+    const user = await repo.findById({ id });
     expect(user).toEqual({ id, name: 'Alice' });
   });
 
   test('findById() returns null when no row matches', async () => {
-    const user = await repo.findById(999);
+    const user = await repo.findById({ id: 999 });
     expect(user).toBeNull();
   });
 
@@ -62,17 +62,17 @@ describe('Integration: Repository CRUD', () => {
 
   test('update() changes the row identified by PK', async () => {
     const id = await repo.create({ name: 'Alice' });
-    const user = await repo.findById(id);
+    const user = await repo.findById({ id });
     if (!user) throw new Error('User not found');
     await repo.update({ ...user, name: 'Bob' });
-    const updated = await repo.findById(user.id);
+    const updated = await repo.findById({ id: user.id });
     expect(updated).toEqual({ id: user.id, name: 'Bob' });
   });
 
   test('delete() removes the row with the given id', async () => {
     const id = await repo.create({ name: 'Alice' });
     await repo.delete(id);
-    const user = await repo.findById(id);
+    const user = await repo.findById({ id });
     expect(user).toBeNull();
   });
 });

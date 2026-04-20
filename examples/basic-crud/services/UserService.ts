@@ -18,6 +18,6 @@ export class UserService {
   }
 
   async findOne(id: User['id']) {
-    return this.userRepository.findById(id);
+    return this.userRepository.findById({ id });
   }
 }

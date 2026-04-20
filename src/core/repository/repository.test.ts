@@ -48,12 +48,12 @@ describe('Repository', () => {
   describe('findById()', () => {
     test('returns the entity when a matching row exists', async () => {
       await sql`INSERT INTO test_entity (name) VALUES ('Alice')`;
-      const result = await repo.findById(1);
+      const result = await repo.findById({ id: 1 });
       expect(result).toEqual({ id: 1, name: 'Alice' });
     });
 
     test('returns null when no matching row exists', async () => {
-      const result = await repo.findById(999);
+      const result = await repo.findById({ id: 999 });
       expect(result).toBeNull();
     });
   });

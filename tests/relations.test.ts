@@ -45,7 +45,7 @@ describe('Integration: Relations CRUD', () => {
 
   test('create() inserts a row that can be retrieved', async () => {
     const profileId = await profileRepo.create({ bio: 'Hello world' });
-    const profile = await profileRepo.findById(profileId);
+    const profile = await profileRepo.findById({ id: profileId });
     await userRepo.create({ name: 'Alice', profile: profile! });
     const rows = await userRepo.findMany();
     expect(rows.length).toBe(1);
@@ -54,12 +54,12 @@ describe('Integration: Relations CRUD', () => {
 
   test('findById() returns the entity when a row exists', async () => {
     const id = await userRepo.create({ name: 'Alice' });
-    const user = await userRepo.findById(id);
+    const user = await userRepo.findById({ id });
     expect(user).toEqual({ id, name: 'Alice' });
   });
 
   test('findById() returns null when no row matches', async () => {
-    const user = await userRepo.findById(999);
+    const user = await userRepo.findById({ id: 999 });
     expect(user).toBeNull();
   });
 
@@ -73,17 +73,17 @@ describe('Integration: Relations CRUD', () => {
 
   test('update() changes the row identified by PK', async () => {
     const id = await userRepo.create({ name: 'Alice' });
-    const user = await userRepo.findById(id);
+    const user = await userRepo.findById({ id });
     if (!user) throw new Error('User not found');
     await userRepo.update({ ...user, name: 'Bob' });
-    const updated = await userRepo.findById(user.id);
+    const updated = await userRepo.findById({ id: user.id });
     expect(updated).toEqual({ id: user.id, name: 'Bob' });
   });
 
   test('delete() removes the row with the given id', async () => {
     const id = await userRepo.create({ name: 'Alice' });
     await userRepo.delete(id);
-    const user = await userRepo.findById(id);
+    const user = await userRepo.findById({ id });
     expect(user).toBeNull();
   });
 });

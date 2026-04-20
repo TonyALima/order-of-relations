@@ -13,11 +13,12 @@ export class Repository<T, PK extends keyof T = 'id' extends keyof T ? 'id' : ne
     return new QueryBuilder<T>(this.entity, this.db).applyOptions(options).getOne();
   }
 
-  async findById(id: T[PK]): Promise<T | null> {
+  async findById(key: Partial<T>): Promise<T | null> {
     const meta = this.db.getMetadata().get(this.entity)!;
     const primaryProp = meta.columns.find((c) => c.primary)!.propertyName as keyof T;
+    const value = key[primaryProp]!;
     return new QueryBuilder<T>(this.entity, this.db)
-      .applyOptions({ where: (u) => [u[primaryProp]?.eq(id)] })
+      .applyOptions({ where: (u) => [u[primaryProp]?.eq(value)] })
       .getOne();
   }
 
