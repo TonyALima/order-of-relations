@@ -94,7 +94,7 @@ describe('Repository', () => {
   describe('delete()', () => {
     test('removes the row with the given id', async () => {
       await sql`INSERT INTO test_entity (name) VALUES ('Alice')`;
-      await repo.delete(1);
+      await repo.delete({ id: 1 });
 
       const remaining = await sql`SELECT * FROM test_entity`;
       expect(remaining).toHaveLength(0);
@@ -488,6 +488,70 @@ describe('Repository', () => {
         expect(typed.entityName).toBe('OrderItem');
         expect(typed.missingProperties).toEqual(['orderId', 'productId']);
       }
+    });
+  });
+
+  describe('delete() with composite primary keys', () => {
+    class OrderItem {
+      orderId!: number;
+      productId!: number;
+      quantity!: number;
+    }
+
+    const compDb = new Database();
+    compDb.getMetadata().set(OrderItem, {
+      tableName: 'order_item',
+      columns: [
+        { propertyName: 'orderId', columnName: 'orderId', type: COLUMN_TYPE.INTEGER, primary: true, nullable: false },
+        { propertyName: 'productId', columnName: 'productId', type: COLUMN_TYPE.INTEGER, primary: true, nullable: false },
+        { propertyName: 'quantity', columnName: 'quantity', type: COLUMN_TYPE.INTEGER, nullable: false },
+      ],
+      relations: [],
+    });
+
+    let compSql: SQL;
+    let orderItemRepo: Repository<OrderItem>;
+
+    beforeEach(async () => {
+      compSql = new SQL({ url: 'sqlite://:memory:' });
+      await compSql`CREATE TABLE order_item (
+        orderId   INTEGER NOT NULL,
+        productId INTEGER NOT NULL,
+        quantity  INTEGER NOT NULL,
+        PRIMARY KEY (orderId, productId)
+      )`;
+      await compSql`INSERT INTO order_item (orderId, productId, quantity) VALUES (1, 2, 10)`;
+      await compSql`INSERT INTO order_item (orderId, productId, quantity) VALUES (1, 3, 20)`;
+      await compSql`INSERT INTO order_item (orderId, productId, quantity) VALUES (2, 2, 30)`;
+      spyOn(compDb, 'getConnection').mockReturnValue(compSql);
+      orderItemRepo = new Repository<OrderItem>(OrderItem, compDb);
+    });
+
+    test('removes only the row matching every primary key field', async () => {
+      await orderItemRepo.delete({ orderId: 1, productId: 3 });
+
+      const rows = await compSql<{ orderId: number; productId: number; quantity: number }[]>`
+        SELECT * FROM order_item ORDER BY orderId, productId
+      `;
+      expect(rows).toEqual([
+        { orderId: 1, productId: 2, quantity: 10 },
+        { orderId: 2, productId: 2, quantity: 30 },
+      ]);
+    });
+
+    test('removes nothing when no row matches every primary key field', async () => {
+      await orderItemRepo.delete({ orderId: 1, productId: 99 });
+
+      const rows = await compSql<{ orderId: number; productId: number }[]>`
+        SELECT orderId, productId FROM order_item ORDER BY orderId, productId
+      `;
+      expect(rows).toHaveLength(3);
+    });
+
+    test('throws IncompletePrimaryKeyError when a primary key field is missing', async () => {
+      await expect(orderItemRepo.delete({ orderId: 1 })).rejects.toBeInstanceOf(
+        IncompletePrimaryKeyError,
+      );
     });
   });
 });

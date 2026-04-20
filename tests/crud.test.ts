@@ -71,7 +71,7 @@ describe('Integration: Repository CRUD', () => {
 
   test('delete() removes the row with the given id', async () => {
     const id = await repo.create({ name: 'Alice' });
-    await repo.delete(id);
+    await repo.delete({ id });
     const user = await repo.findById({ id });
     expect(user).toBeNull();
   });

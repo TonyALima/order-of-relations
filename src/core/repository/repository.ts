@@ -73,16 +73,28 @@ export class Repository<T, PK extends keyof T = 'id' extends keyof T ? 'id' : ne
     return result[0]![primaryColumn.columnName]!;
   }
 
-  async delete(id: T[PK]): Promise<void> {
+  async delete(key: Partial<T>): Promise<void> {
     const db = this.db;
     const meta = db.getMetadata().get(this.entity)!;
     const sql = db.getConnection();
     const tableName = sql(meta.tableName);
-    const primaryColumn = meta.columns.find((c) => c.primary)!;
+    const primaryColumns = meta.columns.filter((c) => c.primary);
+
+    const missing = primaryColumns
+      .map((pc) => pc.propertyName)
+      .filter((prop) => !(prop in key));
+    if (missing.length > 0) {
+      throw new IncompletePrimaryKeyError(this.entity.name, missing);
+    }
+
+    const whereFragments = primaryColumns.map(
+      (pc) => sql`${sql(pc.columnName)} = ${key[pc.propertyName as keyof T]}`,
+    );
+    const whereClause = whereFragments.reduce((acc, frag) => sql`${acc} AND ${frag}`);
 
     await sql`
       DELETE FROM ${tableName}
-      WHERE ${sql(primaryColumn.columnName)} = ${id}
+      WHERE ${whereClause}
     `;
   }
 

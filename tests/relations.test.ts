@@ -82,7 +82,7 @@ describe('Integration: Relations CRUD', () => {
 
   test('delete() removes the row with the given id', async () => {
     const id = await userRepo.create({ name: 'Alice' });
-    await userRepo.delete(id);
+    await userRepo.delete({ id });
     const user = await userRepo.findById({ id });
     expect(user).toBeNull();
   });
