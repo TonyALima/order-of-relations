@@ -1,6 +1,7 @@
 import { Database } from '../database/database';
 import { QueryBuilder } from '../../query-builder/query-builder';
 import type { FindOptions } from '../../query-builder/types';
+import { IncompletePrimaryKeyError } from './repository.errors';
 
 export class Repository<T, PK extends keyof T = 'id' extends keyof T ? 'id' : never> {
   constructor(private entity: new () => T, private db: Database) {}
@@ -16,6 +17,14 @@ export class Repository<T, PK extends keyof T = 'id' extends keyof T ? 'id' : ne
   async findById(key: Partial<T>): Promise<T | null> {
     const meta = this.db.getMetadata().get(this.entity)!;
     const primaryColumns = meta.columns.filter((c) => c.primary);
+
+    const missing = primaryColumns
+      .map((pc) => pc.propertyName)
+      .filter((prop) => !(prop in key));
+    if (missing.length > 0) {
+      throw new IncompletePrimaryKeyError(this.entity.name, missing);
+    }
+
     return new QueryBuilder<T>(this.entity, this.db)
       .applyOptions({
         where: (u) =>

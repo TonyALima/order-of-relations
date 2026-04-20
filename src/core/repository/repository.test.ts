@@ -4,6 +4,7 @@ import { Repository } from './repository';
 import { Database } from '../database/database';
 import { COLUMN_TYPE } from '../sql-types/sql-types';
 import { RelationType } from '../metadata/metadata';
+import { IncompletePrimaryKeyError } from './repository.errors';
 
 class TestEntity {
   id!: number;
@@ -469,6 +470,24 @@ describe('Repository', () => {
     test('returns null when no row matches all primary key fields', async () => {
       const result = await orderItemRepo.findById({ orderId: 1, productId: 99 });
       expect(result).toBeNull();
+    });
+
+    test('throws IncompletePrimaryKeyError when a primary key field is missing', async () => {
+      await expect(orderItemRepo.findById({ orderId: 1 })).rejects.toBeInstanceOf(
+        IncompletePrimaryKeyError,
+      );
+    });
+
+    test('IncompletePrimaryKeyError lists every missing primary key field', async () => {
+      try {
+        await orderItemRepo.findById({});
+        throw new Error('expected findById to throw');
+      } catch (err) {
+        expect(err).toBeInstanceOf(IncompletePrimaryKeyError);
+        const typed = err as IncompletePrimaryKeyError;
+        expect(typed.entityName).toBe('OrderItem');
+        expect(typed.missingProperties).toEqual(['orderId', 'productId']);
+      }
     });
   });
 });
