@@ -119,4 +119,33 @@ describe('Integration: Repository CRUD with composite primary key', () => {
     const result = await orderItemRepo.findById({ orderId: 1, productId: 99 });
     expect(result).toBeNull();
   });
+
+  test('delete() removes only the row matching every primary key field', async () => {
+    const sql = db.getConnection();
+    await sql`INSERT INTO order_item (orderId, productId, quantity) VALUES (1, 2, 10)`;
+    await sql`INSERT INTO order_item (orderId, productId, quantity) VALUES (1, 3, 20)`;
+
+    await orderItemRepo.delete({ orderId: 1, productId: 3 });
+
+    const rows = await sql<{ orderId: number; productId: number; quantity: number }[]>`
+      SELECT * FROM order_item ORDER BY orderId, productId
+    `;
+    expect(rows).toEqual([{ orderId: 1, productId: 2, quantity: 10 }]);
+  });
+
+  test('update() mutates only the row matching every primary key field', async () => {
+    const sql = db.getConnection();
+    await sql`INSERT INTO order_item (orderId, productId, quantity) VALUES (1, 2, 10)`;
+    await sql`INSERT INTO order_item (orderId, productId, quantity) VALUES (1, 3, 20)`;
+
+    await orderItemRepo.update({ orderId: 1, productId: 3, quantity: 999 });
+
+    const rows = await sql<{ orderId: number; productId: number; quantity: number }[]>`
+      SELECT * FROM order_item ORDER BY orderId, productId
+    `;
+    expect(rows).toEqual([
+      { orderId: 1, productId: 2, quantity: 10 },
+      { orderId: 1, productId: 3, quantity: 999 },
+    ]);
+  });
 });
