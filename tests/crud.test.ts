@@ -76,3 +76,47 @@ describe('Integration: Repository CRUD', () => {
     expect(user).toBeNull();
   });
 });
+
+@Entity(db, 'order_item')
+class OrderItem {
+  @PrimaryColumn({ type: COLUMN_TYPE.INTEGER })
+  orderId!: number;
+
+  @PrimaryColumn({ type: COLUMN_TYPE.INTEGER })
+  productId!: number;
+
+  @Column({ type: COLUMN_TYPE.INTEGER })
+  @NotNullable
+  quantity!: number;
+}
+
+describe('Integration: Repository CRUD with composite primary key', () => {
+  let orderItemRepo: Repository<OrderItem>;
+
+  beforeEach(async () => {
+    db.connect('sqlite://:memory:');
+    await db.create();
+    orderItemRepo = new Repository(OrderItem, db);
+  });
+
+  afterEach(async () => {
+    await db.drop();
+  });
+
+  test('findById() returns the row matching every primary key field', async () => {
+    const sql = db.getConnection();
+    await sql`INSERT INTO order_item (orderId, productId, quantity) VALUES (1, 2, 10)`;
+    await sql`INSERT INTO order_item (orderId, productId, quantity) VALUES (1, 3, 20)`;
+
+    const result = await orderItemRepo.findById({ orderId: 1, productId: 3 });
+    expect(result).toEqual({ orderId: 1, productId: 3, quantity: 20 });
+  });
+
+  test('findById() returns null when no row matches every primary key field', async () => {
+    const sql = db.getConnection();
+    await sql`INSERT INTO order_item (orderId, productId, quantity) VALUES (1, 2, 10)`;
+
+    const result = await orderItemRepo.findById({ orderId: 1, productId: 99 });
+    expect(result).toBeNull();
+  });
+});
