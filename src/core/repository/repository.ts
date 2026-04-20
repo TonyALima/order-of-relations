@@ -103,7 +103,7 @@ export class Repository<T, PK extends keyof T = 'id' extends keyof T ? 'id' : ne
     const meta = db.getMetadata().get(this.entity)!;
     const sql = db.getConnection();
 
-    const primaryColumn = meta.columns.find((c) => c.primary)!;
+    const primaryColumns = meta.columns.filter((c) => c.primary);
     const columns = meta.columns.filter((c) => !c.primary);
     const tableName = sql(meta.tableName);
 
@@ -125,12 +125,15 @@ export class Repository<T, PK extends keyof T = 'id' extends keyof T ? 'id' : ne
       });
     });
 
-    const primaryKeyValue = entity[primaryColumn.propertyName as PK];
+    const whereFragments = primaryColumns.map(
+      (pc) => sql`${sql(pc.columnName)} = ${entity[pc.propertyName as keyof T]}`,
+    );
+    const whereClause = whereFragments.reduce((acc, frag) => sql`${acc} AND ${frag}`);
 
     await sql`
       UPDATE ${tableName}
       SET ${sql(objectToUpdate)}
-      WHERE ${sql(primaryColumn.columnName)} = ${primaryKeyValue}
+      WHERE ${whereClause}
     `;
   }
 }
