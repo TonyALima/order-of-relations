@@ -5,3 +5,4 @@ export { MissingPrimaryColumnError } from './decorators/entity/entity.errors';
 export { MissingNullabilityDecoratorError } from './decorators/nullable/nullable.errors';
 export { SchemaError, UnsupportedColumnTypeError } from './core/sql-types/sql-types.errors';
 export { QueryError, UndefinedWhereConditionError } from './query-builder/query-builder.errors';
+export { RepositoryError, IncompletePrimaryKeyError } from './core/repository/repository.errors';

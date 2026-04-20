@@ -16,6 +16,8 @@ import {
   UnsupportedColumnTypeError,
   QueryError,
   UndefinedWhereConditionError,
+  RepositoryError,
+  IncompletePrimaryKeyError,
 } from './index';
 
 describe('public API exports', () => {
@@ -39,5 +41,7 @@ describe('public API exports', () => {
     expect(UnsupportedColumnTypeError).toBeFunction();
     expect(QueryError).toBeFunction();
     expect(UndefinedWhereConditionError).toBeFunction();
+    expect(RepositoryError).toBeFunction();
+    expect(IncompletePrimaryKeyError).toBeFunction();
   });
 });
