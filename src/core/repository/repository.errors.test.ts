@@ -14,7 +14,7 @@ describe('IncompletePrimaryKeyError', () => {
     const err = new IncompletePrimaryKeyError('OrderItem', ['orderId', 'productId']);
     expect(err.name).toBe('IncompletePrimaryKeyError');
     expect(err.message).toBe(
-      'findById() on OrderItem is missing required primary key field(s): orderId, productId',
+      'OrderItem is missing required primary key field(s): orderId, productId',
     );
   });
 

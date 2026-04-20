@@ -8,7 +8,7 @@ export class IncompletePrimaryKeyError extends RepositoryError {
     readonly missingProperties: string[],
   ) {
     super(
-      `findById() on ${entityName} is missing required primary key field(s): ${missingProperties.join(', ')}`,
+      `${entityName} is missing required primary key field(s): ${missingProperties.join(', ')}`,
     );
   }
 }
