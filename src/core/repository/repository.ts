@@ -15,10 +15,15 @@ export class Repository<T, PK extends keyof T = 'id' extends keyof T ? 'id' : ne
 
   async findById(key: Partial<T>): Promise<T | null> {
     const meta = this.db.getMetadata().get(this.entity)!;
-    const primaryProp = meta.columns.find((c) => c.primary)!.propertyName as keyof T;
-    const value = key[primaryProp]!;
+    const primaryColumns = meta.columns.filter((c) => c.primary);
     return new QueryBuilder<T>(this.entity, this.db)
-      .applyOptions({ where: (u) => [u[primaryProp]?.eq(value)] })
+      .applyOptions({
+        where: (u) =>
+          primaryColumns.map((pc) => {
+            const prop = pc.propertyName as keyof T;
+            return u[prop]?.eq(key[prop]!);
+          }),
+      })
       .getOne();
   }
 

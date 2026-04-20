@@ -424,4 +424,51 @@ describe('Repository', () => {
       });
     });
   });
+
+  describe('findById() with composite primary keys', () => {
+    class OrderItem {
+      orderId!: number;
+      productId!: number;
+      quantity!: number;
+    }
+
+    const compDb = new Database();
+    compDb.getMetadata().set(OrderItem, {
+      tableName: 'order_item',
+      columns: [
+        { propertyName: 'orderId', columnName: 'orderId', type: COLUMN_TYPE.INTEGER, primary: true, nullable: false },
+        { propertyName: 'productId', columnName: 'productId', type: COLUMN_TYPE.INTEGER, primary: true, nullable: false },
+        { propertyName: 'quantity', columnName: 'quantity', type: COLUMN_TYPE.INTEGER, nullable: false },
+      ],
+      relations: [],
+    });
+
+    let compSql: SQL;
+    let orderItemRepo: Repository<OrderItem>;
+
+    beforeEach(async () => {
+      compSql = new SQL({ url: 'sqlite://:memory:' });
+      await compSql`CREATE TABLE order_item (
+        orderId   INTEGER NOT NULL,
+        productId INTEGER NOT NULL,
+        quantity  INTEGER NOT NULL,
+        PRIMARY KEY (orderId, productId)
+      )`;
+      await compSql`INSERT INTO order_item (orderId, productId, quantity) VALUES (1, 2, 10)`;
+      await compSql`INSERT INTO order_item (orderId, productId, quantity) VALUES (1, 3, 20)`;
+      await compSql`INSERT INTO order_item (orderId, productId, quantity) VALUES (2, 2, 30)`;
+      spyOn(compDb, 'getConnection').mockReturnValue(compSql);
+      orderItemRepo = new Repository<OrderItem>(OrderItem, compDb);
+    });
+
+    test('returns the row matching all primary key fields', async () => {
+      const result = await orderItemRepo.findById({ orderId: 1, productId: 3 });
+      expect(result).toEqual({ orderId: 1, productId: 3, quantity: 20 });
+    });
+
+    test('returns null when no row matches all primary key fields', async () => {
+      const result = await orderItemRepo.findById({ orderId: 1, productId: 99 });
+      expect(result).toBeNull();
+    });
+  });
 });
