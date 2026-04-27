@@ -9,8 +9,9 @@ export class UserService {
     this.userRepository = new Repository(User, db);
   }
 
-  async createUser(name: string, email: string) {
-    return this.userRepository.create({ name, email });
+  async createUser(name: string, email: string): Promise<User['id']> {
+    const created = await this.userRepository.create({ name, email });
+    return created.id!;
   }
 
   async listUsers() {

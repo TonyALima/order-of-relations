@@ -35,16 +35,16 @@ describe('Integration: Repository CRUD', () => {
   });
 
   test('create() inserts a row that can be retrieved', async () => {
-    await repo.create({ name: 'Alice' });
+    await repo.create({ id: 1, name: 'Alice' });
     const rows = await repo.findMany();
     expect(rows.length).toBe(1);
     expect(rows[0]!.name).toBe('Alice');
   });
 
   test('findById() returns the entity when a row exists', async () => {
-    const id = await repo.create({ name: 'Alice' });
-    const user = await repo.findById({ id });
-    expect(user).toEqual({ id, name: 'Alice' });
+    const { id } = await repo.create({ id: 1, name: 'Alice' });
+    const user = await repo.findById({ id: id! });
+    expect(user).toEqual({ id: id!, name: 'Alice' });
   });
 
   test('findById() returns null when no row matches', async () => {
@@ -53,16 +53,16 @@ describe('Integration: Repository CRUD', () => {
   });
 
   test('findMany() returns all rows', async () => {
-    await repo.create({ name: 'Alice' });
-    await repo.create({ name: 'Bob' });
+    await repo.create({ id: 1, name: 'Alice' });
+    await repo.create({ id: 2, name: 'Bob' });
     const users = await repo.findMany();
     expect(users).toHaveLength(2);
     expect(users.map((u) => u.name)).toEqual(['Alice', 'Bob']);
   });
 
   test('update() changes the row identified by PK', async () => {
-    const id = await repo.create({ name: 'Alice' });
-    const user = await repo.findById({ id });
+    const { id } = await repo.create({ id: 1, name: 'Alice' });
+    const user = await repo.findById({ id: id! });
     if (!user) throw new Error('User not found');
     await repo.update({ ...user, name: 'Bob' });
     const updated = await repo.findById({ id: user.id });
@@ -70,9 +70,9 @@ describe('Integration: Repository CRUD', () => {
   });
 
   test('delete() removes the row with the given id', async () => {
-    const id = await repo.create({ name: 'Alice' });
-    await repo.delete({ id });
-    const user = await repo.findById({ id });
+    const { id } = await repo.create({ id: 1, name: 'Alice' });
+    await repo.delete({ id: id! });
+    const user = await repo.findById({ id: id! });
     expect(user).toBeNull();
   });
 });

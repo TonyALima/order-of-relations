@@ -44,8 +44,8 @@ describe('Integration: Relations CRUD', () => {
   });
 
   test('create() inserts a row that can be retrieved', async () => {
-    const profileId = await profileRepo.create({ bio: 'Hello world' });
-    const profile = await profileRepo.findById({ id: profileId });
+    const { id: profileId } = await profileRepo.create({ bio: 'Hello world' });
+    const profile = await profileRepo.findById({ id: profileId! });
     await userRepo.create({ name: 'Alice', profile: profile! });
     const rows = await userRepo.findMany();
     expect(rows.length).toBe(1);
@@ -53,9 +53,9 @@ describe('Integration: Relations CRUD', () => {
   });
 
   test('findById() returns the entity when a row exists', async () => {
-    const id = await userRepo.create({ name: 'Alice' });
-    const user = await userRepo.findById({ id });
-    expect(user).toEqual({ id, name: 'Alice' });
+    const { id } = await userRepo.create({ name: 'Alice' });
+    const user = await userRepo.findById({ id: id! });
+    expect(user).toEqual({ id: id!, name: 'Alice' });
   });
 
   test('findById() returns null when no row matches', async () => {
@@ -72,8 +72,8 @@ describe('Integration: Relations CRUD', () => {
   });
 
   test('update() changes the row identified by PK', async () => {
-    const id = await userRepo.create({ name: 'Alice' });
-    const user = await userRepo.findById({ id });
+    const { id } = await userRepo.create({ name: 'Alice' });
+    const user = await userRepo.findById({ id: id! });
     if (!user) throw new Error('User not found');
     await userRepo.update({ ...user, name: 'Bob' });
     const updated = await userRepo.findById({ id: user.id });
@@ -81,9 +81,9 @@ describe('Integration: Relations CRUD', () => {
   });
 
   test('delete() removes the row with the given id', async () => {
-    const id = await userRepo.create({ name: 'Alice' });
-    await userRepo.delete({ id });
-    const user = await userRepo.findById({ id });
+    const { id } = await userRepo.create({ name: 'Alice' });
+    await userRepo.delete({ id: id! });
+    const user = await userRepo.findById({ id: id! });
     expect(user).toBeNull();
   });
 });

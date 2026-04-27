@@ -72,11 +72,11 @@ describe('Repository', () => {
   });
 
   describe('create()', () => {
-    test('inserts a row and returns the generated primary key', async () => {
-      const newId = await repo.create({ name: 'Alice' });
-      expect(newId).toBe(1);
+    test('inserts a row and returns a key object containing the generated primary key', async () => {
+      const created = await repo.create({ name: 'Alice' });
+      expect(created).toEqual({ id: 1 });
 
-      const [row] = await sql`SELECT * FROM test_entity WHERE id = ${newId}`;
+      const [row] = await sql`SELECT * FROM test_entity WHERE id = ${created.id}`;
       expect(row).toEqual({ id: 1, name: 'Alice' });
     });
   });
@@ -165,27 +165,27 @@ describe('Repository', () => {
 
     test('writes FK column from a related object with a PK', async () => {
       await relSql`INSERT INTO profile (id) VALUES (7)`;
-      const newId = await userRepo.create({ name: 'Alice', profile: { id: 7 } });
+      const created = await userRepo.create({ name: 'Alice', profile: { id: 7 } });
 
-      const [row] = await relSql`SELECT * FROM user_with_profile WHERE id = ${newId}`;
-      expect(row).toEqual({ id: newId, name: 'Alice', profile_id: 7 });
+      const [row] = await relSql`SELECT * FROM user_with_profile WHERE id = ${created.id}`;
+      expect(row).toEqual({ id: created.id, name: 'Alice', profile_id: 7 });
     });
 
     test('writes NULL FK when relation property is omitted', async () => {
-      const newId = await userRepo.create({ name: 'Alice' } as Omit<UserWithProfile, 'id'>);
+      const created = await userRepo.create({ name: 'Alice' });
 
-      const [row] = await relSql`SELECT * FROM user_with_profile WHERE id = ${newId}`;
-      expect(row).toEqual({ id: newId, name: 'Alice', profile_id: null });
+      const [row] = await relSql`SELECT * FROM user_with_profile WHERE id = ${created.id}`;
+      expect(row).toEqual({ id: created.id, name: 'Alice', profile_id: null });
     });
 
     test('writes NULL FK when relation property is explicitly undefined', async () => {
-      const newId = await userRepo.create({
+      const created = await userRepo.create({
         name: 'Alice',
         profile: undefined,
       });
 
-      const [row] = await relSql`SELECT * FROM user_with_profile WHERE id = ${newId}`;
-      expect(row).toEqual({ id: newId, name: 'Alice', profile_id: null });
+      const [row] = await relSql`SELECT * FROM user_with_profile WHERE id = ${created.id}`;
+      expect(row).toEqual({ id: created.id, name: 'Alice', profile_id: null });
     });
   });
 
@@ -248,11 +248,11 @@ describe('Repository', () => {
 
     test('writes both FK columns from a composite-PK related object', async () => {
       await compSql`INSERT INTO order_item (orderId, productId) VALUES (1, 2)`;
-      const newId = await detailRepo.create({ orderItem: { orderId: 1, productId: 2 } });
+      const created = await detailRepo.create({ orderItem: { orderId: 1, productId: 2 } });
 
-      const [row] = await compSql`SELECT * FROM order_detail WHERE id = ${newId}`;
+      const [row] = await compSql`SELECT * FROM order_detail WHERE id = ${created.id}`;
       expect(row).toEqual({
-        id: newId,
+        id: created.id,
         orderItem_orderId: 1,
         orderItem_productId: 2,
       });
@@ -602,6 +602,67 @@ describe('Repository', () => {
         { orderId: 1, productId: 3, quantity: 999 },
         { orderId: 2, productId: 2, quantity: 30 },
       ]);
+    });
+  });
+
+  describe('create() with composite primary keys', () => {
+    class OrderItem {
+      orderId!: number;
+      productId!: number;
+      quantity!: number;
+    }
+
+    const compDb = new Database();
+    compDb.getMetadata().set(OrderItem, {
+      tableName: 'order_item',
+      columns: [
+        { propertyName: 'orderId', columnName: 'orderId', type: COLUMN_TYPE.INTEGER, primary: true, nullable: false },
+        { propertyName: 'productId', columnName: 'productId', type: COLUMN_TYPE.INTEGER, primary: true, nullable: false },
+        { propertyName: 'quantity', columnName: 'quantity', type: COLUMN_TYPE.INTEGER, nullable: false },
+      ],
+      relations: [],
+    });
+
+    let compSql: SQL;
+    let orderItemRepo: Repository<OrderItem>;
+
+    beforeEach(async () => {
+      compSql = new SQL({ url: 'sqlite://:memory:' });
+      await compSql`CREATE TABLE order_item (
+        orderId   INTEGER NOT NULL,
+        productId INTEGER NOT NULL,
+        quantity  INTEGER NOT NULL,
+        PRIMARY KEY (orderId, productId)
+      )`;
+      spyOn(compDb, 'getConnection').mockReturnValue(compSql);
+      orderItemRepo = new Repository<OrderItem>(OrderItem, compDb);
+    });
+
+    test('inserts a row using all user-provided primary key values and returns the full key object', async () => {
+      const created = await orderItemRepo.create({ orderId: 1, productId: 2, quantity: 10 });
+
+      expect(created).toEqual({ orderId: 1, productId: 2 });
+
+      const [row] = await compSql`SELECT * FROM order_item WHERE orderId = 1 AND productId = 2`;
+      expect(row).toEqual({ orderId: 1, productId: 2, quantity: 10 });
+    });
+
+    test('throws IncompletePrimaryKeyError when a user-provided primary key field is missing', async () => {
+      await expect(orderItemRepo.create({ orderId: 1, quantity: 10 })).rejects.toBeInstanceOf(
+        IncompletePrimaryKeyError,
+      );
+    });
+
+    test('IncompletePrimaryKeyError lists every missing user-provided primary key field', async () => {
+      try {
+        await orderItemRepo.create({ quantity: 10 });
+        throw new Error('expected create to throw');
+      } catch (err) {
+        expect(err).toBeInstanceOf(IncompletePrimaryKeyError);
+        const typed = err as IncompletePrimaryKeyError;
+        expect(typed.entityName).toBe('OrderItem');
+        expect(typed.missingProperties).toEqual(['orderId', 'productId']);
+      }
     });
   });
 });
