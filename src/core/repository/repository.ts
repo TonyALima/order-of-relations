@@ -85,7 +85,7 @@ export class Repository<T> {
 
     const result = await sql<Record<string, unknown>[]>`
       INSERT INTO ${tableName} ${sql(objectToInsert)}
-      RETURNING ${sqlJoin(sql, primaryColumns, (pc) => sql`${sql(pc.columnName)}`)}
+      RETURNING ${sqlJoin({ sql, items: primaryColumns, map: (pc) => sql`${sql(pc.columnName)}` })}
     `;
 
     const row = result[0]!;
@@ -109,10 +109,12 @@ export class Repository<T> {
       throw new IncompletePrimaryKeyError(this.entity.name, missing);
     }
 
-    const whereFragments = primaryColumns.map(
-      (pc) => sql`${sql(pc.columnName)} = ${key[pc.propertyName as keyof T]}`,
-    );
-    const whereClause = whereFragments.reduce((acc, frag) => sql`${acc} AND ${frag}`);
+    const whereClause = sqlJoin({
+      sql,
+      items: primaryColumns,
+      map: (pc) => sql`${sql(pc.columnName)} = ${key[pc.propertyName as keyof T]}`,
+      separator: sql` AND `,
+    });
 
     await sql`
       DELETE FROM ${tableName}
@@ -147,10 +149,12 @@ export class Repository<T> {
       });
     });
 
-    const whereFragments = primaryColumns.map(
-      (pc) => sql`${sql(pc.columnName)} = ${entity[pc.propertyName as keyof T]}`,
-    );
-    const whereClause = whereFragments.reduce((acc, frag) => sql`${acc} AND ${frag}`);
+    const whereClause = sqlJoin({
+      sql,
+      items: primaryColumns,
+      map: (pc) => sql`${sql(pc.columnName)} = ${entity[pc.propertyName as keyof T]}`,
+      separator: sql` AND `,
+    });
 
     await sql`
       UPDATE ${tableName}

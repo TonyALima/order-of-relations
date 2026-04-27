@@ -81,22 +81,25 @@ export class QueryBuilder<T> {
       'IS NOT NULL': sql`IS NOT NULL`,
     };
 
-    const fragments = this.conditions.map((c) => {
-      const col = sql(c.columnName);
-      if (c.op === 'IS NULL' || c.op === 'IS NOT NULL') {
-        return sql`${col} ${opFragments[c.op]}`;
-      }
-      if (c.op === 'IN') {
-        return sql`${col} IN ${sql(c.value)}`;
-      }
-      return sql`${col} ${opFragments[c.op]} ${c.value}`;
+    const whereClause = sqlJoin({
+      sql,
+      items: this.conditions,
+      map: (c) => {
+        const col = sql(c.columnName);
+        if (c.op === 'IS NULL' || c.op === 'IS NOT NULL') {
+          return sql`${col} ${opFragments[c.op]}`;
+        }
+        if (c.op === 'IN') {
+          return sql`${col} IN ${sql(c.value)}`;
+        }
+        return sql`${col} ${opFragments[c.op]} ${c.value}`;
+      },
+      separator: sql` AND `,
     });
-
-    const whereClause = fragments.reduce((acc, frag) => sql`${acc} AND ${frag}`);
 
     const columnNames = meta.columns.map((c) => c.columnName);
 
-    const cols = sqlJoin(sql, columnNames, (col) => sql`${sql(col)}`);
+    const cols = sqlJoin({ sql, items: columnNames, map: (col) => sql`${sql(col)}` });
 
     return sql<T[]>`SELECT ${cols} FROM ${tableName} WHERE ${whereClause}`;
   }

@@ -56,22 +56,22 @@ export class Database {
 
       const allColumnsWithSqlTypes = [...columnsWithSqlTypes, ...relationsColumnsWithSqlTypes];
 
-      const columnsDefinitionSqlFragment = sqlJoin(
+      const columnsDefinitionSqlFragment = sqlJoin({
         sql,
-        allColumnsWithSqlTypes,
-        (col) =>
+        items: allColumnsWithSqlTypes,
+        map: (col) =>
           col.notNull
             ? sql`${sql(col.columnName)} ${col.sqlType} NOT NULL`
             : sql`${sql(col.columnName)} ${col.sqlType}`,
-      );
+      });
 
       const primaryColumns = metadata.columns.filter((c) => c.primary);
 
-      const primaryColumnsSqlFragment = sqlJoin(
+      const primaryColumnsSqlFragment = sqlJoin({
         sql,
-        primaryColumns,
-        (col) => sql`${sql(col.columnName)}`,
-      );
+        items: primaryColumns,
+        map: (col) => sql`${sql(col.columnName)}`,
+      });
 
       await sql`
         CREATE TABLE ${sql(metadata.tableName)} (
@@ -107,17 +107,17 @@ export class Database {
           const targetMetadata = this.metadata.get(relation.getTarget())!;
           const targetPrimaryColumns = targetMetadata.columns.filter((c) => c.primary);
 
-          const targetPrimaryColumnNames = sqlJoin(
+          const targetPrimaryColumnNames = sqlJoin({
             sql,
-            targetPrimaryColumns,
-            (col) => sql`${sql(col.columnName)}`,
-          );
+            items: targetPrimaryColumns,
+            map: (col) => sql`${sql(col.columnName)}`,
+          });
 
-          const currentTableForeignKeyColumnsNames = sqlJoin(
+          const currentTableForeignKeyColumnsNames = sqlJoin({
             sql,
-            relation.columns,
-            (c) => sql`${sql(c.name)}`,
-          );
+            items: relation.columns,
+            map: (c) => sql`${sql(c.name)}`,
+          });
 
           await tx`
             ALTER TABLE ${sql(metadata.tableName)}
