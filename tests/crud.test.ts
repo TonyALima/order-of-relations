@@ -7,6 +7,7 @@ import {
   Repository,
   COLUMN_TYPE,
   NotNullable,
+  IncompletePrimaryKeyError,
 } from '../src';
 
 const db = new Database();
@@ -147,5 +148,20 @@ describe('Integration: Repository CRUD with composite primary key', () => {
       { orderId: 1, productId: 2, quantity: 10 },
       { orderId: 1, productId: 3, quantity: 999 },
     ]);
+  });
+
+  test('create() inserts a row with user-provided composite primary key and returns the full key', async () => {
+    const created = await orderItemRepo.create({ orderId: 1, productId: 2, quantity: 10 });
+
+    expect(created).toEqual({ orderId: 1, productId: 2 });
+
+    const found = await orderItemRepo.findById(created);
+    expect(found).toEqual({ orderId: 1, productId: 2, quantity: 10 });
+  });
+
+  test('create() throws IncompletePrimaryKeyError when a user-provided primary key field is missing', async () => {
+    await expect(
+      orderItemRepo.create({ orderId: 1, quantity: 10 } as Partial<OrderItem>),
+    ).rejects.toBeInstanceOf(IncompletePrimaryKeyError);
   });
 });
