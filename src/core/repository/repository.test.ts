@@ -79,6 +79,15 @@ describe('Repository', () => {
       const [row] = await sql`SELECT * FROM test_entity WHERE id = ${created.id}`;
       expect(row).toEqual({ id: 1, name: 'Alice' });
     });
+
+    test('forwards a user-supplied value for an auto-generated primary key', async () => {
+      const created = await repo.create({ id: 99, name: 'Alice' });
+
+      expect(created).toEqual({ id: 99 });
+
+      const [row] = await sql`SELECT * FROM test_entity WHERE id = 99`;
+      expect(row).toEqual({ id: 99, name: 'Alice' });
+    });
   });
 
   describe('update()', () => {

@@ -52,6 +52,26 @@ export class Repository<T> {
       .getOne();
   }
 
+  /**
+   * Insert a row and return a key object containing every primary-key column.
+   *
+   * Required input:
+   * - For non-auto-generated primary-key columns (any column whose `type` is
+   *   not `SERIAL` / `SMALLSERIAL` / `BIGSERIAL`), the caller MUST supply a
+   *   value in `entity`. Missing required PKs throw `IncompletePrimaryKeyError`.
+   * - For auto-generated primary-key columns, the caller MAY omit the value
+   *   (the database supplies it) or MAY supply an explicit value to override
+   *   the auto-generation — the explicit value is written to the INSERT and
+   *   echoed back in the returned key. Use overrides for data migrations,
+   *   seeded fixtures, or restoring backups with stable IDs.
+   * - Non-PK fields are not validated by this method; the database's NOT NULL
+   *   constraints catch missing required columns at insert time.
+   *
+   * @returns A `Partial<T>` containing every primary-key column populated from
+   *   the row's RETURNING result.
+   * @throws {IncompletePrimaryKeyError} when a non-auto-generated primary-key
+   *   column is missing from `entity`.
+   */
   async create(entity: Partial<T>): Promise<Partial<T>> {
     const db = this.db;
     const meta = db.getMetadata().get(this.entity)!;
