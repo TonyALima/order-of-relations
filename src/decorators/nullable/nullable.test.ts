@@ -67,3 +67,92 @@ describe('@NotNullable', () => {
     expect(nullableMap.get('email')).toBe(false);
   });
 });
+
+describe('@Nullable type-level constraints', () => {
+  test('accepts field declared with optional `?` modifier', () => {
+    class C {
+      @Nullable
+      nickname?: string;
+    }
+    void C;
+  });
+
+  test('accepts field with explicit `| undefined` union', () => {
+    class C {
+      @Nullable
+      nickname: string | undefined = undefined;
+    }
+    void C;
+  });
+
+  test('rejects non-optional field declared with definite-assignment `!`', () => {
+    class C {
+      // @ts-expect-error - @Nullable requires the field type to include `undefined`
+      @Nullable
+      nickname!: string;
+    }
+    void C;
+  });
+
+  test('rejects union field that does not include `undefined`', () => {
+    class C {
+      // @ts-expect-error - @Nullable requires the field type to include `undefined`
+      @Nullable
+      score!: string | number;
+    }
+    void C;
+  });
+
+  test('rejects nullable-via-`null`-only field (null is not undefined)', () => {
+    class C {
+      // @ts-expect-error - @Nullable requires `undefined` in the type, not `null`
+      @Nullable
+      avatar: string | null = null;
+    }
+    void C;
+  });
+});
+
+describe('@NotNullable type-level constraints', () => {
+  test('accepts non-optional field declared with definite-assignment `!`', () => {
+    class C {
+      @NotNullable
+      email!: string;
+    }
+    void C;
+  });
+
+  test('accepts union field that does not include `undefined`', () => {
+    class C {
+      @NotNullable
+      score!: string | number;
+    }
+    void C;
+  });
+
+  test('accepts `null`-only-nullable field (null is not undefined)', () => {
+    class C {
+      @NotNullable
+      avatar: string | null = null;
+    }
+    void C;
+  });
+
+  test('rejects field declared with optional `?` modifier', () => {
+    class C {
+      // @ts-expect-error - @NotNullable requires the field type to exclude `undefined`
+      @NotNullable
+      email?: string;
+    }
+    void C;
+  });
+
+  test('rejects field with explicit `| undefined` union', () => {
+    class C {
+      // @ts-expect-error - @NotNullable requires the field type to exclude `undefined`
+      @NotNullable
+      email: string | undefined = undefined;
+    }
+    void C;
+  });
+});
