@@ -96,28 +96,6 @@ describe('@ToOne decorator', () => {
     expect(relation.nullable).toBe(false);
   });
 
-  test('uses foreignKeys option as column names when provided', () => {
-    @Entity(db)
-    class Author {
-      @PrimaryColumn({ type: COLUMN_TYPE.SERIAL })
-      id!: number;
-    }
-
-    @Entity(db)
-    class Book {
-      @PrimaryColumn({ type: COLUMN_TYPE.SERIAL })
-      id!: number;
-
-      @ToOne({ target: () => Author, foreignKeys: ['author_id'] })
-      @NotNullable
-      author!: Author;
-    }
-
-    const metadata = db.getMetadata().get(Book)!;
-    const relation = metadata.relations[0]!;
-    expect(relation.columns).toEqual([{ name: 'author_id', type: COLUMN_TYPE.INTEGER, referencedProperty: 'id' }]);
-  });
-
   test('resolves columnType from target primary column', () => {
     @Entity(db)
     class Category {

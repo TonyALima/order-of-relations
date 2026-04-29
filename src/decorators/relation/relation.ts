@@ -6,7 +6,6 @@ import { MissingNullabilityDecoratorError } from '../nullable/nullable.errors';
 
 export interface OneToOneOptions<TType> {
   target: () => Constructor<TType>;
-  foreignKeys?: string[];
 }
 
 export function ToOne<TType>(options: OneToOneOptions<TType>) {
