@@ -38,15 +38,26 @@ export class Database {
 
       if (metadata.discriminator && metadata.discriminator !== metadata.tableName) continue;
 
-      const columnsWithSqlTypes = metadata.columns.map((c) => {
+      type ColumnDefinition = {
+        columnName: string;
+        sqlType: SQL.Query<unknown>;
+        notNull: boolean;
+        defaultFragment?: SQL.Query<unknown>;
+      };
+
+      const columnsWithSqlTypes: ColumnDefinition[] = metadata.columns.map((c) => {
+        const autogen = c.autogeneration;
+        const defaultFragment =
+          autogen && 'dbSide' in autogen ? autogen.dbSide(sql) : undefined;
         return {
           columnName: c.columnName,
           sqlType: getColumnTypeDefinition(sql, c.type),
           notNull: !c.nullable && !c.primary,
+          defaultFragment,
         };
       });
 
-      const relationsColumnsWithSqlTypes = metadata.relations.flatMap((r) =>
+      const relationsColumnsWithSqlTypes: ColumnDefinition[] = metadata.relations.flatMap((r) =>
         (r.columns ?? []).map((c) => ({
           columnName: c.name,
           sqlType: getColumnTypeDefinition(sql, c.type),
@@ -59,10 +70,19 @@ export class Database {
       const columnsDefinitionSqlFragment = sqlJoin({
         sql,
         items: allColumnsWithSqlTypes,
-        map: (col) =>
-          col.notNull
-            ? sql`${sql(col.columnName)} ${col.sqlType} NOT NULL`
-            : sql`${sql(col.columnName)} ${col.sqlType}`,
+        map: (col) => {
+          let definition = sql`${sql(col.columnName)} ${col.sqlType}`;
+
+          if (col.defaultFragment) {
+            definition = sql`${definition} DEFAULT ${col.defaultFragment}`;
+          }
+
+          if (col.notNull) {
+            definition = sql`${definition} NOT NULL`;
+          }
+
+          return definition;
+        },
       });
 
       const primaryColumns = metadata.columns.filter((c) => c.primary);

@@ -86,3 +86,67 @@ describe('@Column with nullability', () => {
     expect(idCol.nullable).toBe(false);
   });
 });
+
+describe('@PrimaryColumn autogeneration constraint flip', () => {
+  test('@PrimaryColumn without autogeneration requires non-optional field declaration', () => {
+    const tdb = new Database();
+
+    @Entity(tdb, 'ok_required')
+    class Ok {
+      @PrimaryColumn({ type: COLUMN_TYPE.INTEGER })
+      id!: number;
+
+      @Column({ type: COLUMN_TYPE.TEXT })
+      @NotNullable
+      name!: string;
+    }
+
+    @Entity(tdb, 'bad_required')
+    class Bad {
+      // @ts-expect-error - field must be non-optional without autogeneration
+      @PrimaryColumn({ type: COLUMN_TYPE.INTEGER })
+      id?: number;
+
+      @Column({ type: COLUMN_TYPE.TEXT })
+      @NotNullable
+      name!: string;
+    }
+
+    void Ok;
+    void Bad;
+  });
+
+  test('@PrimaryColumn with autogeneration requires optional field declaration', () => {
+    const tdb = new Database();
+
+    @Entity(tdb, 'ok_optional')
+    class Ok {
+      @PrimaryColumn({
+        type: COLUMN_TYPE.UUID,
+        autogeneration: { clientSide: () => 'uuid' },
+      })
+      id?: string;
+
+      @Column({ type: COLUMN_TYPE.TEXT })
+      @NotNullable
+      name!: string;
+    }
+
+    @Entity(tdb, 'bad_optional')
+    class Bad {
+      // @ts-expect-error - field must be optional with autogeneration
+      @PrimaryColumn({
+        type: COLUMN_TYPE.UUID,
+        autogeneration: { clientSide: () => 'uuid' },
+      })
+      id!: string;
+
+      @Column({ type: COLUMN_TYPE.TEXT })
+      @NotNullable
+      name!: string;
+    }
+
+    void Ok;
+    void Bad;
+  });
+});

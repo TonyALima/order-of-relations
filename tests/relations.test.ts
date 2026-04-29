@@ -5,8 +5,11 @@ const db = new Database();
 
 @Entity(db)
 class User {
-  @PrimaryColumn({ type: COLUMN_TYPE.SERIAL })
-  id!: number;
+  @PrimaryColumn({
+    type: COLUMN_TYPE.SERIAL,
+    autogeneration: { dbSide: () => undefined },
+  })
+  id?: number;
 
   @Column({ type: COLUMN_TYPE.TEXT })
   @NotNullable
@@ -19,8 +22,11 @@ class User {
 
 @Entity(db)
 class Profile {
-  @PrimaryColumn({ type: COLUMN_TYPE.SERIAL })
-  id!: number;
+  @PrimaryColumn({
+    type: COLUMN_TYPE.SERIAL,
+    autogeneration: { dbSide: () => undefined },
+  })
+  id?: number;
 
   @Column({ type: COLUMN_TYPE.TEXT })
   @NotNullable

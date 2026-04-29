@@ -4,8 +4,11 @@ import { db } from '../db';
 
 @Entity(db)
 export class User {
-  @PrimaryColumn({ type: COLUMN_TYPE.SERIAL })
-  id!: number;
+  @PrimaryColumn({
+    type: COLUMN_TYPE.SERIAL,
+    autogeneration: { dbSide: () => undefined },
+  })
+  id?: number;
 
   @Column({ type: COLUMN_TYPE.TEXT })
   @NotNullable

@@ -21,6 +21,7 @@ db.getMetadata().set(TestEntity, {
       type: COLUMN_TYPE.SERIAL,
       primary: true,
       nullable: false,
+      autogeneration: { dbSide: () => undefined },
     },
     { propertyName: 'name', columnName: 'name', type: COLUMN_TYPE.TEXT, nullable: false },
   ],
@@ -130,6 +131,7 @@ describe('Repository', () => {
           type: COLUMN_TYPE.SERIAL,
           primary: true,
           nullable: false,
+          autogeneration: { dbSide: () => undefined },
         },
       ],
       relations: [],
@@ -143,6 +145,7 @@ describe('Repository', () => {
           type: COLUMN_TYPE.SERIAL,
           primary: true,
           nullable: false,
+          autogeneration: { dbSide: () => undefined },
         },
         { propertyName: 'name', columnName: 'name', type: COLUMN_TYPE.TEXT, nullable: false },
       ],
@@ -220,7 +223,14 @@ describe('Repository', () => {
     compDb.getMetadata().set(OrderDetail, {
       tableName: 'order_detail',
       columns: [
-        { propertyName: 'id', columnName: 'id', type: COLUMN_TYPE.SERIAL, primary: true, nullable: false },
+        {
+          propertyName: 'id',
+          columnName: 'id',
+          type: COLUMN_TYPE.SERIAL,
+          primary: true,
+          nullable: false,
+          autogeneration: { dbSide: () => undefined },
+        },
       ],
       relations: [
         {
@@ -672,6 +682,167 @@ describe('Repository', () => {
         expect(typed.entityName).toBe('OrderItem');
         expect(typed.missingProperties).toEqual(['orderId', 'productId']);
       }
+    });
+  });
+
+  describe('create() with clientSide autogeneration', () => {
+    class UuidEntity {
+      id?: string;
+      name!: string;
+    }
+
+    let invocationCount = 0;
+    const uuidDb = new Database();
+    uuidDb.getMetadata().set(UuidEntity, {
+      tableName: 'uuid_entity',
+      columns: [
+        {
+          propertyName: 'id',
+          columnName: 'id',
+          type: COLUMN_TYPE.UUID,
+          primary: true,
+          nullable: false,
+          autogeneration: {
+            clientSide: () => {
+              invocationCount += 1;
+              return `uuid-${invocationCount}`;
+            },
+          },
+        },
+        { propertyName: 'name', columnName: 'name', type: COLUMN_TYPE.TEXT, nullable: false },
+      ],
+      relations: [],
+    });
+
+    let uuidSql: SQL;
+    let uuidRepo: Repository<UuidEntity>;
+
+    beforeEach(async () => {
+      invocationCount = 0;
+      uuidSql = new SQL({ url: 'sqlite://:memory:' });
+      await uuidSql`CREATE TABLE uuid_entity (
+        id   TEXT PRIMARY KEY,
+        name TEXT NOT NULL
+      )`;
+      spyOn(uuidDb, 'getConnection').mockReturnValue(uuidSql);
+      uuidRepo = new Repository<UuidEntity>(UuidEntity, uuidDb);
+    });
+
+    test('invokes clientSide function and writes its return into INSERT and key', async () => {
+      const key = await uuidRepo.create({ name: 'Alice' });
+
+      expect(invocationCount).toBe(1);
+      expect(key).toEqual({ id: 'uuid-1' });
+
+      const [row] = await uuidSql`SELECT * FROM uuid_entity WHERE id = ${key.id}`;
+      expect(row).toEqual({ id: 'uuid-1', name: 'Alice' });
+    });
+
+    test('explicit caller value wins over clientSide function', async () => {
+      const key = await uuidRepo.create({ id: 'caller-uuid', name: 'Alice' });
+
+      expect(invocationCount).toBe(0);
+      expect(key).toEqual({ id: 'caller-uuid' });
+
+      const [row] = await uuidSql`SELECT * FROM uuid_entity WHERE id = 'caller-uuid'`;
+      expect(row).toEqual({ id: 'caller-uuid', name: 'Alice' });
+    });
+  });
+
+  describe('create() with dbSide autogeneration', () => {
+    class SerialEntity {
+      id?: number;
+      name!: string;
+    }
+
+    const serialDb = new Database();
+    serialDb.getMetadata().set(SerialEntity, {
+      tableName: 'serial_entity',
+      columns: [
+        {
+          propertyName: 'id',
+          columnName: 'id',
+          type: COLUMN_TYPE.SERIAL,
+          primary: true,
+          nullable: false,
+          autogeneration: { dbSide: () => undefined },
+        },
+        { propertyName: 'name', columnName: 'name', type: COLUMN_TYPE.TEXT, nullable: false },
+      ],
+      relations: [],
+    });
+
+    let serialSql: SQL;
+    let serialRepo: Repository<SerialEntity>;
+
+    beforeEach(async () => {
+      serialSql = new SQL({ url: 'sqlite://:memory:' });
+      await serialSql`CREATE TABLE serial_entity (
+        id   INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL
+      )`;
+      spyOn(serialDb, 'getConnection').mockReturnValue(serialSql);
+      serialRepo = new Repository<SerialEntity>(SerialEntity, serialDb);
+    });
+
+    test('omits column from INSERT and reads back from RETURNING', async () => {
+      const key = await serialRepo.create({ name: 'Alice' });
+
+      expect(typeof key.id).toBe('number');
+      expect(key.id).toBeGreaterThan(0);
+
+      const [row] = await serialSql`SELECT * FROM serial_entity WHERE id = ${key.id}`;
+      expect(row).toEqual({ id: key.id, name: 'Alice' });
+    });
+  });
+
+  describe('create() requirePrimaryKey via autogeneration metadata', () => {
+    class StrictSerial {
+      id!: number;
+      name!: string;
+    }
+
+    const strictDb = new Database();
+    strictDb.getMetadata().set(StrictSerial, {
+      tableName: 'strict_serial',
+      columns: [
+        {
+          propertyName: 'id',
+          columnName: 'id',
+          type: COLUMN_TYPE.SERIAL,
+          primary: true,
+          nullable: false,
+        },
+        { propertyName: 'name', columnName: 'name', type: COLUMN_TYPE.TEXT, nullable: false },
+      ],
+      relations: [],
+    });
+
+    let strictSql: SQL;
+    let strictRepo: Repository<StrictSerial>;
+
+    beforeEach(async () => {
+      strictSql = new SQL({ url: 'sqlite://:memory:' });
+      await strictSql`CREATE TABLE strict_serial (
+        id   INTEGER PRIMARY KEY,
+        name TEXT NOT NULL
+      )`;
+      spyOn(strictDb, 'getConnection').mockReturnValue(strictSql);
+      strictRepo = new Repository<StrictSerial>(StrictSerial, strictDb);
+    });
+
+    test('throws IncompletePrimaryKeyError for SERIAL-typed PK without autogeneration when value omitted', async () => {
+      await expect(
+        strictRepo.create({ name: 'Alice' } as Partial<StrictSerial>),
+      ).rejects.toBeInstanceOf(IncompletePrimaryKeyError);
+    });
+
+    test('accepts the row when caller supplies an id for a non-autogenerating PK', async () => {
+      const key = await strictRepo.create({ id: 42, name: 'Alice' });
+      expect(key).toEqual({ id: 42 });
+
+      const [row] = await strictSql`SELECT * FROM strict_serial WHERE id = 42`;
+      expect(row).toEqual({ id: 42, name: 'Alice' });
     });
   });
 });

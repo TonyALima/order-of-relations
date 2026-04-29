@@ -1,3 +1,4 @@
+import type { Autogeneration } from '../../decorators/column/column';
 import { COLUMN_TYPE, toForeignKeyType } from '../sql-types/sql-types';
 import type { Constructor } from '../utils/utils';
 import { RelationTargetNotFoundError } from './metadata.errors';
@@ -8,6 +9,7 @@ export interface ColumnMetadata {
   type: COLUMN_TYPE;
   primary?: boolean;
   nullable: boolean;
+  autogeneration?: Autogeneration<unknown>;
 }
 
 export enum RelationType {

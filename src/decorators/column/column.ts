@@ -1,10 +1,25 @@
+import type { SQL } from 'bun';
+
 import type { ColumnMetadata } from '../../core/metadata/metadata';
-import { COLUMN_TYPE } from '../../core/sql-types/sql-types';
+import type { COLUMN_TYPE } from '../../core/sql-types/sql-types';
 import { COLUMNS_KEY } from '../entity/entity';
 import { MissingNullabilityDecoratorError } from '../nullable/nullable.errors';
-import { NULLABLE_KEY } from '../nullable/nullable';
+import {
+  NULLABLE_KEY,
+  type NullableField,
+  type NotNullableField,
+} from '../nullable/nullable';
 
-type ColumnOptions = { name?: string; type: COLUMN_TYPE };
+/** Strategy for producing a column's value when the caller omits it. */
+export type Autogeneration<Value> =
+  | { clientSide: () => Value }
+  | { dbSide: (sql: SQL) => SQL.Query<unknown> | undefined };
+
+export type ColumnOptions<Value = unknown> = {
+  name?: string;
+  type: COLUMN_TYPE;
+  autogeneration?: Autogeneration<Value>;
+};
 
 function registerColumn(
   options: ColumnOptions,
@@ -27,19 +42,34 @@ function registerColumn(
     type: options.type,
     primary,
     nullable: primary ? false : nullableEntry!,
+    autogeneration: options.autogeneration,
   });
 }
 
-export function Column(options: ColumnOptions) {
+export function Column(options: Omit<ColumnOptions, 'autogeneration'>) {
   return function (_value: undefined, context: ClassFieldDecoratorContext) {
     return registerColumn(options, context);
   };
 }
 
-export function PrimaryColumn(options: ColumnOptions) {
+export function PrimaryColumn<OptValue>(
+  options: ColumnOptions<OptValue> & { autogeneration: Autogeneration<OptValue> },
+): <This, Value>(
+  _value: undefined,
+  context: ClassFieldDecoratorContext<This, NullableField<Value>>,
+) => void;
+
+export function PrimaryColumn<OptValue>(
+  options: ColumnOptions<OptValue> & { autogeneration?: undefined },
+): <This, Value>(
+  _value: undefined,
+  context: ClassFieldDecoratorContext<This, NotNullableField<Value>>,
+) => void;
+
+export function PrimaryColumn<OptValue>(options: ColumnOptions<OptValue>) {
   return function <This, Value>(
     _value: undefined,
-    context: ClassFieldDecoratorContext<This, Value & (undefined extends Value ? never : Value)>,
+    context: ClassFieldDecoratorContext<This, Value>,
   ) {
     return registerColumn(options, context, true);
   };
