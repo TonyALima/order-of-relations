@@ -1,68 +1,9 @@
 # order-of-relations
 
-TypeScript ORM library for PostgreSQL. Uses ECMAScript Stage-3 decorators (no `reflect-metadata`) for entity mapping, a generic `Repository<T>` with a fluent query builder, a DI container, transaction support, and schema-based migrations.
-
+TypeScript ORM library for PostgreSQL. Uses ECMAScript Stage-3 decorators (no `reflect-metadata` dependency) for entity mapping.
 This is both a TCC (undergraduate thesis) project and a publishable npm package.
 
-## Project Structure
-
-```text
-src/                                  ← published library
-  core/
-    container/
-      container.ts                    DI singleton container
-    database/
-      database.ts                     Database connection + schema create/drop
-      database.errors.ts              Database-specific errors
-      database.test.ts
-    metadata/
-      metadata.ts                     Entity/column/relation metadata storage
-      metadata.errors.ts              Metadata-specific errors
-      metadata.test.ts
-    orm-error/
-      index.ts                        Base OrmError class
-    repository/
-      repository.ts                   Generic Repository<T>
-      repository.test.ts
-    sql-types/
-      sql-types.ts                    SQL column types + definitions
-      sql-types.errors.ts             SQL type-related errors
-      sql-types.test.ts
-    utils/
-      utils.ts
-  decorators/
-    column/
-      column.ts                       @Column, @PrimaryColumn
-    entity/
-      entity.ts                       @Entity
-      entity.errors.ts                Entity decorator errors
-      entity.test.ts
-    relation/
-      relation.ts                     @ToOne
-      relation.test.ts
-    service/
-      service.ts                      @Service, @Inject, @InjectRepository
-  query-builder/
-    query-builder.ts                  Fluent QueryBuilder<T>
-    query-builder.errors.ts           Query builder errors
-    query-builder.test.ts
-    types.ts                          Condition/FindOptions interfaces
-  errors.ts                           Public error exports
-  index.ts                            Public API barrel export
-  index.test.ts
-examples/
-  basic-crud/
-    entities/User.ts
-    services/UserService.ts
-    index.ts
-  inheritance/
-    entities/User.ts
-    entities/AdminUser.ts
-    services/UserHierarchyService.ts
-    index.ts
-  relations/
-    services/
-```
+**For project context in 30 seconds, read `docs/vault/OOR/wiki/brief.md`.** It covers architecture, hard rules, method shapes, and open questions, with wikilinks for depth.
 
 ## Bun commands usage
 
@@ -104,18 +45,20 @@ bunx eslint .
 
 **Critical rule — `sql.unsafe`**: Never use `sql.unsafe` anywhere in this repository. All SQL must go through parameterized queries to prevent SQL injection. Use the query builder or parameterized `sql` tagged template literals instead.
 
-## Key Architecture Decisions
+## Wiki Knowledge Base
 
-- **Decorator metadata**: ECMAScript Stage-3 decorators with a custom `metadataStorage` Map. No `reflect-metadata` dependency.
-- **DI container**: `Container` holds singletons. `@Service` wraps constructor to inject `@Inject` / `@InjectRepository` fields.
-- **Query builder**: `Repository.find()` returns a `QueryBuilder<T>` that accumulates clauses and executes lazily on `getMany()` / `getOne()`.
+The OOR design wiki lives at `docs/vault/OOR/wiki/` (symlink to the wiki repo).
 
-## Column Type Mapping (`@Column({ type })`)
+Read it when you need: the _why_ behind an architectural choice, cross-component
+flows, entity models, or historical decisions. Do NOT read it for syntax,
+file-finding, or general coding tasks.
 
-| TypeScript intent | `type` value                              |
-| ----------------- | ----------------------------------------- |
-| auto-increment PK | `'serial'` (default for `@PrimaryColumn`) |
-| integer           | `'integer'`                               |
-| text              | `'text'` (default for `@Column`)          |
-| boolean           | `'boolean'`                               |
-| timestamp         | `'timestamp'`                             |
+Read in this order, stopping as soon as you have enough:
+
+1. `docs/vault/OOR/wiki/brief.md` — 30-second project overview (start here on a fresh session).
+2. `docs/vault/OOR/wiki/hot.md` — what changed recently.
+3. `docs/vault/OOR/wiki/index.md` — full index.
+4. `docs/vault/OOR/wiki/<section>/index.md` where `<section>` is one of `domains`, `concepts`, `decisions`, `flows`, `entities`.
+5. The specific page from the sub-index.
+
+Do not modify wiki files unless explicitly asked.
