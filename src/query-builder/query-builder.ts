@@ -12,7 +12,7 @@ export class QueryBuilder<T> {
     private db: Database,
   ) {}
 
-  setSubClassesDiscriminator() {
+  private setSubClassesDiscriminator() {
     const meta = this.db.getMetadata().get(this.entity)!;
     const subclasses: EntityMetadata[] = [];
     for (const [t, m] of this.db.getMetadata()) {
@@ -33,7 +33,7 @@ export class QueryBuilder<T> {
     }
   }
 
-  setConcreteClassDiscriminator() {
+  private setConcreteClassDiscriminator() {
     const meta = this.db.getMetadata().get(this.entity)!;
     if (meta.discriminator) {
       this.conditions.push({
