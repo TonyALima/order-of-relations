@@ -37,5 +37,8 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 docs/plans
 docs/superpowers
 
+# Obsidian vault — lives in a sibling repo (order-of-relations-vault), symlinked here
+docs/vault/OOR
+
 #VSCode settings
 .vscode/settings.json
