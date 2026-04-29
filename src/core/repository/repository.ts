@@ -5,7 +5,7 @@ import { IncompletePrimaryKeyError } from './repository.errors';
 import { sqlJoin } from '../utils/utils';
 import type { ColumnMetadata } from '../metadata/metadata';
 
-export class Repository<T> {
+export class Repository<T extends object> {
   constructor(
     private entity: new () => T,
     private db: Database,
@@ -58,7 +58,7 @@ export class Repository<T> {
    * @returns A `Partial<T>` containing every primary-key column.
    * @throws {IncompletePrimaryKeyError} when a primary-key column without `autogeneration` is missing from `entity`.
    */
-  async create(entity: Partial<T>): Promise<Partial<T>> {
+  async create(entity: T): Promise<Partial<T>> {
     const db = this.db;
     const meta = db.getMetadata().get(this.entity)!;
     const sql = db.getConnection();

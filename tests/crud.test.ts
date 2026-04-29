@@ -161,7 +161,8 @@ describe('Integration: Repository CRUD with composite primary key', () => {
 
   test('create() throws IncompletePrimaryKeyError when a user-provided primary key field is missing', async () => {
     await expect(
-      orderItemRepo.create({ orderId: 1, quantity: 10 } as Partial<OrderItem>),
+      // @ts-expect-error productId required
+      orderItemRepo.create({ orderId: 1, quantity: 10 }),
     ).rejects.toBeInstanceOf(IncompletePrimaryKeyError);
   });
 });
