@@ -34,8 +34,6 @@ export class Database {
     const sql = this.getConnection();
 
     for (const [, metadata] of this.metadata) {
-      if (metadata.columns.length === 0) continue;
-
       if (metadata.discriminator && metadata.discriminator !== metadata.tableName) continue;
 
       type ColumnDefinition = {
