@@ -77,9 +77,10 @@ export class Repository<T extends object> {
       }
     }
 
-    const objectToInsert: Record<string, unknown> = {
-      discriminator: meta.discriminator,
-    };
+    const objectToInsert: Record<string, unknown> = {};
+    if (meta.discriminator !== undefined) {
+      objectToInsert['discriminator'] = meta.discriminator;
+    }
 
     primaryColumns.forEach((col) => {
       const propertyName = col.propertyName as keyof T;
