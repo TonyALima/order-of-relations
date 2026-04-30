@@ -150,3 +150,20 @@ describe('@PrimaryColumn autogeneration constraint flip', () => {
     void Bad;
   });
 });
+
+test('@PrimaryColumn rejects unbranded field declaration', () => {
+  const tdb = new Database();
+
+  @Entity(tdb, 'ci_unbranded_pk')
+  class Bad {
+    // @ts-expect-error - id must be PrimaryKey<number>, not plain number
+    @PrimaryColumn({ type: COLUMN_TYPE.INTEGER })
+    id!: number;
+
+    @Column({ type: COLUMN_TYPE.TEXT })
+    @NotNullable
+    name!: string;
+  }
+
+  void Bad;
+});

@@ -11,6 +11,9 @@ declare const __pkBrand: unique symbol;
 /** Marks a primary-key field. Purely a type-level brand — erased at runtime. */
 export type PrimaryKey<V> = V & { readonly [__pkBrand]: true };
 
+/** Constraint for primary-key fields whose declaration may be omitted (autogeneration). */
+type NullablePrimaryKey<V> = PrimaryKey<V> | undefined;
+
 /** Strategy for producing a column's value when the caller omits it. */
 export type Autogeneration<Value> =
   | { clientSide: () => Value }
@@ -57,14 +60,14 @@ export function PrimaryColumn<OptValue>(
   options: ColumnOptions<OptValue> & { autogeneration: Autogeneration<OptValue> },
 ): <This, Value>(
   _value: undefined,
-  context: ClassFieldDecoratorContext<This, NullableField<Value>>,
+  context: ClassFieldDecoratorContext<This, NullableField<Value> & NullablePrimaryKey<Value>>,
 ) => void;
 
 export function PrimaryColumn<OptValue>(
   options: ColumnOptions<OptValue> & { autogeneration?: undefined },
 ): <This, Value>(
   _value: undefined,
-  context: ClassFieldDecoratorContext<This, NotNullableField<Value>>,
+  context: ClassFieldDecoratorContext<This, NotNullableField<Value> & PrimaryKey<Value>>,
 ) => void;
 
 export function PrimaryColumn<OptValue>(options: ColumnOptions<OptValue>) {
