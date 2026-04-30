@@ -4,19 +4,7 @@ import type { FindOptions } from '../../query-builder/types';
 import { IncompletePrimaryKeyError } from './repository.errors';
 import { sqlJoin } from '../utils/utils';
 import type { ColumnMetadata } from '../metadata/metadata';
-import type { PrimaryKey } from '../../decorators/column/column';
-
-type Unbrand<V> = V extends PrimaryKey<infer U> ? U : V;
-
-type PKKeys<T> = {
-  [K in keyof T]-?: NonNullable<T[K]> extends PrimaryKey<unknown> ? K : never;
-}[keyof T];
-
-type UnbrandedT<T> = { [K in keyof T]: Unbrand<T[K]> };
-
-export type PKInput<T> = { [K in PKKeys<T>]-?: NonNullable<Unbrand<T[K]>> };
-
-export type PKOutput<T> = { [K in PKKeys<T>]-?: NonNullable<T[K]> };
+import type { PKInput, PKOutput, UnbrandedT } from '../../types';
 
 export class Repository<T extends object> {
   constructor(

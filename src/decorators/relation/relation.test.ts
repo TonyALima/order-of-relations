@@ -2,7 +2,8 @@ import { expect, test, describe } from 'bun:test';
 import { RelationType } from '../../core/metadata/metadata';
 import { Database } from '../../core/database/database';
 import { Entity } from '../entity/entity';
-import { PrimaryColumn, type PrimaryKey } from '../column/column';
+import { PrimaryColumn } from '../column/column';
+import type { PrimaryKey } from '../../types';
 import { Nullable, NotNullable } from '../nullable/nullable';
 import { MissingNullabilityDecoratorError } from '../nullable/nullable.errors';
 import { COLUMN_TYPE } from '../../core/sql-types/sql-types';
@@ -115,7 +116,9 @@ describe('@ToOne decorator', () => {
 
     const metadata = db.getMetadata().get(Article);
     const relation = metadata!.relations[0]!;
-    expect(relation.columns).toEqual([{ name: 'category_id', type: COLUMN_TYPE.INTEGER, referencedProperty: 'id' }]);
+    expect(relation.columns).toEqual([
+      { name: 'category_id', type: COLUMN_TYPE.INTEGER, referencedProperty: 'id' },
+    ]);
   });
 
   test('derives FK column name from target PK property name', () => {
@@ -137,7 +140,9 @@ describe('@ToOne decorator', () => {
 
     const metadata = db.getMetadata().get(Post)!;
     const relation = metadata.relations[0]!;
-    expect(relation.columns).toEqual([{ name: 'tag_tagId', type: COLUMN_TYPE.INTEGER, referencedProperty: 'tagId' }]);
+    expect(relation.columns).toEqual([
+      { name: 'tag_tagId', type: COLUMN_TYPE.INTEGER, referencedProperty: 'tagId' },
+    ]);
   });
 
   test('derives FK column names from target composite PK property names', () => {

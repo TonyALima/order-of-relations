@@ -1,4 +1,4 @@
-import type { Unbrand } from '../decorators/column/column';
+import type { Unbrand } from '../types';
 
 export interface Condition {
   columnName: string;

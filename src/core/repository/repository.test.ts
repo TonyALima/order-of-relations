@@ -6,7 +6,8 @@ import { COLUMN_TYPE } from '../sql-types/sql-types';
 import { RelationType } from '../metadata/metadata';
 import { IncompletePrimaryKeyError } from './repository.errors';
 import { Entity } from '../../decorators/entity/entity';
-import { Column, PrimaryColumn, type PrimaryKey } from '../../decorators/column/column';
+import { Column, PrimaryColumn } from '../../decorators/column/column';
+import type { PrimaryKey } from '../../types';
 import { NotNullable } from '../../decorators/nullable/nullable';
 
 class TestEntity {

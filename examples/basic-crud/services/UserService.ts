@@ -1,5 +1,5 @@
 import { Repository } from '../../../src';
-import type { PKInput } from '../../../src/core/repository/repository';
+import type { PKInput } from '../../../src/types';
 import { db } from '../db';
 import { User } from '../entities/User';
 

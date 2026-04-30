@@ -1,4 +1,4 @@
-import type { Autogeneration } from '../../decorators/column/column';
+import type { Autogeneration } from '../../types';
 import { COLUMN_TYPE, toForeignKeyType } from '../sql-types/sql-types';
 import type { Constructor } from '../utils/utils';
 import { RelationTargetNotFoundError } from './metadata.errors';

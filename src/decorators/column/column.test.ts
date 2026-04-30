@@ -1,7 +1,8 @@
 import { describe, test, expect } from 'bun:test';
 import { MissingNullabilityDecoratorError } from '../nullable/nullable.errors';
 import { Nullable, NotNullable } from '../nullable/nullable';
-import { Column, PrimaryColumn, type PrimaryKey } from './column';
+import { Column, PrimaryColumn } from './column';
+import type { PrimaryKey } from '../../types';
 import { COLUMN_TYPE } from '../../core/sql-types/sql-types';
 import { Entity } from '../entity/entity';
 import { Database } from '../../core/database/database';

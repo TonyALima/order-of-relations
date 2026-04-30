@@ -1,32 +1,8 @@
-import type { SQL } from 'bun';
-
 import type { ColumnMetadata } from '../../core/metadata/metadata';
-import type { COLUMN_TYPE } from '../../core/sql-types/sql-types';
+import type { PrimaryKey, NullablePrimaryKey, Autogeneration, ColumnOptions } from '../../types';
 import { COLUMNS_KEY } from '../entity/entity';
 import { MissingNullabilityDecoratorError } from '../nullable/nullable.errors';
 import { NULLABLE_KEY, type NullableField, type NotNullableField } from '../nullable/nullable';
-
-declare const __pkBrand: unique symbol;
-
-/** Marks a primary-key field. Purely a type-level brand — erased at runtime. */
-export type PrimaryKey<V> = V & { readonly [__pkBrand]: true };
-
-/** Strips the `PrimaryKey<>` brand from a value type; passes other types through. */
-export type Unbrand<V> = V extends PrimaryKey<infer U> ? U : V;
-
-/** Constraint for primary-key fields whose declaration may be omitted (autogeneration). */
-export type NullablePrimaryKey<V> = PrimaryKey<V> | undefined;
-
-/** Strategy for producing a column's value when the caller omits it. */
-export type Autogeneration<Value> =
-  | { clientSide: () => Value }
-  | { dbSide: (sql: SQL) => SQL.Query<unknown> | undefined };
-
-export type ColumnOptions<Value = unknown> = {
-  name?: string;
-  type: COLUMN_TYPE;
-  autogeneration?: Autogeneration<Value>;
-};
 
 function registerColumn(
   options: ColumnOptions,
