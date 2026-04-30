@@ -1,3 +1,5 @@
+import type { Unbrand } from '../decorators/column/column';
+
 export interface Condition {
   columnName: string;
   op: '=' | '!=' | '>' | '>=' | '<' | '<=' | 'IS NULL' | 'IS NOT NULL' | 'IN';
@@ -17,7 +19,7 @@ export interface FieldConditionBuilder<V> {
 }
 
 export type Conditions<T> = {
-  [K in keyof T]?: FieldConditionBuilder<T[K]>;
+  [K in keyof T]?: FieldConditionBuilder<Unbrand<T[K]>>;
 };
 
 export enum InheritanceSearchType {

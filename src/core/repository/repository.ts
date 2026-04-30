@@ -53,9 +53,8 @@ export class Repository<T extends object> {
       .applyOptions({
         where: (u) =>
           primaryColumns.map((pc) => {
-            const prop = pc.propertyName as keyof T;
-            const pkProp = pc.propertyName as keyof PKInput<T>;
-            return u[prop]?.eq(key[pkProp] as T[keyof T]);
+            const prop = pc.propertyName as keyof T & keyof PKInput<T>;
+            return u[prop]?.eq(key[prop]);
           }),
       })
       .getOne();
