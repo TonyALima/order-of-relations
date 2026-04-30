@@ -6,11 +6,11 @@ import { COLUMN_TYPE } from '../sql-types/sql-types';
 import { RelationType } from '../metadata/metadata';
 import { IncompletePrimaryKeyError } from './repository.errors';
 import { Entity } from '../../decorators/entity/entity';
-import { Column, PrimaryColumn } from '../../decorators/column/column';
+import { Column, PrimaryColumn, type PrimaryKey } from '../../decorators/column/column';
 import { NotNullable } from '../../decorators/nullable/nullable';
 
 class TestEntity {
-  id?: number;
+  id?: PrimaryKey<number>;
   name!: string;
 }
 
@@ -54,7 +54,7 @@ describe('Repository', () => {
     test('returns the entity when a matching row exists', async () => {
       await sql`INSERT INTO test_entity (name) VALUES ('Alice')`;
       const result = await repo.findById({ id: 1 });
-      expect(result).toEqual({ id: 1, name: 'Alice' });
+      expect(result).toEqual({ id: 1 as PrimaryKey<number>, name: 'Alice' });
     });
 
     test('returns null when no matching row exists', async () => {
@@ -69,8 +69,8 @@ describe('Repository', () => {
       await sql`INSERT INTO test_entity (name) VALUES ('Bob')`;
       const result = await repo.findMany();
       expect(result).toEqual([
-        { id: 1, name: 'Alice' },
-        { id: 2, name: 'Bob' },
+        { id: 1 as PrimaryKey<number>, name: 'Alice' },
+        { id: 2 as PrimaryKey<number>, name: 'Bob' },
       ]);
     });
   });
@@ -78,7 +78,7 @@ describe('Repository', () => {
   describe('create()', () => {
     test('inserts a row and returns a key object containing the generated primary key', async () => {
       const created = await repo.create({ name: 'Alice' });
-      expect(created).toEqual({ id: 1 });
+      expect(created).toEqual({ id: 1 as PrimaryKey<number> });
 
       const [row] = await sql`SELECT * FROM test_entity WHERE id = ${created.id}`;
       expect(row).toEqual({ id: 1, name: 'Alice' });
@@ -87,7 +87,7 @@ describe('Repository', () => {
     test('forwards a user-supplied value for an auto-generated primary key', async () => {
       const created = await repo.create({ id: 99, name: 'Alice' });
 
-      expect(created).toEqual({ id: 99 });
+      expect(created).toEqual({ id: 99 as PrimaryKey<number> });
 
       const [row] = await sql`SELECT * FROM test_entity WHERE id = 99`;
       expect(row).toEqual({ id: 99, name: 'Alice' });
@@ -116,10 +116,10 @@ describe('Repository', () => {
 
   describe('create() with relations', () => {
     class Profile {
-      id!: number;
+      id!: PrimaryKey<number>;
     }
     class UserWithProfile {
-      id?: number;
+      id?: PrimaryKey<number>;
       name!: string;
       profile?: Profile;
     }
@@ -180,7 +180,7 @@ describe('Repository', () => {
 
     test('writes FK column from a related object with a PK', async () => {
       await relSql`INSERT INTO profile (id) VALUES (7)`;
-      const created = await userRepo.create({ name: 'Alice', profile: { id: 7 } });
+      const created = await userRepo.create({ name: 'Alice', profile: { id: 7 as PrimaryKey<number> } });
 
       const [row] = await relSql`SELECT * FROM user_with_profile WHERE id = ${created.id}`;
       expect(row).toEqual({ id: created.id, name: 'Alice', profile_id: 7 });
@@ -206,11 +206,11 @@ describe('Repository', () => {
 
   describe('create() with composite-FK relations', () => {
     class OrderItem {
-      orderId!: number;
-      productId!: number;
+      orderId!: PrimaryKey<number>;
+      productId!: PrimaryKey<number>;
     }
     class OrderDetail {
-      id?: number;
+      id?: PrimaryKey<number>;
       orderItem?: OrderItem;
     }
 
@@ -270,7 +270,7 @@ describe('Repository', () => {
 
     test('writes both FK columns from a composite-PK related object', async () => {
       await compSql`INSERT INTO order_item (orderId, productId) VALUES (1, 2)`;
-      const created = await detailRepo.create({ orderItem: { orderId: 1, productId: 2 } });
+      const created = await detailRepo.create({ orderItem: { orderId: 1 as PrimaryKey<number>, productId: 2 as PrimaryKey<number> } });
 
       const [row] = await compSql`SELECT * FROM order_detail WHERE id = ${created.id}`;
       expect(row).toEqual({
@@ -283,10 +283,10 @@ describe('Repository', () => {
 
   describe('update() with relations', () => {
     class Profile {
-      id!: number;
+      id!: PrimaryKey<number>;
     }
     class UserWithProfile {
-      id!: number;
+      id!: PrimaryKey<number>;
       name!: string;
       profile?: Profile | null;
     }
@@ -348,7 +348,7 @@ describe('Repository', () => {
       await relSql`INSERT INTO profile (id) VALUES (9)`;
       await relSql`INSERT INTO user_with_profile (id, name, profile_id) VALUES (1, 'Alice', 7)`;
 
-      await userRepo.update({ id: 1, name: 'Alice', profile: { id: 9 } });
+      await userRepo.update({ id: 1, name: 'Alice', profile: { id: 9 as PrimaryKey<number> } });
 
       const [row] = await relSql`SELECT * FROM user_with_profile WHERE id = 1`;
       expect(row).toEqual({ id: 1, name: 'Alice', profile_id: 9 });
@@ -377,11 +377,11 @@ describe('Repository', () => {
 
   describe('update() with composite-FK relations', () => {
     class OrderItem {
-      orderId!: number;
-      productId!: number;
+      orderId!: PrimaryKey<number>;
+      productId!: PrimaryKey<number>;
     }
     class OrderDetail {
-      id!: number;
+      id!: PrimaryKey<number>;
       orderItem?: OrderItem;
     }
 
@@ -437,7 +437,7 @@ describe('Repository', () => {
       await compSql`INSERT INTO order_item (orderId, productId) VALUES (3, 4)`;
       await compSql`INSERT INTO order_detail (id, orderItem_orderId, orderItem_productId) VALUES (1, 1, 2)`;
 
-      await detailRepo.update({ id: 1, orderItem: { orderId: 3, productId: 4 } });
+      await detailRepo.update({ id: 1, orderItem: { orderId: 3 as PrimaryKey<number>, productId: 4 as PrimaryKey<number> } });
 
       const [row] = await compSql`SELECT * FROM order_detail WHERE id = 1`;
       expect(row).toEqual({
@@ -450,8 +450,8 @@ describe('Repository', () => {
 
   describe('findById() with composite primary keys', () => {
     class OrderItem {
-      orderId!: number;
-      productId!: number;
+      orderId!: PrimaryKey<number>;
+      productId!: PrimaryKey<number>;
       quantity!: number;
     }
 
@@ -486,7 +486,7 @@ describe('Repository', () => {
 
     test('returns the row matching all primary key fields', async () => {
       const result = await orderItemRepo.findById({ orderId: 1, productId: 3 });
-      expect(result).toEqual({ orderId: 1, productId: 3, quantity: 20 });
+      expect(result).toEqual({ orderId: 1 as PrimaryKey<number>, productId: 3 as PrimaryKey<number>, quantity: 20 });
     });
 
     test('returns null when no row matches all primary key fields', async () => {
@@ -495,14 +495,14 @@ describe('Repository', () => {
     });
 
     test('throws IncompletePrimaryKeyError when a primary key field is missing', async () => {
-      await expect(orderItemRepo.findById({ orderId: 1 })).rejects.toBeInstanceOf(
-        IncompletePrimaryKeyError,
-      );
+      await expect(
+        orderItemRepo.findById({ orderId: 1 } as unknown as { orderId: number; productId: number }),
+      ).rejects.toBeInstanceOf(IncompletePrimaryKeyError);
     });
 
     test('IncompletePrimaryKeyError lists every missing primary key field', async () => {
       try {
-        await orderItemRepo.findById({});
+        await orderItemRepo.findById({} as unknown as { orderId: number; productId: number });
         throw new Error('expected findById to throw');
       } catch (err) {
         expect(err).toBeInstanceOf(IncompletePrimaryKeyError);
@@ -515,8 +515,8 @@ describe('Repository', () => {
 
   describe('delete() with composite primary keys', () => {
     class OrderItem {
-      orderId!: number;
-      productId!: number;
+      orderId!: PrimaryKey<number>;
+      productId!: PrimaryKey<number>;
       quantity!: number;
     }
 
@@ -571,16 +571,16 @@ describe('Repository', () => {
     });
 
     test('throws IncompletePrimaryKeyError when a primary key field is missing', async () => {
-      await expect(orderItemRepo.delete({ orderId: 1 })).rejects.toBeInstanceOf(
-        IncompletePrimaryKeyError,
-      );
+      await expect(
+        orderItemRepo.delete({ orderId: 1 } as unknown as { orderId: number; productId: number }),
+      ).rejects.toBeInstanceOf(IncompletePrimaryKeyError);
     });
   });
 
   describe('update() with composite primary keys', () => {
     class OrderItem {
-      orderId!: number;
-      productId!: number;
+      orderId!: PrimaryKey<number>;
+      productId!: PrimaryKey<number>;
       quantity!: number;
     }
 
@@ -629,8 +629,8 @@ describe('Repository', () => {
 
   describe('create() with composite primary keys', () => {
     class OrderItem {
-      orderId!: number;
-      productId!: number;
+      orderId!: PrimaryKey<number>;
+      productId!: PrimaryKey<number>;
       quantity!: number;
     }
 
@@ -663,7 +663,7 @@ describe('Repository', () => {
     test('inserts a row using all user-provided primary key values and returns the full key object', async () => {
       const created = await orderItemRepo.create({ orderId: 1, productId: 2, quantity: 10 });
 
-      expect(created).toEqual({ orderId: 1, productId: 2 });
+      expect(created).toEqual({ orderId: 1 as PrimaryKey<number>, productId: 2 as PrimaryKey<number> });
 
       const [row] = await compSql`SELECT * FROM order_item WHERE orderId = 1 AND productId = 2`;
       expect(row).toEqual({ orderId: 1, productId: 2, quantity: 10 });
@@ -692,7 +692,7 @@ describe('Repository', () => {
 
   describe('create() with clientSide autogeneration', () => {
     class UuidEntity {
-      id?: string;
+      id?: PrimaryKey<string>;
       name!: string;
     }
 
@@ -737,7 +737,7 @@ describe('Repository', () => {
       const key = await uuidRepo.create({ name: 'Alice' });
 
       expect(invocationCount).toBe(1);
-      expect(key).toEqual({ id: 'uuid-1' });
+      expect(key).toEqual({ id: 'uuid-1' as PrimaryKey<string> });
 
       const [row] = await uuidSql`SELECT * FROM uuid_entity WHERE id = ${key.id}`;
       expect(row).toEqual({ id: 'uuid-1', name: 'Alice' });
@@ -747,7 +747,7 @@ describe('Repository', () => {
       const key = await uuidRepo.create({ id: 'caller-uuid', name: 'Alice' });
 
       expect(invocationCount).toBe(0);
-      expect(key).toEqual({ id: 'caller-uuid' });
+      expect(key).toEqual({ id: 'caller-uuid' as PrimaryKey<string> });
 
       const [row] = await uuidSql`SELECT * FROM uuid_entity WHERE id = 'caller-uuid'`;
       expect(row).toEqual({ id: 'caller-uuid', name: 'Alice' });
@@ -756,7 +756,7 @@ describe('Repository', () => {
 
   describe('create() with dbSide autogeneration', () => {
     class SerialEntity {
-      id?: number;
+      id?: PrimaryKey<number>;
       name!: string;
     }
 
@@ -803,7 +803,7 @@ describe('Repository', () => {
 
   describe('create() requirePrimaryKey via autogeneration metadata', () => {
     class StrictSerial {
-      id!: number;
+      id!: PrimaryKey<number>;
       name!: string;
     }
 
@@ -845,7 +845,7 @@ describe('Repository', () => {
 
     test('accepts the row when caller supplies an id for a non-autogenerating PK', async () => {
       const key = await strictRepo.create({ id: 42, name: 'Alice' });
-      expect(key).toEqual({ id: 42 });
+      expect(key).toEqual({ id: 42 as PrimaryKey<number> });
 
       const [row] = await strictSql`SELECT * FROM strict_serial WHERE id = 42`;
       expect(row).toEqual({ id: 42, name: 'Alice' });
@@ -859,7 +859,7 @@ describe('Repository', () => {
       @Entity(tdb)
       class CompileUser {
         @PrimaryColumn({ type: COLUMN_TYPE.INTEGER })
-        id!: number;
+        id!: PrimaryKey<number>;
 
         @Column({ type: COLUMN_TYPE.TEXT })
         @NotNullable
@@ -882,10 +882,10 @@ describe('Repository', () => {
       @Entity(tdb, 'ci_compile_oi')
       class CompileOrderItem {
         @PrimaryColumn({ type: COLUMN_TYPE.INTEGER })
-        orderId!: number;
+        orderId!: PrimaryKey<number>;
 
         @PrimaryColumn({ type: COLUMN_TYPE.INTEGER })
-        productId!: number;
+        productId!: PrimaryKey<number>;
 
         @Column({ type: COLUMN_TYPE.INTEGER })
         @NotNullable
@@ -907,7 +907,7 @@ describe('Repository', () => {
           type: COLUMN_TYPE.UUID,
           autogeneration: { clientSide: () => 'uuid' },
         })
-        id?: string;
+        id?: PrimaryKey<string>;
 
         @Column({ type: COLUMN_TYPE.TEXT })
         @NotNullable
@@ -919,6 +919,167 @@ describe('Repository', () => {
       void (() => repo.create({ name: 'Alice' }));
 
       void (() => repo.create({ id: 'explicit', name: 'Alice' }));
+    });
+  });
+
+  describe('findById/delete/update compile-time PK enforcement', () => {
+    const tdb = new Database();
+
+    @Entity(tdb, 'pk_user')
+    class PkUser {
+      @PrimaryColumn({ type: COLUMN_TYPE.INTEGER })
+      id!: PrimaryKey<number>;
+
+      @Column({ type: COLUMN_TYPE.TEXT })
+      @NotNullable
+      name!: string;
+    }
+
+    @Entity(tdb, 'pk_order_item')
+    class PkOrderItem {
+      @PrimaryColumn({ type: COLUMN_TYPE.INTEGER })
+      orderId!: PrimaryKey<number>;
+
+      @PrimaryColumn({ type: COLUMN_TYPE.INTEGER })
+      productId!: PrimaryKey<number>;
+
+      @Column({ type: COLUMN_TYPE.INTEGER })
+      @NotNullable
+      quantity!: number;
+    }
+
+    @Entity(tdb, 'pk_autogen')
+    class PkAutogen {
+      @PrimaryColumn({
+        type: COLUMN_TYPE.UUID,
+        autogeneration: { clientSide: () => 'uuid' },
+      })
+      id?: PrimaryKey<string>;
+
+      @Column({ type: COLUMN_TYPE.TEXT })
+      @NotNullable
+      name!: string;
+    }
+
+    test('findById rejects empty / missing-PK / wrong-field keys', () => {
+      const repo = new Repository(PkUser, tdb);
+      // @ts-expect-error empty key missing id
+      void (() => repo.findById({}));
+      // @ts-expect-error missing id
+      void (() => repo.findById({ name: 'x' }));
+      void (() => repo.findById({ id: 1 }));
+    });
+
+    test('delete rejects empty / missing-PK', () => {
+      const repo = new Repository(PkUser, tdb);
+      // @ts-expect-error empty key missing id
+      void (() => repo.delete({}));
+      // @ts-expect-error missing id
+      void (() => repo.delete({ name: 'x' }));
+      void (() => repo.delete({ id: 1 }));
+    });
+
+    test('findById rejects missing composite-PK field', () => {
+      const repo = new Repository(PkOrderItem, tdb);
+      // @ts-expect-error missing productId
+      void (() => repo.findById({ orderId: 1 }));
+      void (() => repo.findById({ orderId: 1, productId: 2 }));
+    });
+
+    test('update rejects missing PK on autogen entity', () => {
+      const repo = new Repository(PkAutogen, tdb);
+      // @ts-expect-error missing id
+      void (() => repo.update({ name: 'x' }));
+      void (() => repo.update({ id: 'abc', name: 'x' }));
+    });
+
+    test('update accepts entity returned from findById (round-trip)', async () => {
+      const roundTripDb = new Database();
+
+      class RoundTripUser {
+        id!: PrimaryKey<number>;
+        name!: string;
+      }
+
+      roundTripDb.getMetadata().set(RoundTripUser, {
+        tableName: 'round_trip_user',
+        columns: [
+          {
+            propertyName: 'id',
+            columnName: 'id',
+            type: COLUMN_TYPE.INTEGER,
+            primary: true,
+            nullable: false,
+          },
+          {
+            propertyName: 'name',
+            columnName: 'name',
+            type: COLUMN_TYPE.TEXT,
+            nullable: false,
+          },
+        ],
+        relations: [],
+      });
+
+      const roundTripSql = new SQL({ url: 'sqlite://:memory:' });
+      await roundTripSql`CREATE TABLE round_trip_user (
+        id   INTEGER PRIMARY KEY,
+        name TEXT NOT NULL
+      )`;
+      spyOn(roundTripDb, 'getConnection').mockReturnValue(roundTripSql);
+
+      const roundTripRepo = new Repository(RoundTripUser, roundTripDb);
+      await roundTripRepo.create({ id: 1, name: 'Alice' });
+
+      const fetched = await roundTripRepo.findById({ id: 1 });
+      expect(fetched).toEqual({ id: 1 as PrimaryKey<number>, name: 'Alice' });
+
+      await roundTripRepo.update({ ...fetched!, name: 'Bob' });
+
+      const updated = await roundTripRepo.findById({ id: 1 });
+      expect(updated).toEqual({ id: 1 as PrimaryKey<number>, name: 'Bob' });
+    });
+
+    test('update runtime defense: cast-bypassed missing PK throws IncompletePrimaryKeyError', async () => {
+      const defenseDb = new Database();
+
+      class DefenseEntity {
+        id!: PrimaryKey<number>;
+        name!: string;
+      }
+
+      defenseDb.getMetadata().set(DefenseEntity, {
+        tableName: 'defense_entity',
+        columns: [
+          {
+            propertyName: 'id',
+            columnName: 'id',
+            type: COLUMN_TYPE.INTEGER,
+            primary: true,
+            nullable: false,
+          },
+          {
+            propertyName: 'name',
+            columnName: 'name',
+            type: COLUMN_TYPE.TEXT,
+            nullable: false,
+          },
+        ],
+        relations: [],
+      });
+
+      const defenseSql = new SQL({ url: 'sqlite://:memory:' });
+      await defenseSql`CREATE TABLE defense_entity (
+        id   INTEGER PRIMARY KEY,
+        name TEXT NOT NULL
+      )`;
+      spyOn(defenseDb, 'getConnection').mockReturnValue(defenseSql);
+
+      const defenseRepo = new Repository(DefenseEntity, defenseDb);
+
+      await expect(
+        defenseRepo.update({ name: 'no-pk' } as unknown as DefenseEntity),
+      ).rejects.toBeInstanceOf(IncompletePrimaryKeyError);
     });
   });
 });

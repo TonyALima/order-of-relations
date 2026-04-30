@@ -4,7 +4,7 @@ export * from './errors';
 // Decorators
 export { Entity } from './decorators/entity/entity';
 export { Column, PrimaryColumn } from './decorators/column/column';
-export type { Autogeneration, ColumnOptions } from './decorators/column/column';
+export type { Autogeneration, ColumnOptions, PrimaryKey } from './decorators/column/column';
 export { Nullable, NotNullable, NULLABLE_KEY } from './decorators/nullable/nullable';
 export { ToOne } from './decorators/relation/relation';
 

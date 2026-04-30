@@ -14,18 +14,12 @@ export class UserHierarchyService {
     this.adminRepository = new Repository(AdminUser, db);
   }
 
-  async createRegularUser(name: string, email: string): Promise<User['id']> {
-    const created = await this.userRepository.create({ name, email });
-    return created.id!;
+  async createRegularUser(name: string, email: string) {
+    return await this.userRepository.create({ name, email });
   }
 
-  async createAdmin(
-    name: string,
-    email: string,
-    permissionLevel: string,
-  ): Promise<AdminUser['id']> {
-    const created = await this.adminRepository.create({ name, email, permissionLevel });
-    return created.id!;
+  async createAdmin(name: string, email: string, permissionLevel: string) {
+    return await this.adminRepository.create({ name, email, permissionLevel });
   }
 
   async listUsers() {

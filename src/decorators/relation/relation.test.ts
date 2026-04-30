@@ -2,7 +2,7 @@ import { expect, test, describe } from 'bun:test';
 import { RelationType } from '../../core/metadata/metadata';
 import { Database } from '../../core/database/database';
 import { Entity } from '../entity/entity';
-import { PrimaryColumn } from '../column/column';
+import { PrimaryColumn, type PrimaryKey } from '../column/column';
 import { Nullable, NotNullable } from '../nullable/nullable';
 import { MissingNullabilityDecoratorError } from '../nullable/nullable.errors';
 import { COLUMN_TYPE } from '../../core/sql-types/sql-types';
@@ -15,7 +15,7 @@ describe('@ToOne decorator', () => {
     @Entity(db)
     class User {
       @PrimaryColumn({ type: COLUMN_TYPE.SERIAL })
-      id!: number;
+      id!: PrimaryKey<number>;
 
       @ToOne({ target: () => Profile })
       @Nullable
@@ -25,7 +25,7 @@ describe('@ToOne decorator', () => {
     @Entity(db)
     class Profile {
       @PrimaryColumn({ type: COLUMN_TYPE.SERIAL })
-      id!: number;
+      id!: PrimaryKey<number>;
 
       @ToOne({ target: () => User })
       @NotNullable
@@ -58,13 +58,13 @@ describe('@ToOne decorator', () => {
     @Entity(db)
     class Owner {
       @PrimaryColumn({ type: COLUMN_TYPE.SERIAL })
-      id!: number;
+      id!: PrimaryKey<number>;
     }
 
     @Entity(db)
     class Pet {
       @PrimaryColumn({ type: COLUMN_TYPE.SERIAL })
-      id!: number;
+      id!: PrimaryKey<number>;
 
       @ToOne({ target: () => Owner })
       @Nullable
@@ -79,13 +79,13 @@ describe('@ToOne decorator', () => {
     @Entity(db)
     class Country {
       @PrimaryColumn({ type: COLUMN_TYPE.SERIAL })
-      id!: number;
+      id!: PrimaryKey<number>;
     }
 
     @Entity(db)
     class City {
       @PrimaryColumn({ type: COLUMN_TYPE.SERIAL })
-      id!: number;
+      id!: PrimaryKey<number>;
 
       @ToOne({ target: () => Country })
       @NotNullable
@@ -100,13 +100,13 @@ describe('@ToOne decorator', () => {
     @Entity(db)
     class Category {
       @PrimaryColumn({ type: COLUMN_TYPE.SERIAL })
-      id!: number;
+      id!: PrimaryKey<number>;
     }
 
     @Entity(db)
     class Article {
       @PrimaryColumn({ type: COLUMN_TYPE.SERIAL })
-      id!: number;
+      id!: PrimaryKey<number>;
 
       @ToOne({ target: () => Category })
       @NotNullable
@@ -122,13 +122,13 @@ describe('@ToOne decorator', () => {
     @Entity(db)
     class Tag {
       @PrimaryColumn({ type: COLUMN_TYPE.SERIAL })
-      tagId!: number;
+      tagId!: PrimaryKey<number>;
     }
 
     @Entity(db)
     class Post {
       @PrimaryColumn({ type: COLUMN_TYPE.SERIAL })
-      id!: number;
+      id!: PrimaryKey<number>;
 
       @ToOne({ target: () => Tag })
       @NotNullable
@@ -144,16 +144,16 @@ describe('@ToOne decorator', () => {
     @Entity(db)
     class OrderItem {
       @PrimaryColumn({ type: COLUMN_TYPE.INTEGER })
-      orderId!: number;
+      orderId!: PrimaryKey<number>;
 
       @PrimaryColumn({ type: COLUMN_TYPE.INTEGER })
-      productId!: number;
+      productId!: PrimaryKey<number>;
     }
 
     @Entity(db)
     class OrderDetail {
       @PrimaryColumn({ type: COLUMN_TYPE.SERIAL })
-      id!: number;
+      id!: PrimaryKey<number>;
 
       @ToOne({ target: () => OrderItem })
       @NotNullable
@@ -176,7 +176,7 @@ describe('@ToOne with nullability guard', () => {
     @Entity(guardDb)
     class Target {
       @PrimaryColumn({ type: COLUMN_TYPE.SERIAL })
-      id!: number;
+      id!: PrimaryKey<number>;
     }
 
     let caught: unknown;
@@ -184,7 +184,7 @@ describe('@ToOne with nullability guard', () => {
       @Entity(guardDb)
       class Owner {
         @PrimaryColumn({ type: COLUMN_TYPE.SERIAL })
-        id!: number;
+        id!: PrimaryKey<number>;
 
         @ToOne({ target: () => Target })
         target!: Target;
@@ -205,14 +205,14 @@ describe('@ToOne with nullability guard', () => {
     @Entity(guardDb)
     class Target {
       @PrimaryColumn({ type: COLUMN_TYPE.SERIAL })
-      id!: number;
+      id!: PrimaryKey<number>;
     }
 
     expect(() => {
       @Entity(guardDb)
       class Owner {
         @PrimaryColumn({ type: COLUMN_TYPE.SERIAL })
-        id!: number;
+        id!: PrimaryKey<number>;
 
         @ToOne({ target: () => Target })
         @Nullable
@@ -228,14 +228,14 @@ describe('@ToOne with nullability guard', () => {
     @Entity(guardDb)
     class Target {
       @PrimaryColumn({ type: COLUMN_TYPE.SERIAL })
-      id!: number;
+      id!: PrimaryKey<number>;
     }
 
     expect(() => {
       @Entity(guardDb)
       class Owner {
         @PrimaryColumn({ type: COLUMN_TYPE.SERIAL })
-        id!: number;
+        id!: PrimaryKey<number>;
 
         @ToOne({ target: () => Target })
         @NotNullable

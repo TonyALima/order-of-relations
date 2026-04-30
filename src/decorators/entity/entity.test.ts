@@ -3,7 +3,7 @@ import { Database } from '../../core/database/database';
 import { MetadataError } from '../../core/metadata/metadata.errors';
 import { OrmError } from '../../core/orm-error';
 import { COLUMN_TYPE } from '../../core/sql-types/sql-types';
-import { Column, PrimaryColumn } from '../column/column';
+import { Column, PrimaryColumn, type PrimaryKey } from '../column/column';
 import { NotNullable } from '../nullable/nullable';
 import { Entity } from './entity';
 import { MissingPrimaryColumnError } from './entity.errors';
@@ -37,7 +37,7 @@ describe('@Entity / @Column decorators', () => {
     @Entity(db, 'user')
     class User {
       @PrimaryColumn({ type: COLUMN_TYPE.SERIAL })
-      id!: number;
+      id!: PrimaryKey<number>;
 
       @Column({ type: COLUMN_TYPE.TEXT })
       @NotNullable

@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryColumn, NotNullable } from '../../../src';
+import { Entity, Column, PrimaryColumn, NotNullable, type PrimaryKey } from '../../../src';
 import { COLUMN_TYPE } from '../../../src/core/sql-types/sql-types';
 import { db } from '../db';
 
@@ -8,7 +8,7 @@ export class User {
     type: COLUMN_TYPE.SERIAL,
     autogeneration: { dbSide: () => undefined },
   })
-  id?: number;
+  id?: PrimaryKey<number>;
 
   @Column({ type: COLUMN_TYPE.TEXT })
   @NotNullable

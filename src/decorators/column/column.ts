@@ -4,11 +4,12 @@ import type { ColumnMetadata } from '../../core/metadata/metadata';
 import type { COLUMN_TYPE } from '../../core/sql-types/sql-types';
 import { COLUMNS_KEY } from '../entity/entity';
 import { MissingNullabilityDecoratorError } from '../nullable/nullable.errors';
-import {
-  NULLABLE_KEY,
-  type NullableField,
-  type NotNullableField,
-} from '../nullable/nullable';
+import { NULLABLE_KEY, type NullableField, type NotNullableField } from '../nullable/nullable';
+
+declare const __pkBrand: unique symbol;
+
+/** Marks a primary-key field. Purely a type-level brand — erased at runtime. */
+export type PrimaryKey<V> = V & { readonly [__pkBrand]: true };
 
 /** Strategy for producing a column's value when the caller omits it. */
 export type Autogeneration<Value> =

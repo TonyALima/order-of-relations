@@ -8,6 +8,7 @@ import {
   Repository,
   COLUMN_TYPE,
   NotNullable,
+  type PrimaryKey,
 } from '../src';
 
 describe('Integration: @PrimaryColumn autogeneration', () => {
@@ -19,7 +20,7 @@ describe('Integration: @PrimaryColumn autogeneration', () => {
       type: COLUMN_TYPE.UUID,
       autogeneration: { dbSide: (sql) => sql`gen_random_uuid()` },
     })
-    id?: string;
+    id?: PrimaryKey<string>;
 
     @Column({ type: COLUMN_TYPE.TEXT })
     @NotNullable
@@ -32,7 +33,7 @@ describe('Integration: @PrimaryColumn autogeneration', () => {
       type: COLUMN_TYPE.SERIAL,
       autogeneration: { dbSide: () => undefined },
     })
-    id?: number;
+    id?: PrimaryKey<number>;
 
     @Column({ type: COLUMN_TYPE.TEXT })
     @NotNullable
@@ -45,7 +46,7 @@ describe('Integration: @PrimaryColumn autogeneration', () => {
       type: COLUMN_TYPE.UUID,
       autogeneration: { clientSide: () => randomUUID() },
     })
-    id?: string;
+    id?: PrimaryKey<string>;
 
     @Column({ type: COLUMN_TYPE.TEXT })
     @NotNullable
@@ -94,10 +95,10 @@ describe('Integration: @PrimaryColumn autogeneration', () => {
 
     const sql = db.getConnection();
     const rows = await sql<{ id: string; name: string }[]>`
-      SELECT id, name FROM client_uuid WHERE id = ${key.id!}
+      SELECT id, name FROM client_uuid WHERE id = ${key.id}
     `;
     expect(rows).toHaveLength(1);
-    expect(rows[0]!.id).toBe(key.id!);
+    expect(rows[0]!.id).toBe(key.id);
     expect(rows[0]!.name).toBe('Alice');
   });
 });

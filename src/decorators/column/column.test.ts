@@ -1,7 +1,7 @@
 import { describe, test, expect } from 'bun:test';
 import { MissingNullabilityDecoratorError } from '../nullable/nullable.errors';
 import { Nullable, NotNullable } from '../nullable/nullable';
-import { Column, PrimaryColumn } from './column';
+import { Column, PrimaryColumn, type PrimaryKey } from './column';
 import { COLUMN_TYPE } from '../../core/sql-types/sql-types';
 import { Entity } from '../entity/entity';
 import { Database } from '../../core/database/database';
@@ -15,7 +15,7 @@ describe('@Column with nullability', () => {
       @Entity(db, 'missing_null')
       class MissingNull {
         @PrimaryColumn({ type: COLUMN_TYPE.SERIAL })
-        id!: number;
+        id!: PrimaryKey<number>;
 
         @Column({ type: COLUMN_TYPE.TEXT })
         name!: string;
@@ -36,7 +36,7 @@ describe('@Column with nullability', () => {
       @Entity(db, 'pk_only')
       class PkOnly {
         @PrimaryColumn({ type: COLUMN_TYPE.SERIAL })
-        id!: number;
+        id!: PrimaryKey<number>;
       }
       void PkOnly;
     }).not.toThrow();
@@ -46,7 +46,7 @@ describe('@Column with nullability', () => {
     @Entity(db, 'not_null_col')
     class NotNullCol {
       @PrimaryColumn({ type: COLUMN_TYPE.SERIAL })
-      id!: number;
+      id!: PrimaryKey<number>;
 
       @Column({ type: COLUMN_TYPE.TEXT })
       @NotNullable
@@ -62,7 +62,7 @@ describe('@Column with nullability', () => {
     @Entity(db, 'null_col')
     class NullCol {
       @PrimaryColumn({ type: COLUMN_TYPE.SERIAL })
-      id!: number;
+      id!: PrimaryKey<number>;
 
       @Column({ type: COLUMN_TYPE.TEXT })
       @Nullable
@@ -78,7 +78,7 @@ describe('@Column with nullability', () => {
     @Entity(db, 'pk_nullable')
     class PkNullable {
       @PrimaryColumn({ type: COLUMN_TYPE.SERIAL })
-      id!: number;
+      id!: PrimaryKey<number>;
     }
 
     const metadata = db.getMetadata().get(PkNullable)!;
@@ -94,7 +94,7 @@ describe('@PrimaryColumn autogeneration constraint flip', () => {
     @Entity(tdb, 'ok_required')
     class Ok {
       @PrimaryColumn({ type: COLUMN_TYPE.INTEGER })
-      id!: number;
+      id!: PrimaryKey<number>;
 
       @Column({ type: COLUMN_TYPE.TEXT })
       @NotNullable
@@ -105,7 +105,7 @@ describe('@PrimaryColumn autogeneration constraint flip', () => {
     class Bad {
       // @ts-expect-error - field must be non-optional without autogeneration
       @PrimaryColumn({ type: COLUMN_TYPE.INTEGER })
-      id?: number;
+      id?: PrimaryKey<number>;
 
       @Column({ type: COLUMN_TYPE.TEXT })
       @NotNullable
@@ -125,7 +125,7 @@ describe('@PrimaryColumn autogeneration constraint flip', () => {
         type: COLUMN_TYPE.UUID,
         autogeneration: { clientSide: () => 'uuid' },
       })
-      id?: string;
+      id?: PrimaryKey<string>;
 
       @Column({ type: COLUMN_TYPE.TEXT })
       @NotNullable
@@ -139,7 +139,7 @@ describe('@PrimaryColumn autogeneration constraint flip', () => {
         type: COLUMN_TYPE.UUID,
         autogeneration: { clientSide: () => 'uuid' },
       })
-      id!: string;
+      id!: PrimaryKey<string>;
 
       @Column({ type: COLUMN_TYPE.TEXT })
       @NotNullable

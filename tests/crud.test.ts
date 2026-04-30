@@ -8,6 +8,7 @@ import {
   COLUMN_TYPE,
   NotNullable,
   IncompletePrimaryKeyError,
+  type PrimaryKey,
 } from '../src';
 
 const db = new Database();
@@ -15,7 +16,7 @@ const db = new Database();
 @Entity(db)
 class User {
   @PrimaryColumn({ type: COLUMN_TYPE.INTEGER })
-  id!: number;
+  id!: PrimaryKey<number>;
 
   @Column({ type: COLUMN_TYPE.TEXT })
   @NotNullable
@@ -44,8 +45,8 @@ describe('Integration: Repository CRUD', () => {
 
   test('findById() returns the entity when a row exists', async () => {
     const { id } = await repo.create({ id: 1, name: 'Alice' });
-    const user = await repo.findById({ id: id! });
-    expect(user).toEqual({ id: id!, name: 'Alice' });
+    const user = await repo.findById({ id });
+    expect(user).toEqual({ id: id as PrimaryKey<number>, name: 'Alice' });
   });
 
   test('findById() returns null when no row matches', async () => {
@@ -63,7 +64,7 @@ describe('Integration: Repository CRUD', () => {
 
   test('update() changes the row identified by PK', async () => {
     const { id } = await repo.create({ id: 1, name: 'Alice' });
-    const user = await repo.findById({ id: id! });
+    const user = await repo.findById({ id });
     if (!user) throw new Error('User not found');
     await repo.update({ ...user, name: 'Bob' });
     const updated = await repo.findById({ id: user.id });
@@ -72,8 +73,8 @@ describe('Integration: Repository CRUD', () => {
 
   test('delete() removes the row with the given id', async () => {
     const { id } = await repo.create({ id: 1, name: 'Alice' });
-    await repo.delete({ id: id! });
-    const user = await repo.findById({ id: id! });
+    await repo.delete({ id });
+    const user = await repo.findById({ id });
     expect(user).toBeNull();
   });
 });
@@ -81,10 +82,10 @@ describe('Integration: Repository CRUD', () => {
 @Entity(db, 'order_item')
 class OrderItem {
   @PrimaryColumn({ type: COLUMN_TYPE.INTEGER })
-  orderId!: number;
+  orderId!: PrimaryKey<number>;
 
   @PrimaryColumn({ type: COLUMN_TYPE.INTEGER })
-  productId!: number;
+  productId!: PrimaryKey<number>;
 
   @Column({ type: COLUMN_TYPE.INTEGER })
   @NotNullable
@@ -110,7 +111,7 @@ describe('Integration: Repository CRUD with composite primary key', () => {
     await sql`INSERT INTO order_item (orderId, productId, quantity) VALUES (1, 3, 20)`;
 
     const result = await orderItemRepo.findById({ orderId: 1, productId: 3 });
-    expect(result).toEqual({ orderId: 1, productId: 3, quantity: 20 });
+    expect(result).toEqual({ orderId: 1 as PrimaryKey<number>, productId: 3 as PrimaryKey<number>, quantity: 20 });
   });
 
   test('findById() returns null when no row matches every primary key field', async () => {
@@ -153,10 +154,10 @@ describe('Integration: Repository CRUD with composite primary key', () => {
   test('create() inserts a row with user-provided composite primary key and returns the full key', async () => {
     const created = await orderItemRepo.create({ orderId: 1, productId: 2, quantity: 10 });
 
-    expect(created).toEqual({ orderId: 1, productId: 2 });
+    expect(created).toEqual({ orderId: 1 as PrimaryKey<number>, productId: 2 as PrimaryKey<number> });
 
     const found = await orderItemRepo.findById(created);
-    expect(found).toEqual({ orderId: 1, productId: 2, quantity: 10 });
+    expect(found).toEqual({ orderId: 1 as PrimaryKey<number>, productId: 2 as PrimaryKey<number>, quantity: 10 });
   });
 
   test('create() throws IncompletePrimaryKeyError when a user-provided primary key field is missing', async () => {
