@@ -66,12 +66,17 @@ export class QueryBuilder<T> {
     const sql = this.db.getConnection();
     const tableName = sql(meta.tableName);
 
-    if (this.conditions.length === 0) {
-      return addLimit
-        ? sql<T[]>`SELECT * FROM ${tableName} LIMIT 1`
-        : sql<T[]>`SELECT * FROM ${tableName}`;
-    }
+    const columnNames = meta.columns.map((c) => c.columnName);
+    const cols = sqlJoin({ sql, items: columnNames, map: (col) => sql`${sql(col)}` });
 
+    const whereClause = this.conditions.length === 0 ? sql`` : sql`WHERE ${this.buildWhere()}`;
+    const limitClause = addLimit ? sql`LIMIT 1` : sql``;
+
+    return sql<T[]>`SELECT ${cols} FROM ${tableName} ${whereClause} ${limitClause}`;
+  }
+
+  private buildWhere() {
+    const sql = this.db.getConnection();
     const opFragments = {
       '=': sql`=`,
       '!=': sql`!=`,
@@ -83,7 +88,7 @@ export class QueryBuilder<T> {
       'IS NOT NULL': sql`IS NOT NULL`,
     };
 
-    const whereClause = sqlJoin({
+    return sqlJoin({
       sql,
       items: this.conditions,
       map: (c) => {
@@ -98,13 +103,6 @@ export class QueryBuilder<T> {
       },
       separator: sql` AND `,
     });
-
-    const columnNames = meta.columns.map((c) => c.columnName);
-    const cols = sqlJoin({ sql, items: columnNames, map: (col) => sql`${sql(col)}` });
-
-    return addLimit
-      ? sql<T[]>`SELECT ${cols} FROM ${tableName} WHERE ${whereClause} LIMIT 1`
-      : sql<T[]>`SELECT ${cols} FROM ${tableName} WHERE ${whereClause}`;
   }
 
   async getMany(): Promise<T[]> {
