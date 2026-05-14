@@ -61,13 +61,15 @@ export class QueryBuilder<T> {
     return this;
   }
 
-  async getMany(): Promise<T[]> {
+  private async executeSelect(addLimit: boolean = false): Promise<T[]> {
     const meta = this.db.getMetadata().get(this.entity)!;
     const sql = this.db.getConnection();
     const tableName = sql(meta.tableName);
 
     if (this.conditions.length === 0) {
-      return sql<T[]>`SELECT * FROM ${tableName}`;
+      return addLimit
+        ? sql<T[]>`SELECT * FROM ${tableName} LIMIT 1`
+        : sql<T[]>`SELECT * FROM ${tableName}`;
     }
 
     const opFragments = {
@@ -98,14 +100,19 @@ export class QueryBuilder<T> {
     });
 
     const columnNames = meta.columns.map((c) => c.columnName);
-
     const cols = sqlJoin({ sql, items: columnNames, map: (col) => sql`${sql(col)}` });
 
-    return sql<T[]>`SELECT ${cols} FROM ${tableName} WHERE ${whereClause}`;
+    return addLimit
+      ? sql<T[]>`SELECT ${cols} FROM ${tableName} WHERE ${whereClause} LIMIT 1`
+      : sql<T[]>`SELECT ${cols} FROM ${tableName} WHERE ${whereClause}`;
+  }
+
+  async getMany(): Promise<T[]> {
+    return this.executeSelect();
   }
 
   async getOne(): Promise<T | null> {
-    const rows = await this.getMany();
+    const rows = await this.executeSelect(true);
     return rows[0] ?? null;
   }
 

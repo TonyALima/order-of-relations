@@ -225,6 +225,17 @@ describe('Repository - findMany', () => {
   });
 });
 
+describe('QueryBuilder - getOne uses LIMIT 1', () => {
+  test('getOne does not delegate to getMany', async () => {
+    const sql = await setupDb();
+    spyOn(db, 'getConnection').mockReturnValue(sql);
+    const qb = new QueryBuilder(QbUser, db);
+    const getManyspy = spyOn(qb, 'getMany');
+    await qb.getOne();
+    expect(getManyspy).not.toHaveBeenCalled();
+  });
+});
+
 describe('Repository - findOne', () => {
   let repo: Repository<QbUser>;
 
