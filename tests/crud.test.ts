@@ -111,7 +111,11 @@ describe('Integration: Repository CRUD with composite primary key', () => {
     await sql`INSERT INTO order_item (orderId, productId, quantity) VALUES (1, 3, 20)`;
 
     const result = await orderItemRepo.findById({ orderId: 1, productId: 3 });
-    expect(result).toEqual({ orderId: 1 as PrimaryKey<number>, productId: 3 as PrimaryKey<number>, quantity: 20 });
+    expect(result).toEqual({
+      orderId: 1 as PrimaryKey<number>,
+      productId: 3 as PrimaryKey<number>,
+      quantity: 20,
+    });
   });
 
   test('findById() returns null when no row matches every primary key field', async () => {
@@ -154,10 +158,17 @@ describe('Integration: Repository CRUD with composite primary key', () => {
   test('create() inserts a row with user-provided composite primary key and returns the full key', async () => {
     const created = await orderItemRepo.create({ orderId: 1, productId: 2, quantity: 10 });
 
-    expect(created).toEqual({ orderId: 1 as PrimaryKey<number>, productId: 2 as PrimaryKey<number> });
+    expect(created).toEqual({
+      orderId: 1 as PrimaryKey<number>,
+      productId: 2 as PrimaryKey<number>,
+    });
 
     const found = await orderItemRepo.findById(created);
-    expect(found).toEqual({ orderId: 1 as PrimaryKey<number>, productId: 2 as PrimaryKey<number>, quantity: 10 });
+    expect(found).toEqual({
+      orderId: 1 as PrimaryKey<number>,
+      productId: 2 as PrimaryKey<number>,
+      quantity: 10,
+    });
   });
 
   test('create() throws IncompletePrimaryKeyError when a user-provided primary key field is missing', async () => {
