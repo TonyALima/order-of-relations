@@ -42,3 +42,7 @@ docs/vault/OOR
 
 #VSCode settings
 .vscode/settings.json
+
+#Ai config
+.abacusai
+.claude
