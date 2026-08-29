@@ -12,6 +12,15 @@ TypeScript ORM library for PostgreSQL. Uses ECMAScript Stage-3 decorators for en
 - Use `bunx <package> <command>` instead of `npx <package> <command>`
 - Bun automatically loads .env, so don't use dotenv.
 
+## TypeScript toolchain
+
+The project runs TypeScript 7 (native Go compiler) side-by-side with TypeScript 6:
+
+- `bunx tsc` (or `bun run typecheck`) uses **TypeScript 7** via the `@typescript/native` alias.
+- `typescript-eslint` (lint) still needs the TypeScript 6 programmatic API, so the `typescript`
+  package is aliased to `@typescript/typescript6` (exposed as `bunx tsc6`).
+- Do not bump `typescript` to 7 directly: TS7 ships no programmatic API yet, which would break lint.
+
 ## Testing
 
 This project follows **TDD (Test-Driven Development)**. When implementing new features or fixing bugs:
