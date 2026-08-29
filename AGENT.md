@@ -1,9 +1,6 @@
 # order-of-relations
 
-TypeScript ORM library for PostgreSQL. Uses ECMAScript Stage-3 decorators (no `reflect-metadata` dependency) for entity mapping.
-This is both a TCC (undergraduate thesis) project and a publishable npm package.
-
-**For project context in 30 seconds, read `docs/vault/OOR/wiki/brief.md`.** It covers architecture, hard rules, method shapes, and open questions, with wikilinks for depth.
+TypeScript ORM library for PostgreSQL. Uses ECMAScript Stage-3 decorators for entity mapping.
 
 ## Bun commands usage
 
