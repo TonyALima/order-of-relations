@@ -8,6 +8,7 @@ import {
   COLUMN_TYPE,
   NotNullable,
   IncompletePrimaryKeyError,
+  EmptyUpdateError,
   type PrimaryKey,
 } from '../src';
 
@@ -224,5 +225,11 @@ describe('Integration: Repository partial update', () => {
       name: 'Bob',
       email: 'alice@example.com',
     });
+  });
+
+  test('update() with only the primary key throws EmptyUpdateError', async () => {
+    const { id } = await profileRepo.create({ id: 1, name: 'Alice', email: 'alice@example.com' });
+
+    await expect(profileRepo.update({ id })).rejects.toBeInstanceOf(EmptyUpdateError);
   });
 });

@@ -12,3 +12,9 @@ export class IncompletePrimaryKeyError extends RepositoryError {
     );
   }
 }
+
+export class EmptyUpdateError extends RepositoryError {
+  constructor(readonly entityName: string) {
+    super(`${entityName} update requires at least one non-primary-key field to set`);
+  }
+}
