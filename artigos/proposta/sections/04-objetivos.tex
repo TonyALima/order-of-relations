@@ -1,0 +1,13 @@
+\newpage
+\section{Objetivos específicos}
+\label{sc:objetivos}
+
+Para concretizar a proposta de um ORM fundado em metaprogramação, definem-se os seguintes objetivos específicos:
+
+\begin{enumerate}
+    \item \textbf{Projetar} um conjunto de \emph{decorators} para declarar entidades e seu mapeamento objeto-relacional --- colunas, chave primária, nulabilidade e relações --- diretamente em classes TypeScript.
+    \item \textbf{Empregar} programação em nível de tipos para impor, em tempo de compilação, a correção das operações de persistência.
+    \item \textbf{Implementar} as operações de persistência sobre cada entidade por meio de um repositório.
+    \item \textbf{Construir} um mecanismo de composição de consultas que permita filtrar e recuperar entidades sem escrever SQL em texto.
+    \item \textbf{Oferecer} suporte à herança entre entidades pelo mapeamento de tabela única (STI).
+\end{enumerate}

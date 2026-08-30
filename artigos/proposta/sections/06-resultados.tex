@@ -1,0 +1,9 @@
+\newpage
+\section{Resultados esperados}
+\label{sc:resultados}
+
+O resultado central é um ORM funcional para PostgreSQL cuja característica definidora está na reunião coerente das características apontadas anteriormente, em especial a coexistência de modelagem de hierarquias, por herança de tabela única (STI), com uma composição de consultas integralmente verificada pelo sistema de tipos. É essa combinação que a revisão identificou como interseção ainda não ocupada por nenhuma biblioteca, e é o seu preenchimento que o trabalho se propõe a entregar.
+
+Sobre esse artefato, prevê-se uma avaliação experimental que o contraste com ORMs concorrentes, em desempenho, em usabilidade da API, ou em ambos. A metodologia, as métricas e os cenários dessa comparação serão definidos ao longo do trabalho.
+
+Os resultados se acumulam ao longo das fases previstas no cronograma (Seção \ref{sc:cronograma}), que se encadeiam por dependência. O núcleo do ORM se constrói em duas etapas sucessivas: a camada de definição de entidades por \emph{decorators} e de persistência por repositório vem primeiro e habilita o \emph{query builder}, já que não há o que consultar enquanto não houver entidades mapeadas e tipadas. Com esse núcleo concluído, o resultado central fica disponível como artefato, na coexistência entre herança de tabela única e composição de consultas verificada em compilação. A avaliação experimental só ganha objeto a partir daí, e as fases de teste e de análise, também encadeadas, produzem os dados comparativos e depois a sua interpretação frente aos concorrentes. A redação final encerra o percurso reunindo fundamentação, implementação e resultados. A sequência das entregas acompanha assim a ordem em que cada resultado se torna possível.
