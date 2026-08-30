@@ -46,6 +46,13 @@ cp .env ../<nome-worktree>/.env
 ```
 
   Se o `.env` não existir no checkout atual, pule este passo.
+- Instale as dependências dentro da nova worktree (a worktree não herda o `node_modules`):
+
+```bash
+bun install
+```
+
+  Use o gerenciador de pacotes do projeto (ver `AGENT.md`).
 
 ### 3. Implementar (TDD)
 
