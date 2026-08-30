@@ -131,7 +131,7 @@ export class Repository<T extends object> {
     `;
   }
 
-  async update(entity: UnbrandedT<T> & PKInput<T>): Promise<void> {
+  async update(entity: Partial<UnbrandedT<T>> & PKInput<T>): Promise<void> {
     const db = this.db;
     const meta = db.getMetadata().get(this.entity)!;
     const sql = db.getConnection();
@@ -146,7 +146,9 @@ export class Repository<T extends object> {
     columns.forEach((col) => {
       const columnName = col.columnName;
       const propertyName = col.propertyName as keyof UnbrandedT<T>;
-      objectToUpdate[columnName] = entity[propertyName];
+      if (propertyName in entity) {
+        objectToUpdate[columnName] = entity[propertyName];
+      }
     });
 
     meta.relations.forEach((relation) => {
@@ -156,7 +158,9 @@ export class Repository<T extends object> {
         | undefined;
 
       relation.columns!.forEach((fk) => {
-        objectToUpdate[fk.name] = related == null ? null : related[fk.referencedProperty];
+        if (relation.propertyName in entity) {
+          objectToUpdate[fk.name] = related == null ? null : related[fk.referencedProperty];
+        }
       });
     });
 
