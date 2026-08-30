@@ -111,7 +111,7 @@ export class Repository<T extends object> {
     return key as PKOutput<T>;
   }
 
-  async delete(key: PKInput<T>): Promise<void> {
+  async delete(key: PKInput<T>): Promise<number> {
     const db = this.db;
     const meta = db.getMetadata().get(this.entity)!;
     const sql = db.getConnection();
@@ -125,13 +125,16 @@ export class Repository<T extends object> {
       separator: sql` AND `,
     });
 
-    await sql`
+    const result = await sql`
       DELETE FROM ${tableName}
       WHERE ${whereClause}
+      RETURNING ${sqlJoin({ sql, items: primaryColumns, map: (pc) => sql`${sql(pc.columnName)}` })}
     `;
+
+    return result.length;
   }
 
-  async update(entity: UnbrandedT<T> & PKInput<T>): Promise<void> {
+  async update(entity: UnbrandedT<T> & PKInput<T>): Promise<number> {
     const db = this.db;
     const meta = db.getMetadata().get(this.entity)!;
     const sql = db.getConnection();
@@ -167,10 +170,13 @@ export class Repository<T extends object> {
       separator: sql` AND `,
     });
 
-    await sql`
+    const result = await sql`
       UPDATE ${tableName}
       SET ${sql(objectToUpdate)}
       WHERE ${whereClause}
+      RETURNING ${sqlJoin({ sql, items: primaryColumns, map: (pc) => sql`${sql(pc.columnName)}` })}
     `;
+
+    return result.length;
   }
 }

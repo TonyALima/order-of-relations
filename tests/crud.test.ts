@@ -66,16 +66,28 @@ describe('Integration: Repository CRUD', () => {
     const { id } = await repo.create({ id: 1, name: 'Alice' });
     const user = await repo.findById({ id });
     if (!user) throw new Error('User not found');
-    await repo.update({ ...user, name: 'Bob' });
+    const affected = await repo.update({ ...user, name: 'Bob' });
+    expect(affected).toBe(1);
     const updated = await repo.findById({ id: user.id });
     expect(updated).toEqual({ id: user.id, name: 'Bob' });
   });
 
+  test('update() returns 0 when no row matches the primary key', async () => {
+    const affected = await repo.update({ id: 999, name: 'Bob' });
+    expect(affected).toBe(0);
+  });
+
   test('delete() removes the row with the given id', async () => {
     const { id } = await repo.create({ id: 1, name: 'Alice' });
-    await repo.delete({ id });
+    const removed = await repo.delete({ id });
+    expect(removed).toBe(1);
     const user = await repo.findById({ id });
     expect(user).toBeNull();
+  });
+
+  test('delete() returns 0 when no row matches the primary key', async () => {
+    const removed = await repo.delete({ id: 999 });
+    expect(removed).toBe(0);
   });
 });
 
