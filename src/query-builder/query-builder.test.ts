@@ -2,7 +2,13 @@ import { describe, test, expect, spyOn, beforeEach } from 'bun:test';
 import { SQL } from 'bun';
 import { OrmError } from '../core/orm-error';
 import { QueryBuilder } from './query-builder';
-import { QueryError, UndefinedWhereConditionError } from './query-builder.errors';
+import {
+  QueryError,
+  UndefinedWhereConditionError,
+  InvalidOrderByColumnError,
+  InvalidLimitError,
+  InvalidOffsetError,
+} from './query-builder.errors';
 import { Repository } from '../core/repository/repository';
 import { Database } from '../core/database/database';
 import { COLUMN_TYPE } from '../core/sql-types/sql-types';
@@ -271,5 +277,113 @@ describe('Repository - findOne', () => {
       expect(user).not.toBeNull();
       expect(user!.name).toBe(expectedName);
     }
+  });
+});
+// ── Fluent API unit tests ────────────────────────────────────────────────────
+
+describe('QueryBuilder - fluent API', () => {
+  test('where returns this and sets conditions', () => {
+    const qb = new QueryBuilder(QbUser, db);
+    const result = qb.where((u) => [u.name?.eq('Alice')]);
+    expect(result).toBe(qb);
+    expect(qb['conditions']).toEqual([{ columnName: 'name', op: '=', value: 'Alice' }]);
+  });
+
+  test('where throws UndefinedWhereConditionError on undefined condition', () => {
+    const qb = new QueryBuilder(QbUser, db);
+    expect(() => qb.where((u) => [u.name?.eq('Alice'), undefined])).toThrow(
+      UndefinedWhereConditionError,
+    );
+  });
+
+  test('orderBy returns this and stores column + direction', () => {
+    const qb = new QueryBuilder(QbUser, db);
+    const result = qb.orderBy('name', 'DESC');
+    expect(result).toBe(qb);
+    expect(qb['orderByClause']).toEqual({ column: 'name', direction: 'DESC' });
+  });
+
+  test('orderBy defaults to ASC', () => {
+    const qb = new QueryBuilder(QbUser, db);
+    qb.orderBy('age');
+    expect(qb['orderByClause']).toEqual({ column: 'age', direction: 'ASC' });
+  });
+
+  test('orderBy with unknown column throws InvalidOrderByColumnError', () => {
+    const qb = new QueryBuilder(QbUser, db);
+    expect(() => qb.orderBy('nonexistent' as keyof QbUser)).toThrow(InvalidOrderByColumnError);
+  });
+
+  test('limit returns this and stores value', () => {
+    const qb = new QueryBuilder(QbUser, db);
+    expect(qb.limit(10)).toBe(qb);
+    expect(qb['limitValue']).toBe(10);
+  });
+
+  test('limit rejects negative values', () => {
+    const qb = new QueryBuilder(QbUser, db);
+    expect(() => qb.limit(-1)).toThrow(InvalidLimitError);
+  });
+
+  test('offset returns this and stores value', () => {
+    const qb = new QueryBuilder(QbUser, db);
+    expect(qb.offset(20)).toBe(qb);
+    expect(qb['offsetValue']).toBe(20);
+  });
+
+  test('offset rejects negative values', () => {
+    const qb = new QueryBuilder(QbUser, db);
+    expect(() => qb.offset(-1)).toThrow(InvalidOffsetError);
+  });
+});
+
+// ── Fluent API integration tests ─────────────────────────────────────────────
+
+describe('QueryBuilder - fluent API integration', () => {
+  let sql: SQL;
+
+  beforeEach(async () => {
+    sql = await setupDb();
+    spyOn(db, 'getConnection').mockReturnValue(sql);
+  });
+
+  test('orderBy ASC orders results', async () => {
+    const qb = new QueryBuilder(QbUser, db);
+    const users = await qb.orderBy('name', 'ASC').getMany();
+    expect(users.map((u) => u.name)).toEqual(['Alice', 'Bob', 'Carol']);
+  });
+
+  test('orderBy DESC orders results', async () => {
+    const qb = new QueryBuilder(QbUser, db);
+    const users = await qb.orderBy('name', 'DESC').getMany();
+    expect(users.map((u) => u.name)).toEqual(['Carol', 'Bob', 'Alice']);
+  });
+
+  test('limit restricts number of rows', async () => {
+    const qb = new QueryBuilder(QbUser, db);
+    const users = await qb.orderBy('name', 'ASC').limit(2).getMany();
+    expect(users.map((u) => u.name)).toEqual(['Alice', 'Bob']);
+  });
+
+  test('offset skips rows', async () => {
+    const qb = new QueryBuilder(QbUser, db);
+    const users = await qb.orderBy('name', 'ASC').limit(10).offset(1).getMany();
+    expect(users.map((u) => u.name)).toEqual(['Bob', 'Carol']);
+  });
+
+  test('limit + offset paginate', async () => {
+    const qb = new QueryBuilder(QbUser, db);
+    const users = await qb.orderBy('name', 'ASC').limit(1).offset(1).getMany();
+    expect(users.map((u) => u.name)).toEqual(['Bob']);
+  });
+
+  test('full fluent chain with where', async () => {
+    const qb = new QueryBuilder(QbUser, db);
+    const users = await qb
+      .where((u) => [u.age?.gte(18)])
+      .orderBy('name', 'ASC')
+      .limit(1)
+      .getMany();
+    expect(users.map((u) => u.name)).toEqual(['Alice']);
   });
 });
