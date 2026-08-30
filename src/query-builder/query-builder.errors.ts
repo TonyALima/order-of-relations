@@ -10,3 +10,15 @@ export class UndefinedWhereConditionError extends QueryError {
     );
   }
 }
+
+export class InvalidLimitError extends QueryError {
+  constructor(readonly value: number) {
+    super(`limit() expects a non-negative number, got ${value}.`);
+  }
+}
+
+export class InvalidOffsetError extends QueryError {
+  constructor(readonly value: number) {
+    super(`offset() expects a non-negative number, got ${value}.`);
+  }
+}
