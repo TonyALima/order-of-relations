@@ -68,3 +68,20 @@ Read in this order, stopping as soon as you have enough:
 5. The specific page from the sub-index.
 
 Do not modify wiki files unless explicitly asked.
+
+@RTK.md
+
+## Memory Policy
+
+- ALWAYS ask for confirmation before adding a memory. Never write to the memory directory or MEMORY.md without an explicit yes from me first.
+
+## Commit Policy
+
+- NEVER use `--no-verify` or bypass pre-commit hooks. If a hook fails (e.g., NPM_TOKEN missing, husky issues), stop and ask the user how to proceed.
+- Committing with `-c commit.gpgsign=false` (or any flag that disables GPG signing) is EXTREMELY FORBIDDEN. Never disable signing to work around an error — stop and ask the user.
+- Do NOT commit spec files, design docs, or planning artifacts unless explicitly requested.
+- Ensure branch names match the project's required pattern before committing.
+
+## Code Style Policy
+
+- NEVER add comments to code you produce. No explanatory, section, TODO, or `ponytail:` comments. Code must be self-explanatory through naming. Only exception: I explicitly ask for a comment, or the file already requires structured docblocks (e.g. JSDoc contracts in a public package).
