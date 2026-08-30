@@ -41,7 +41,21 @@ git branch -r --merged origin/main
 Se a branch remota não aparecer na lista de merged, **pare** e informe o usuário — não
 remova uma branch cujo PR ainda não foi mergeado.
 
-### 3. Remover a worktree
+### 3. Atualizar a `main` local
+
+Depois de confirmar o merge, **sempre** atualize a branch `main` local com o conteúdo
+mergeado antes de prosseguir:
+
+```bash
+git checkout main
+git pull --ff-only
+```
+
+Use `--ff-only` para garantir que a `main` local avance apenas por fast-forward. Se o
+`pull` falhar (ex.: a `main` local divergiu), **pare** e informe o usuário — não force
+o merge nem remova a branch enquanto a `main` local não estiver alinhada.
+
+### 4. Remover a worktree
 
 ```bash
 git worktree remove <caminho-da-worktree>
@@ -50,7 +64,7 @@ git worktree remove <caminho-da-worktree>
 Se a worktree tiver alterações não commitadas, use `--force` apenas com confirmação
 explícita do usuário.
 
-### 4. Remover a branch local
+### 5. Remover a branch local
 
 ```bash
 git branch -d <branch>
@@ -59,13 +73,13 @@ git branch -d <branch>
 Use `-d` (delete apenas se merged). Se falhar por não estar merged, reavalie antes de
 usar `-D`.
 
-### 5. Remover a branch remota
+### 6. Remover a branch remota
 
 ```bash
 git push origin --delete <branch>
 ```
 
-### 6. Limpar referências órfãs (opcional)
+### 7. Limpar referências órfãs (opcional)
 
 ```bash
 git worktree prune
@@ -76,5 +90,6 @@ git fetch --prune
 
 - **Nunca** remova a branch `main` nem o checkout atual.
 - **Nunca** remova uma branch cujo PR ainda não foi merged — confirme antes.
+- **Sempre** execute `git pull --ff-only` na `main` local depois de confirmar o merge, antes de remover a worktree/branch.
 - Se a worktree tiver alterações não commitadas, não as descarte sem confirmação do usuário.
 - Ao final, confirme ao usuário o que foi removido (worktree, branch local e remota).
