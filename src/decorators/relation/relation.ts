@@ -4,11 +4,11 @@ import { RELATIONS_KEY } from '../entity/entity';
 import { NULLABLE_KEY } from '../nullable/nullable';
 import { MissingNullabilityDecoratorError } from '../nullable/nullable.errors';
 
-export interface OneToOneOptions<TType> {
+export interface ToOneOptions<TType> {
   target: () => Constructor<TType>;
 }
 
-export function ToOne<TType>(options: OneToOneOptions<TType>) {
+export function ToOne<TType>(options: ToOneOptions<TType>) {
   return function (
     _value: undefined,
     context: ClassFieldDecoratorContext<unknown, TType | undefined>,
