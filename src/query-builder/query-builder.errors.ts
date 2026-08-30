@@ -11,12 +11,6 @@ export class UndefinedWhereConditionError extends QueryError {
   }
 }
 
-export class InvalidOrderByColumnError extends QueryError {
-  constructor(readonly column: string) {
-    super(`Cannot order by column "${column}": no such column on the entity.`);
-  }
-}
-
 export class InvalidLimitError extends QueryError {
   constructor(readonly value: number) {
     super(`limit() expects a non-negative number, got ${value}.`);

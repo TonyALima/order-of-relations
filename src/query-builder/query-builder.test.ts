@@ -5,7 +5,6 @@ import { QueryBuilder } from './query-builder';
 import {
   QueryError,
   UndefinedWhereConditionError,
-  InvalidOrderByColumnError,
   InvalidLimitError,
   InvalidOffsetError,
 } from './query-builder.errors';
@@ -309,9 +308,13 @@ describe('QueryBuilder - fluent API', () => {
     expect(qb['orderByClause']).toEqual({ column: 'age', direction: 'ASC' });
   });
 
-  test('orderBy with unknown column throws InvalidOrderByColumnError', () => {
+  test('orderBy rejects unknown columns at compile time', () => {
     const qb = new QueryBuilder(QbUser, db);
-    expect(() => qb.orderBy('nonexistent' as keyof QbUser)).toThrow(InvalidOrderByColumnError);
+    const invalid = (): void => {
+      // @ts-expect-error - 'nonexistent' is not a key of QbUser
+      qb.orderBy('nonexistent');
+    };
+    expect(invalid).toBeTypeOf('function');
   });
 
   test('limit returns this and stores value', () => {

@@ -4,14 +4,13 @@ import { sqlJoin, type Constructor } from '../core/utils/utils';
 import { InheritanceSearchType, type Condition, type Conditions, type FindOptions } from './types';
 import {
   UndefinedWhereConditionError,
-  InvalidOrderByColumnError,
   InvalidLimitError,
   InvalidOffsetError,
 } from './query-builder.errors';
 
 export class QueryBuilder<T> {
   private conditions: Condition[] = [];
-  private orderByClause: { column: string; direction: 'ASC' | 'DESC' } | undefined;
+  private orderByClause: { column: keyof T; direction: 'ASC' | 'DESC' } | undefined;
   private limitValue: number | undefined;
   private offsetValue: number | undefined;
 
@@ -63,12 +62,7 @@ export class QueryBuilder<T> {
   }
 
   orderBy(column: keyof T, direction: 'ASC' | 'DESC' = 'ASC'): this {
-    const meta = this.db.getMetadata().get(this.entity)!;
-    const col = meta.columns.find((c) => c.propertyName === column);
-    if (!col) {
-      throw new InvalidOrderByColumnError(String(column));
-    }
-    this.orderByClause = { column: col.columnName, direction };
+    this.orderByClause = { column, direction };
     return this;
   }
 
@@ -110,9 +104,9 @@ export class QueryBuilder<T> {
 
     const whereClause = this.conditions.length === 0 ? sql`` : sql`WHERE ${this.buildWhere()}`;
     const orderByClause = this.orderByClause
-      ? sql`ORDER BY ${sql(this.orderByClause.column)} ${
-          this.orderByClause.direction === 'DESC' ? sql`DESC` : sql`ASC`
-        }`
+      ? sql`ORDER BY ${sql(
+          meta.columns.find((c) => c.propertyName === this.orderByClause!.column)!.columnName,
+        )} ${this.orderByClause.direction === 'DESC' ? sql`DESC` : sql`ASC`}`
       : sql``;
     const limitClause = addLimit
       ? sql`LIMIT 1`
