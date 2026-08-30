@@ -1,0 +1,46 @@
+# ---- LaTeX: artefatos de compilação ----
+*.aux
+*.log
+*.toc
+*.lof
+*.lot
+*.out
+*.dvi
+*.xdv
+
+# ---- Bibliografia (bibtex / biber) ----
+*.bbl
+*.blg
+*.bcf
+*.run.xml
+
+# ---- latexmk ----
+*.fdb_latexmk
+*.fls
+
+# ---- SyncTeX (sincronização editor <-> PDF) ----
+*.synctex
+*.synctex(busy)
+*.synctex.gz
+*.synctex.gz(busy)
+
+# ---- todonotes (este projeto usa \todoin/\todogeg/\todovwcm) ----
+*.tdo
+
+# ---- TikZ/PGF externalizado (se um dia usar \tikzexternalize) ----
+*.auxlock
+
+# ---- Editor / Sistema operacional ----
+.DS_Store
+*.swp
+*~
+# .vscode/        # descomente se NÃO quiser versionar config do LaTeX Workshop
+
+# ---- Artefatos de planejamento / continuidade (não versionados) ----
+docs/
+
+# ---- Saída final ----
+# O PDF compilado (main.pdf) É versionado de propósito: é o entregável da banca
+# e a compilação acontece no Overleaf (sem toolchain LaTeX local).
+# Para parar de versioná-lo, descomente a linha abaixo:
+# *.pdf

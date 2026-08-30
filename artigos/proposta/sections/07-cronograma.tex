@@ -1,0 +1,136 @@
+\newpage
+\section{Cronograma de atividades do TCC02}
+\label{sc:cronograma}
+
+\begin{longtable}{p{\textwidth}}
+\label{tab:fases}\\
+\toprule%
+\myrowcolour%
+\bfseries F.1: Revisão bibliográfica \\
+\midrule
+Aprofundamento e atualização da revisão iniciada no TCC01, fixando o referencial sobre mapeamento objeto-relacional, o padrão \emph{Data Mapper} e a metaprogramação em TypeScript que fundamenta a implementação.
+\\
+\midrule
+\myrowcolour%
+\bfseries Atividades planejadas para a fase 1 \\
+\midrule
+A.1.1 Levantar e atualizar a literatura sobre ORMs, \emph{Data Mapper}, \emph{decorators} e programação em nível de tipos. \\
+A.1.2 Consolidar o comparativo do OOR com os ORMs concorrentes (TypeORM, Prisma, Drizzle, Sequelize). \\
+\midrule
+\myrowcolour%
+\bfseries Resultados esperados para a fase 1 \\
+\midrule
+Base bibliográfica consolidada e comparativo de referência que orienta as decisões de projeto das fases seguintes. \\
+\toprule%
+\myrowcolour%
+\bfseries F.2: \emph{Decorators} para o ORM OOR com \emph{Data Mapper} \\
+\midrule
+Implementação da camada de definição de entidades por \emph{decorators} e da camada de persistência segundo o padrão \emph{Data Mapper}, atendendo aos objetivos específicos de declaração do mapeamento, tipagem em compilação e persistência por repositório.
+\\
+\midrule
+\myrowcolour%
+\bfseries Atividades planejadas para a fase 2 \\
+\midrule
+A.2.1 Implementar os \emph{decorators} (\texttt{@Entity}, \texttt{@Column}, \texttt{@PrimaryColumn}, \texttt{@ToOne}, \texttt{@Nullable}) e o \texttt{MetadataStorage} por \texttt{Database}, sem \texttt{reflect-metadata}. \\
+A.2.2 Implementar o \texttt{Repository<T>} com as operações de persistência sobre cada entidade. \\
+A.2.3 Aplicar programação em nível de tipos (\emph{brand} \texttt{PrimaryKey<V>}, ausência de \texttt{any}) e dar suporte à herança de tabela única (STI). \\
+\midrule
+\myrowcolour%
+\bfseries Resultados esperados para a fase 2 \\
+\midrule
+Entidades declaráveis por \emph{decorators} que verifica em tempo de compilação possíveis erros de mapeamento e suporte a STI.
+Entidades persistíveis via repositório. \\
+\toprule%
+\myrowcolour%
+\bfseries F.3: \emph{Query builder} para o ORM OOR \\
+\midrule
+Construção do mecanismo de composição de consultas, que permite filtrar e recuperar entidades por encadeamento de operações --- sem SQL em texto --- e traduzi-las para SQL sempre parametrizado.
+\\
+\midrule
+\myrowcolour%
+\bfseries Atividades planejadas para a fase 3 \\
+\midrule
+A.3.1 Implementar o \texttt{QueryBuilder<T>} \emph{lazy}, com a interface de composição encadeável de consultas. \\
+A.3.2 Traduzir as consultas para SQL parametrizado por meio do \emph{driver} \texttt{SQL} do Bun. \\
+A.3.3 Garantir a verificação das consultas pelo sistema de tipos em compilação. \\
+\midrule
+\myrowcolour%
+\bfseries Resultados esperados para a fase 3 \\
+\midrule
+Leituras expressas sem SQL em texto, verificadas em compilação e traduzidas para consultas parametrizadas, completando o núcleo funcional do ORM. \\
+\toprule%
+\myrowcolour%
+\bfseries F.4: Teste de desempenho ou de usabilidade \\
+\midrule
+Avaliação experimental do OOR, contrastando-o com ORMs concorrentes em desempenho e/ou em usabilidade da API, tomando como referência metodológica o \emph{benchmark} revisado.
+\\
+\midrule
+\myrowcolour%
+\bfseries Atividades planejadas para a fase 4 \\
+\midrule
+A.4.1 Definir a metodologia, as métricas e os cenários de teste, bem como os ORMs de comparação. \\
+A.4.2 Executar os testes e coletar as medições de forma reprodutível. \\
+\midrule
+\myrowcolour%
+\bfseries Resultados esperados para a fase 4 \\
+\midrule
+Conjunto de dados experimentais coletados sob protocolo definido, comparáveis entre o OOR e os ORMs concorrentes. \\
+\toprule%
+\myrowcolour%
+\bfseries F.5: Análise do teste de desempenho ou de usabilidade \\
+\midrule
+Tratamento, interpretação e discussão dos dados coletados na fase anterior, situando o OOR frente aos concorrentes e às hipóteses do trabalho.
+\\
+\midrule
+\myrowcolour%
+\bfseries Atividades planejadas para a fase 5 \\
+\midrule
+A.5.1 Tabular os dados e aplicar as medidas de resumo (estatística descritiva, gráficos). \\
+A.5.2 Analisar e discutir os resultados em comparação com os ORMs concorrentes. \\
+\midrule
+\myrowcolour%
+\bfseries Resultados esperados para a fase 5 \\
+\midrule
+Análise consolidada que evidencia os pontos fortes e as limitações do OOR e responde às questões de pesquisa. \\
+\toprule%
+\myrowcolour%
+\bfseries F.6: Redação do artigo \\
+\midrule
+Redação do documento final do TCC02, integrando fundamentação, implementação e resultados, com revisão pelo orientador e preparação da defesa.
+\\
+\midrule
+\myrowcolour%
+\bfseries Atividades planejadas para a fase 6 \\
+\midrule
+A.6.1 Redigir o artigo, articulando a revisão, os métodos, a implementação e os resultados. \\
+A.6.2 Revisar o texto com o orientador e incorporar os ajustes. \\
+A.6.3 Preparar a apresentação e a defesa perante a banca. \\
+\midrule
+\myrowcolour%
+\bfseries Resultados esperados para a fase 6 \\
+\midrule
+Artigo final concluído e revisado, pronto para submissão e defesa. \\
+\bottomrule
+\end{longtable}
+
+
+\begin{ganttchart}[
+y unit title=.6cm,
+y unit chart=.6cm,
+x unit = 2.8cm,
+hgrid,
+vgrid,
+time slot format=isodate-yearmonth,
+time slot unit=month,
+inline,
+bar height=0.7,
+bar/.append style={fill=gray!50, inner sep=0pt}
+]{2026-08}{2026-12}
+\gantttitlecalendar{year, month} \\
+  \ganttbar{F.1: Revisão bibliográfica}{2026-08}{2026-09} \\
+  \ganttbar{F.2: \emph{Decorators}}{2026-08}{2026-10} \\
+  \ganttbar{F.3: \emph{Query builder}}{2026-10}{2026-11} \\
+  \ganttbar{F.4: Testes}{2026-11}{2026-12} \\
+  \ganttbar{F.5: Análise dos testes}{2026-12}{2026-12} \\
+  \ganttbar{F.6: Redação do artigo}{2026-11}{2026-12} \\
+\end{ganttchart}

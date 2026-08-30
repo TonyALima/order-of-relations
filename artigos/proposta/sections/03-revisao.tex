@@ -1,0 +1,45 @@
+\newpage
+\section{Revisão bibliográfica}
+\label{sc:revisao}
+
+O ecossistema de mapeadores objeto-relacionais (ORMs) para TypeScript é maduro e populoso, o que torna uma varredura exaustiva inviável neste escopo. Optou-se por uma amostragem dirigida: três bibliotecas, cada uma representando o estado da arte em um eixo no qual esta proposta se posiciona. O \textbf{TypeORM}~\cite{typeorm} é o vizinho \emph{arquitetural}, por também se fundar em \emph{decorators}~\cite{tc39-decorators}; o \textbf{Prisma}~\cite{prisma}, o vizinho de \emph{mercado}, hoje o ORM de maior adoção; e o \textbf{Drizzle}~\cite{drizzle}, o vizinho de \emph{toolchain}, com suporte de primeira classe ao Bun e guia oficial na documentação do próprio \emph{runtime} ~\cite{bun-drizzle}. Como fundamentação recorre-se ao \emph{benchmark} revisado por pares de Zhadko-Bazilevych~\cite{jcsi2025}, sobre PostgreSQL, cujo encaixe é parcial: mede Sequelize, Prisma e TypeORM, mas não o Drizzle.
+
+Os três diferem em pontos decisivos para a proposta. O TypeORM estabeleceu a forma visual (\texttt{@Entity}, \texttt{@Column}) que esta proposta herda, baseada em \emph{decorators}, que são uma forma de fazer metaprogramação em TypeScript. A própria classe TypeScript, anotada por esses \emph{decorators}, serve de esquema: a descrição das entidades, suas colunas e relações que o ORM consulta para mediar o acesso ao banco. Prende-se, porém, ao dialeto legado de \emph{decorators} (que exige \texttt{experimentalDecorators} e o \emph{polyfill} \texttt{reflect-metadata}), é o mais equilibrado entre os avaliados por Zhadko-Bazilevych~\cite{jcsi2025}. 
+
+O Prisma desloca esse esquema para fora do TypeScript, descrevendo-o em uma DSL própria (\texttt{schema.prisma}) a partir da qual gera o código de acesso, e expressa consultas como objetos literais sem encadeamento; vence sob carga paralela graças ao seu \emph{pool} de conexões, mas é o mais lento em leituras simples não cacheadas~\cite{jcsi2025}. 
+
+O Drizzle retoma o esquema em TypeScript, inferindo os tipos de objetos-tabela (\texttt{pgTable}), e expõe consultas via funções auxiliares (\texttt{eq}, \texttt{and}), porém sem mecanismo de herança entre entidades.
+
+Quando o esquema é escrito em TypeScript, em vez de em um arquivo à parte, ele passa a compartilhar a linguagem do resto da aplicação. As entidades são classes reais, e não a cópia de uma descrição externa que precisa ser mantida em sincronia: podem recorrer a herança e a encapsulamento, e o compilador as verifica como qualquer outro trecho de código.
+
+Essa herança é o ponto em que o modelo de objetos e o relacional mais se afastam: como não há um modo padrão de tratar herança em SQL, mapear uma hierarquia de classes exige uma estratégia~\cite[p.~62]{fowler}. Entre as catalogadas por Fowler, a herança de tabela única (STI)~\cite[p.~269]{fowler} acomoda toda a hierarquia em uma única tabela, com uma coluna discriminadora indicando o subtipo de cada linha, e é a de maior desempenho na leitura, por nunca recorrer a junções para recuperar uma instância~\cite{openjpa}. Em contrapartida, deixa colunas vazias quando os subtipos não compartilham campos~\cite[p.~270]{fowler}. Preserva, assim, no banco a hierarquia que o código expressa como classes, sem o custo de leitura das alternativas que distribuem os subtipos por várias tabelas.
+
+As bibliotecas se distinguem ainda pelo padrão com que organizam a persistência, no sentido que Fowler dá aos termos. No \emph{Active Record}~\cite[p.~165]{fowler}, o próprio objeto encapsula a linha da tabela, o acesso ao banco e a lógica de domínio, o que acopla o desenho dos objetos ao esquema; no \emph{Data Mapper}~\cite[p.~170]{fowler}, uma camada à parte transfere os dados entre objetos e banco e os mantém mutuamente alheios, de modo que os objetos não contêm SQL nem conhecem o esquema. O TypeORM oferece os dois~\cite{typeorm}; o Prisma adota o \emph{Data Mapper}, com o acesso concentrado em um cliente gerado~\cite{prisma}.
+
+A composição das consultas é uma questão à parte do padrão de persistência e dele independe: há abordagens que sequer expõem uma camada de consulta componível. Quando ela existe, costuma tomar a forma de um \emph{query builder}: uma interface, em geral fluente~\cite{fowler-fluent}, que constrói a consulta programaticamente, em vez de concatenar SQL em texto. O ponto decisivo não é dispor de um \emph{query builder}, mas se sua construção é integralmente verificada pelo sistema de tipos~\cite{gil2010}: o do TypeORM ainda exige fragmentos de SQL em texto nos parâmetros, enquanto o cliente gerado do Prisma, as funções auxiliares do Drizzle e a proposta compõem as consultas sem essas \emph{strings}. O Drizzle é o caso-limite: como se resume, no essencial, a um \emph{query builder} e não modela entidades como classes, é ele que não se enquadra nem em \emph{Data Mapper} nem em \emph{Active Record}.
+
+A Tabela~\ref{tab:orms} sintetiza esse contraste pelos critérios mais decisivos para a proposta.
+
+\begin{table}[ht]
+\centering
+\caption{Comparação entre a proposta (OOR) e as soluções existentes, pelos critérios centrais do trabalho.}
+\label{tab:orms}
+\begin{tabular}{p{6.4cm}cccc}
+\toprule
+\myrowcolour
+\textbf{Critério} & \textbf{OOR} & TypeORM & Prisma & Drizzle \\
+\midrule
+Decorators Stage-3 & Sim & Não & --- & --- \\
+Esquema em TypeScript & Sim & Sim & Não & Sim \\
+Suporte nativo ao Bun & Sim & Não & Parcial & Sim \\
+Herança de tabela única (STI) nativa & Sim & Sim & Não & Não \\
+Persistência via \emph{Data Mapper} & Sim & Sim & Sim & Não \\
+Persistência via \emph{Active Record} & Não & Sim & Não & Não \\
+\emph{Query builder type-safe} & Sim & Não & Sim & Sim \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Nenhuma das três soluções reúne, simultaneamente, o dialeto Stage-3 sem \emph{polyfill}, a classe como esquema com herança de tabela única nativa e o alinhamento ao Bun. É nessa interseção ainda vazia que esta proposta se posiciona.
+
+O contraste de \emph{design} não esgota a revisão: o padrão de persistência tem também uma consequência de desempenho que o campo conhece bem, o anti-padrão \emph{N+1} --- uma consulta inicial que retorna N resultados, seguida de N consultas subsequentes. Turcotte et al.~\cite{reformulator} mostram que a camada de abstração do ORM oculta o custo das operações de banco e que esse anti-padrão prolifera porque iterar sobre coleções de objetos é natural em linguagens orientadas a objetos --- o estudo o demonstra sobre o Sequelize, ORM de \emph{Active Record}, em que disparar uma consulta por elemento ao percorrer objetos passa despercebido. O modo como a biblioteca estrutura o acesso à persistência influi diretamente sobre esse risco.
