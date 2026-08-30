@@ -27,22 +27,24 @@ assuma o comportamento mais razoável — não trave pedindo detalhes que não s
 
 ### 2. Criar a worktree e a branch
 
-A partir da branch `main` atualizada, crie uma worktree isolada e uma branch descritiva:
+A partir da branch `main` atualizada, crie uma worktree isolada e uma branch descritiva.
+Todas as worktrees ficam dentro do folder `../worktrees` (irmão do repo), uma por branch:
 
 ```bash
 git fetch origin
-git worktree add -b <tipo>/<descricao-curta> ../<nome-worktree> origin/main
+mkdir -p ../worktrees
+git worktree add -b <tipo>/<descricao-curta> ../worktrees/<nome-worktree> origin/main
 ```
 
 - `<tipo>` segue a convenção do repo: `feat/`, `fix/`, `refactor/`, `chore/`, `docs/`.
 - `<descricao-curta>` em kebab-case, ex.: `fix/to-one-name`.
-- `<nome-worktree>` é um diretório irmão do repo (ex.: `../order-of-relations-<branch>`).
+- `<nome-worktree>` é um diretório dentro de `../worktrees` (ex.: `../worktrees/order-of-relations-<branch>`).
 - **Todo o trabalho de implementação acontece DENTRO da worktree**, nunca no checkout atual.
 - Copie o arquivo `.env` do checkout atual para a nova worktree, para que o ambiente
   (variáveis de ambiente, credenciais locais) funcione dentro dela:
 
 ```bash
-cp .env ../<nome-worktree>/.env
+cp .env ../worktrees/<nome-worktree>/.env
 ```
 
   Se o `.env` não existir no checkout atual, pule este passo.
