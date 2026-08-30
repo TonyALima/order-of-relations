@@ -1,6 +1,6 @@
 import { test, expect, describe } from 'bun:test';
 import { OrmError } from '../orm-error';
-import { RepositoryError, IncompletePrimaryKeyError } from './repository.errors';
+import { RepositoryError, IncompletePrimaryKeyError, EmptyUpdateError } from './repository.errors';
 
 describe('IncompletePrimaryKeyError', () => {
   test('instanceof chain: OrmError > RepositoryError > IncompletePrimaryKeyError', () => {
@@ -22,5 +22,25 @@ describe('IncompletePrimaryKeyError', () => {
     const err = new IncompletePrimaryKeyError('OrderItem', ['productId']);
     expect(err.entityName).toBe('OrderItem');
     expect(err.missingProperties).toEqual(['productId']);
+  });
+});
+
+describe('EmptyUpdateError', () => {
+  test('instanceof chain: OrmError > RepositoryError > EmptyUpdateError', () => {
+    const err = new EmptyUpdateError('User');
+    expect(err).toBeInstanceOf(OrmError);
+    expect(err).toBeInstanceOf(RepositoryError);
+    expect(err).toBeInstanceOf(EmptyUpdateError);
+  });
+
+  test('has correct name and message', () => {
+    const err = new EmptyUpdateError('User');
+    expect(err.name).toBe('EmptyUpdateError');
+    expect(err.message).toBe('User update requires at least one non-primary-key field to set');
+  });
+
+  test('exposes entityName for programmatic inspection', () => {
+    const err = new EmptyUpdateError('User');
+    expect(err.entityName).toBe('User');
   });
 });
