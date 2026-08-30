@@ -38,6 +38,14 @@ git worktree add -b <tipo>/<descricao-curta> ../<nome-worktree> origin/main
 - `<descricao-curta>` em kebab-case, ex.: `fix/to-one-name`.
 - `<nome-worktree>` é um diretório irmão do repo (ex.: `../order-of-relations-<branch>`).
 - **Todo o trabalho de implementação acontece DENTRO da worktree**, nunca no checkout atual.
+- Copie o arquivo `.env` do checkout atual para a nova worktree, para que o ambiente
+  (variáveis de ambiente, credenciais locais) funcione dentro dela:
+
+```bash
+cp .env ../<nome-worktree>/.env
+```
+
+  Se o `.env` não existir no checkout atual, pule este passo.
 
 ### 3. Implementar (TDD)
 
