@@ -58,6 +58,7 @@ describe('Integration: Relations CRUD', () => {
 
   afterEach(async () => {
     await db.drop();
+    await db.getConnection().close();
   });
 
   test('create() inserts a row that can be retrieved', async () => {
@@ -102,5 +103,19 @@ describe('Integration: Relations CRUD', () => {
     await userRepo.delete({ id });
     const user = await userRepo.findById({ id });
     expect(user).toBeNull();
+  });
+
+  test('update() preserves the relation FK when the relation field is omitted', async () => {
+    const { id: profileId } = await profileRepo.create({ bio: 'Hello world' });
+    const profile = await profileRepo.findById({ id: profileId });
+    const { id } = await userRepo.create({ name: 'Alice', profile: profile! });
+
+    await userRepo.update({ id: id!, name: 'Bob' });
+
+    const sql = db.getConnection();
+    const [row] = await sql<{ name: string; profile_id: number }[]>`
+      SELECT name, profile_id FROM ${sql('User')} WHERE id = ${id}
+    `;
+    expect(row).toEqual({ name: 'Bob', profile_id: profileId });
   });
 });

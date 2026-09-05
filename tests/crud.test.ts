@@ -8,6 +8,7 @@ import {
   COLUMN_TYPE,
   NotNullable,
   IncompletePrimaryKeyError,
+  EmptyUpdateError,
   type PrimaryKey,
 } from '../src';
 
@@ -176,5 +177,59 @@ describe('Integration: Repository CRUD with composite primary key', () => {
       // @ts-expect-error productId required
       orderItemRepo.create({ orderId: 1, quantity: 10 }),
     ).rejects.toBeInstanceOf(IncompletePrimaryKeyError);
+  });
+
+  test('update() throws IncompletePrimaryKeyError when a primary key field is missing', async () => {
+    await expect(
+      // @ts-expect-error productId required
+      orderItemRepo.update({ orderId: 1, quantity: 999 }),
+    ).rejects.toBeInstanceOf(IncompletePrimaryKeyError);
+  });
+});
+
+@Entity(db, 'profile')
+class Profile {
+  @PrimaryColumn({ type: COLUMN_TYPE.INTEGER })
+  id!: PrimaryKey<number>;
+
+  @Column({ type: COLUMN_TYPE.TEXT })
+  @NotNullable
+  name!: string;
+
+  @Column({ type: COLUMN_TYPE.TEXT })
+  @NotNullable
+  email!: string;
+}
+
+describe('Integration: Repository partial update', () => {
+  let profileRepo: Repository<Profile>;
+
+  beforeEach(async () => {
+    db.connect('sqlite://:memory:');
+    await db.create();
+    profileRepo = new Repository(Profile, db);
+  });
+
+  afterEach(async () => {
+    await db.drop();
+  });
+
+  test('update() with a partial entity changes only the provided fields', async () => {
+    const { id } = await profileRepo.create({ id: 1, name: 'Alice', email: 'alice@example.com' });
+
+    await profileRepo.update({ id, name: 'Bob' });
+
+    const updated = await profileRepo.findById({ id });
+    expect(updated).toEqual({
+      id: id as PrimaryKey<number>,
+      name: 'Bob',
+      email: 'alice@example.com',
+    });
+  });
+
+  test('update() with only the primary key throws EmptyUpdateError', async () => {
+    const { id } = await profileRepo.create({ id: 1, name: 'Alice', email: 'alice@example.com' });
+
+    await expect(profileRepo.update({ id })).rejects.toBeInstanceOf(EmptyUpdateError);
   });
 });

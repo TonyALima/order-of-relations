@@ -18,6 +18,7 @@ import {
   UndefinedWhereConditionError,
   RepositoryError,
   IncompletePrimaryKeyError,
+  EmptyUpdateError,
 } from './index';
 
 describe('public API exports', () => {
@@ -43,5 +44,6 @@ describe('public API exports', () => {
     expect(UndefinedWhereConditionError).toBeFunction();
     expect(RepositoryError).toBeFunction();
     expect(IncompletePrimaryKeyError).toBeFunction();
+    expect(EmptyUpdateError).toBeFunction();
   });
 });
