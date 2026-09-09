@@ -78,6 +78,7 @@ Os decoradores registram metadados das entidades. `Database` usa esses metadados
 ## Documentação
 
 - [Arquitetura](docs/architecture.md)
+- [Contratos do Repository](docs/repository.md)
 - [Architecture Decision Records](docs/adr/README.md)
 - [Diagrama de classes](docs/class-diagram.md)
 - [Convenções de documentação no código](docs/code-documentation.md)
