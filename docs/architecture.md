@@ -92,6 +92,14 @@ fragmentos parametrizados e se conectar ao PostgreSQL. O PostgreSQL é a única
 base suportada; tipos de coluna, geração no banco, tabelas, restrições e
 consultas seguem esse modelo.
 
+Valores de entidades e filtros são vinculados por templates `sql`. Nomes de
+tabela e coluna são identificadores, não parâmetros: eles vêm dos metadados e
+passam pelo helper `sql(nome)` do Bun. Tipos de DDL, operadores e direções são
+fragmentos fechados definidos pelo ORM. A criação de esquema não usa
+parâmetros de valores; a instrução composta de herança usa `.simple()`, cujo
+protocolo não aceita parâmetros. `sql.unsafe` é proibido em todos esses
+caminhos, conforme o [ADR-0004](adr/0004-sql-parametrizado.md).
+
 ## Fluxos principais
 
 ### Registro e criação do esquema
