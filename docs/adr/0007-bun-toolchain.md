@@ -11,11 +11,6 @@ código, instalar dependências, testar, compilar e formatar. Essa combinação
 cria configurações e versões adicionais sem necessidade para o fluxo de
 contribuição deste ORM.
 
-Esta decisão histórica foi recuperada de registros que preservam seu contexto
-e alternativas. Ela foi conferida contra o projeto atual: `bun.lock` é o
-lockfile, os comandos documentados usam Bun e `package.json` define `bun
-build`, `bunx tsc`, `bun --bun eslint` e `bun --bun prettier`.
-
 ## Decisão
 
 Bun é a ferramenta única para instalar dependências, executar arquivos
@@ -28,16 +23,6 @@ ESLint; ESLint verifica o código, Prettier formata e Husky executa o hook de
 pré-commit. Essas ferramentas permanecem declaradas em `package.json` e são
 invocadas pelos scripts ou hooks, sem introduzir Node, npm, yarn, pnpm, Jest,
 Vitest, `ts-node`, `tsx`, webpack, tsup ou Rollup no fluxo do projeto.
-
-Esta decisão define o ambiente de contribuição. Ela não afirma compatibilidade
-ou portabilidade do pacote publicado para outros runtimes.
-
-## Alternativas consideradas
-
-- Node com `tsx`, pnpm e Vitest: rejeitada por exigir múltiplos binários e
-  configurações para os mesmos papéis já cobertos pelo Bun neste projeto.
-- Deno: rejeitada por divergir mais das dependências e convenções do
-  ecossistema npm, sem benefício necessário para este ORM.
 
 ## Consequências
 
@@ -56,11 +41,3 @@ ou portabilidade do pacote publicado para outros runtimes.
   investigação durante o desenvolvimento.
 - Atualizações do TypeScript usado na verificação devem preservar o alias
   TypeScript 6 exigido pelo ESLint.
-
-## Referências
-
-- [Manifesto de dependências e scripts](../../package.json)
-- [Lockfile do Bun](../../bun.lock)
-- [Configuração TypeScript](../../tsconfig.json)
-- [Configuração ESLint](../../eslint.config.ts)
-- [Guia de desenvolvimento](../development.md)

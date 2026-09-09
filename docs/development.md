@@ -13,7 +13,7 @@ O projeto é uma biblioteca TypeScript para PostgreSQL. Não há servidor de des
 ou outro processo persistente para iniciar.
 
 O [ADR-0007: Bun como toolchain do projeto](adr/0007-bun-toolchain.md)
-registra a decisão, seus trade-offs e o papel das ferramentas auxiliares.
+registra a toolchain e o papel das ferramentas auxiliares.
 
 ## Preparar o ambiente
 
