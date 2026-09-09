@@ -51,24 +51,6 @@ bunx eslint .
 
 **Critical rule — `sql.unsafe`**: Never use `sql.unsafe` anywhere in this repository. All SQL must go through parameterized queries to prevent SQL injection. Use the query builder or parameterized `sql` tagged template literals instead.
 
-## Wiki Knowledge Base
-
-The OOR design wiki lives at `docs/vault/OOR/wiki/` (symlink to the wiki repo).
-
-Read it when you need: the _why_ behind an architectural choice, cross-component
-flows, entity models, or historical decisions. Do NOT read it for syntax,
-file-finding, or general coding tasks.
-
-Read in this order, stopping as soon as you have enough:
-
-1. `docs/vault/OOR/wiki/brief.md` — 30-second project overview (start here on a fresh session).
-2. `docs/vault/OOR/wiki/hot.md` — what changed recently.
-3. `docs/vault/OOR/wiki/index.md` — full index.
-4. `docs/vault/OOR/wiki/<section>/index.md` where `<section>` is one of `domains`, `concepts`, `decisions`, `flows`, `entities`.
-5. The specific page from the sub-index.
-
-Do not modify wiki files unless explicitly asked.
-
 @RTK.md
 
 ## Memory Policy
