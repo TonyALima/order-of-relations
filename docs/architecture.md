@@ -126,9 +126,10 @@ consultas seguem esse modelo.
 
 ## Relação com ADRs
 
-Não há ADRs versionados no repositório atualmente. Quando uma decisão
-arquitetural ganhar um ADR, este documento deve registrar somente seu efeito na
-arquitetura e referenciar o ADR para contexto e justificativa.
+As decisões arquiteturais relevantes são registradas como
+[ADRs](adr/README.md). Este documento registra somente seus efeitos na
+arquitetura; cada ADR preserva o contexto, as alternativas e a justificativa
+da decisão.
 
 Para a estrutura de classes e tipos do código, consulte o
 [diagrama de classes](class-diagram.md).
