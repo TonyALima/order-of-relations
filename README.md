@@ -85,9 +85,11 @@ Os decoradores registram metadados das entidades. `Database` usa esses metadados
 
 - [Arquitetura](docs/architecture.md)
 - [Guia de relações `ToOne`](docs/relations.md)
+- [Contratos do Repository](docs/repository.md)
 - [Architecture Decision Records](docs/adr/README.md)
 - [Diagrama de classes](docs/class-diagram.md)
 - [Convenções de documentação no código](docs/code-documentation.md)
 - [Guia de testes](docs/testing.md)
 - [Guia de desenvolvimento](docs/development.md)
 - [Guia de contribuição](CONTRIBUTING.md)
+- [Backlog de desenvolvimento](https://github.com/TonyALima/order-of-relations/issues)
