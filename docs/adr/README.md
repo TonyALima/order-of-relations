@@ -39,8 +39,7 @@ locais não exigem ADR.
 
 ## Decisões anteriores
 
-Nenhuma decisão existente será registrada retroativamente neste momento. O
-histórico disponível não contém, de forma confiável, o contexto e as
-alternativas necessários para um ADR. Registre decisões anteriores apenas se
-essas informações puderem ser recuperadas e ainda forem úteis; os novos ADRs
-seguem esta convenção a partir de agora.
+O [ADR-0002](0002-repository-query-builder-boundary.md) registra uma
+decisão anterior cujo contexto e alternativas puderam ser recuperados do vault
+legado. Outras decisões históricas só devem ser registradas quando esse mesmo
+nível de evidência estiver disponível.

@@ -131,5 +131,8 @@ As decisões arquiteturais relevantes são registradas como
 arquitetura; cada ADR preserva o contexto, as alternativas e a justificativa
 da decisão.
 
+O [ADR-0002](adr/0002-repository-query-builder-boundary.md) define a
+fronteira entre a fachada pública `Repository` e o `QueryBuilder` interno.
+
 Para a estrutura de classes e tipos do código, consulte o
 [diagrama de classes](class-diagram.md).
