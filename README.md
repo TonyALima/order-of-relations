@@ -80,5 +80,6 @@ Os decoradores registram metadados das entidades. `Database` usa esses metadados
 - [Arquitetura](docs/architecture.md)
 - [Diagrama de classes](docs/class-diagram.md)
 - [Convenções de documentação no código](docs/code-documentation.md)
+- [Guia de testes](docs/testing.md)
 - [Guia de desenvolvimento](docs/development.md)
 - [Guia de contribuição](CONTRIBUTING.md)
