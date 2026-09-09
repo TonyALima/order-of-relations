@@ -39,8 +39,10 @@ locais não exigem ADR.
 
 ## Decisões anteriores
 
-Nenhuma decisão existente será registrada retroativamente neste momento. O
-histórico disponível não contém, de forma confiável, o contexto e as
-alternativas necessários para um ADR. Registre decisões anteriores apenas se
-essas informações puderem ser recuperadas e ainda forem úteis; os novos ADRs
-seguem esta convenção a partir de agora.
+Uma decisão anterior foi importada porque seus registros preservam contexto e
+alternativas suficientes:
+
+- [ADR-0005: API estrita, sem `any`](0005-no-any-type-driven-api.md)
+
+Registre outras decisões anteriores apenas se essas informações puderem ser
+recuperadas e ainda forem úteis; os novos ADRs seguem esta convenção.
