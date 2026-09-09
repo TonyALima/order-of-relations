@@ -77,6 +77,12 @@ O repositório não contém regras de negócio, orquestração de casos de uso o
 hidratação automática de grafos de relações. Essas responsabilidades continuam
 na aplicação consumidora.
 
+As chaves primárias são identificadas nos tipos das entidades por
+`PrimaryKey<V>`. Essa marca permite que o repositório exija uma chave completa
+em operações que a usam, sem exigir valores marcados dos consumidores; a
+decisão e a limitação dos decoradores Stage 3 estão registradas no
+[ADR-0008](adr/0008-chaves-primarias-tipadas.md).
+
 ### QueryBuilder
 
 `QueryBuilder<T>` constrói consultas `SELECT` tipadas para uma entidade. Ele

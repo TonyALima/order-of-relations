@@ -41,11 +41,13 @@ locais não exigem ADR.
 
 | ADR | Decisão | Status |
 | --- | --- | --- |
+| [0001](0001-decoradores-ecmascript-stage-3.md) | Usar decoradores ECMAScript Stage 3 | Accepted |
 | [0002](0002-repository-query-builder-boundary.md) | Definir a fronteira entre `Repository` e `QueryBuilder` | Accepted |
 | [0004](0004-sql-parametrizado.md) | Usar somente SQL parametrizado | Accepted |
 | [0005](0005-no-any-type-driven-api.md) | Manter uma API estrita, sem `any` | Accepted |
 | [0006](0006-ritmo-tdd-e-organizacao-dos-testes.md) | Adotar TDD e organizar testes por escopo | Accepted |
 | [0007](0007-bun-toolchain.md) | Usar Bun como toolchain do projeto | Accepted |
+| [0008](0008-chaves-primarias-tipadas.md) | Usar chaves primárias tipadas com `PrimaryKey` | Accepted |
 
 Os ADRs 0002 e 0004 foram importados de históricos recuperados. Eles preservam
 o contexto e as alternativas que continuam necessários para orientar a

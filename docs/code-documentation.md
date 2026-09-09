@@ -51,7 +51,7 @@ Use as tags abaixo apenas quando acrescentarem informação útil:
  *
  * @throws {IncompletePrimaryKeyError} Quando uma chave primária composta estiver incompleta.
  */
-async create(entity: CreateInput<T>): Promise<PrimaryKey<T>> {
+async create(entity: UnbrandedT<T>): Promise<PKOutput<T>> {
   // ...
 }
 ```

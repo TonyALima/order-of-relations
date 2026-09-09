@@ -1,7 +1,6 @@
-import { Repository } from '../../../src';
+import { InheritanceSearchType, Repository } from '../../../src';
 import { User } from '../entities/User';
 import { AdminUser } from '../entities/AdminUser';
-import { InheritanceSearchType } from '../../../src/query-builder/types';
 import { db } from '../db';
 
 export class UserHierarchyService {

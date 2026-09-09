@@ -21,3 +21,4 @@ export type {
   Conditions,
   FindOptions,
 } from './query-builder/types';
+export { InheritanceSearchType } from './query-builder/types';
