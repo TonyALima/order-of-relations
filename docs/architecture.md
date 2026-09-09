@@ -38,7 +38,9 @@ mapeamento, como a presença de uma chave primária e a nulabilidade explícita
 de campos comuns e relações.
 
 Esse nível define o mapeamento; ele não abre conexões, cria tabelas nem emite
-consultas.
+consultas. A escolha pelos decoradores ECMAScript Stage 3 e pelo armazenamento
+próprio dos metadados é registrada no
+[ADR-0001](adr/0001-decoradores-ecmascript-stage-3.md).
 
 ### Metadados
 
