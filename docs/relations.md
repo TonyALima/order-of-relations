@@ -1,8 +1,6 @@
 # Relações `ToOne`
 
 `ToOne` representa uma referência de uma entidade para uma única entidade alvo.
-É a única API de relação exposta pela biblioteca: não há `OneToMany` nem
-`ManyToMany`.
 
 O exemplo completo em [examples/relations/index.ts](../examples/relations/index.ts)
 cria e remove suas próprias tabelas de desenvolvimento. Execute-o com uma URL
