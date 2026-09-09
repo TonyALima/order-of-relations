@@ -1,5 +1,4 @@
 import { Repository } from '../../../src';
-import type { PKInput } from '../../../src/types';
 import { db } from '../db';
 import { User } from '../entities/User';
 
@@ -19,7 +18,7 @@ export class UserService {
     return this.userRepository.findMany();
   }
 
-  async findOne(key: PKInput<User>) {
+  async findOne(key: { id: number }) {
     return this.userRepository.findById(key);
   }
 }

@@ -37,10 +37,6 @@ entre componentes, tenham alternativas relevantes, sejam difíceis de reverter
 ou precisem preservar o motivo para mudanças futuras. Decisões triviais ou
 locais não exigem ADR.
 
-## Decisões anteriores
+## Decisões registradas
 
-Nenhuma decisão existente será registrada retroativamente neste momento. O
-histórico disponível não contém, de forma confiável, o contexto e as
-alternativas necessários para um ADR. Registre decisões anteriores apenas se
-essas informações puderem ser recuperadas e ainda forem úteis; os novos ADRs
-seguem esta convenção a partir de agora.
+- [ADR-0008: Chaves primárias tipadas com `PrimaryKey`](0008-chaves-primarias-tipadas.md)

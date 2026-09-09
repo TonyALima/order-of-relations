@@ -1,5 +1,4 @@
-import { Entity, Column, NotNullable } from '../../../src';
-import { COLUMN_TYPE } from '../../../src/core/sql-types/sql-types';
+import { COLUMN_TYPE, Entity, Column, NotNullable } from '../../../src';
 import { User } from './User';
 import { db } from '../db';
 

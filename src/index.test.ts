@@ -18,6 +18,7 @@ import {
   UndefinedWhereConditionError,
   RepositoryError,
   IncompletePrimaryKeyError,
+  InheritanceSearchType,
 } from './index';
 
 describe('public API exports', () => {
@@ -28,6 +29,7 @@ describe('public API exports', () => {
     expect(ToOne).toBeFunction();
     expect(Database).toBeDefined();
     expect(Repository).toBeFunction();
+    expect(InheritanceSearchType).toBeDefined();
   });
 
   test('all error classes are exported', () => {

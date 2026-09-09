@@ -1,5 +1,4 @@
-import { Entity, Column, PrimaryColumn, NotNullable, type PrimaryKey } from '../../../src';
-import { COLUMN_TYPE } from '../../../src/core/sql-types/sql-types';
+import { COLUMN_TYPE, Entity, Column, PrimaryColumn, NotNullable, type PrimaryKey } from '../../../src';
 import { db } from '../db';
 
 @Entity(db)
