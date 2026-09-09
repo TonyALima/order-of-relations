@@ -1,0 +1,7 @@
+#!/usr/bin/env sh
+
+if ! sed -n '1p' "$1" | grep -Eq '^[^(:![:space:]]+(\([^()]+\))?!?: .+'; then
+  echo 'A mensagem de commit deve seguir Conventional Commits 1.0.0.' >&2
+  echo 'Exemplo: feat(repository): adiciona busca por id' >&2
+  exit 1
+fi
