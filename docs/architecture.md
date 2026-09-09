@@ -38,7 +38,9 @@ mapeamento, como a presença de uma chave primária e a nulabilidade explícita
 de campos comuns e relações.
 
 Esse nível define o mapeamento; ele não abre conexões, cria tabelas nem emite
-consultas.
+consultas. A escolha pelos decoradores ECMAScript Stage 3 e pelo armazenamento
+próprio dos metadados é registrada no
+[ADR-0001](adr/0001-decoradores-ecmascript-stage-3.md).
 
 ### Metadados
 
@@ -91,6 +93,14 @@ A única integração de infraestrutura é `SQL` do Bun, usado para compor
 fragmentos parametrizados e se conectar ao PostgreSQL. O PostgreSQL é a única
 base suportada; tipos de coluna, geração no banco, tabelas, restrições e
 consultas seguem esse modelo.
+
+Valores de entidades e filtros são vinculados por templates `sql`. Nomes de
+tabela e coluna são identificadores, não parâmetros: eles vêm dos metadados e
+passam pelo helper `sql(nome)` do Bun. Tipos de DDL, operadores e direções são
+fragmentos fechados definidos pelo ORM. A criação de esquema não usa
+parâmetros de valores; a instrução composta de herança usa `.simple()`, cujo
+protocolo não aceita parâmetros. `sql.unsafe` é proibido em todos esses
+caminhos, conforme o [ADR-0004](adr/0004-sql-parametrizado.md).
 
 ## Fluxos principais
 

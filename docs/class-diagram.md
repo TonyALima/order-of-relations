@@ -101,18 +101,6 @@ classDiagram
 
     Database *-- MetadataStorage : owns
 
-    %% ── core/container ───────────────────────────────────────────────────────
-    namespace core_container {
-        class Container {
-            <<singleton>>
-            -instances: Map~Constructor, unknown~
-            +register~T~(token, instance): void
-            +resolve~T~(target): T
-        }
-    }
-
-    Database --> Container : resolves services
-
     %% ── core/repository ──────────────────────────────────────────────────────
     namespace core_repository {
         class Repository~T~ {
@@ -193,17 +181,9 @@ classDiagram
             <<decorator>>
             +ToOne~T~(options): PropertyDecorator
         }
-        class ServiceDecorators {
-            <<decorator>>
-            +Service(): ClassDecorator
-            +Inject(type): PropertyDecorator
-            +InjectRepository(entity): PropertyDecorator
-        }
     }
 
     Entity --> MetadataStorage : registers EntityMetadata
     Column --> MetadataStorage : registers ColumnMetadata
     ToOne --> MetadataStorage : registers RelationMetadata
-    ServiceDecorators --> Container : registers & resolves
-    ServiceDecorators --> Repository : creates via InjectRepository
 ```
