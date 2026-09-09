@@ -13,7 +13,13 @@ export type Unbrand<V> = V extends PrimaryKey<infer U> ? U : V;
 /** Constraint for primary-key fields whose declaration may be omitted (autogeneration). */
 export type NullablePrimaryKey<V> = PrimaryKey<V> | undefined;
 
-/** Strategy for producing a column's value when the caller omits it. */
+/**
+ * Strategy for producing a column's value when the caller omits it.
+ *
+ * `dbSide` returns a trusted, closed DDL expression for `DEFAULT`; it must not
+ * include external input or call `sql.unsafe`, because DDL expressions are not
+ * bound value parameters.
+ */
 export type Autogeneration<Value> =
   | { clientSide: () => Value }
   | { dbSide: (sql: SQL) => SQL.Query<unknown> | undefined };
