@@ -6,17 +6,12 @@ Accepted
 
 ## Contexto
 
-Uma API pública tipada perde seu valor quando aceita ou retorna `any`: o
-compilador deixa de verificar a forma da entidade e dos valores que cruzam a
-API. Isso é especialmente relevante para um ORM, em que uma incompatibilidade
-entre propriedade, chave primária ou condição pode só aparecer no PostgreSQL.
+Uma API pública tipada perde valor quando aceita ou retorna `any`, pois o
+compilador deixa de verificar entidades e valores. Em um ORM, incompatibilidades
+de propriedade, chave ou condição podem só aparecer no PostgreSQL.
 
-Esta decisão histórica foi recuperada de registros que preservam seu contexto.
-Ela foi conferida contra o projeto atual: `tsconfig.json` mantém `strict`, o
-perfil recomendado de `typescript-eslint` está ativo em `eslint.config.ts` e
-configura `@typescript-eslint/no-explicit-any` como erro, e o barril público em
-`src/index.ts` expõe contratos genéricos como `Repository<T>`, `Conditions<T>`
-e `PrimaryKey<V>`.
+O projeto usa TypeScript estrito, proíbe `any` explícito no ESLint e expõe
+contratos públicos genéricos.
 
 ## Decisão
 
@@ -35,18 +30,6 @@ Por exemplo, `Conditions<T>` associa cada propriedade de `T` a um
 em `findById()`. Esses contratos preservam a relação entre entidade, chave e
 valor de comparação; não validam, por si só, dados recebidos do banco ou
 metadados criados em tempo de execução.
-
-## Alternativas consideradas
-
-- Permitir `any` apenas nos módulos internos e proibi-lo na API pública. Foi
-  rejeitada porque tipos internos participam das assinaturas públicas e esse
-  limite tende a vazar.
-- Substituir todos os tipos por `unknown`. Foi rejeitada: `unknown` é correto
-  em fronteiras opacas, mas não representa relações já conhecidas entre os
-  tipos da entidade, das chaves e das consultas.
-- Aceitar entradas frouxas e depender de erros do PostgreSQL. Foi rejeitada
-  porque transforma incompatibilidades que podem ser expressas nos contratos
-  em falhas tardias de execução.
 
 ## Consequências
 
