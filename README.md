@@ -35,6 +35,12 @@ O exemplo de herança pode ser executado da mesma forma:
 bun examples/inheritance/index.ts
 ```
 
+Para relações `ToOne` com chave simples e composta, use um banco de desenvolvimento:
+
+```bash
+bun examples/relations/index.ts
+```
+
 O ponto de partida para usar a biblioteca é definir uma entidade, conectar ao banco e criar um repositório:
 
 ```ts
@@ -78,6 +84,7 @@ Os decoradores registram metadados das entidades. `Database` usa esses metadados
 ## Documentação
 
 - [Arquitetura](docs/architecture.md)
+- [Guia de relações `ToOne`](docs/relations.md)
 - [Architecture Decision Records](docs/adr/README.md)
 - [Diagrama de classes](docs/class-diagram.md)
 - [Convenções de documentação no código](docs/code-documentation.md)
