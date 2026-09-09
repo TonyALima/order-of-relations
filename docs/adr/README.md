@@ -37,12 +37,14 @@ entre componentes, tenham alternativas relevantes, sejam difíceis de reverter
 ou precisem preservar o motivo para mudanças futuras. Decisões triviais ou
 locais não exigem ADR.
 
-## Decisões anteriores
+## Decisões registradas
 
-Uma decisão anterior foi importada porque seus registros preservam contexto e
-alternativas suficientes:
+| ADR | Decisão | Status |
+| --- | --- | --- |
+| [0004](0004-sql-parametrizado.md) | Usar somente SQL parametrizado | Accepted |
+| [0005](0005-no-any-type-driven-api.md) | Manter uma API estrita, sem `any` | Accepted |
+| [0006](0006-ritmo-tdd-e-organizacao-dos-testes.md) | Adotar TDD e organizar testes por escopo | Accepted |
 
-- [ADR-0005: API estrita, sem `any`](0005-no-any-type-driven-api.md)
-
-Registre outras decisões anteriores apenas se essas informações puderem ser
-recuperadas e ainda forem úteis; os novos ADRs seguem esta convenção.
+O ADR-0004 foi importado do histórico recuperado da wiki legada. Ele preserva
+o contexto e as alternativas que continuam necessários para orientar a
+composição SQL atual.
