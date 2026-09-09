@@ -71,3 +71,5 @@ Para a explicação arquitetural, consulte a [arquitetura](architecture.md); o
 [diagrama de classes](class-diagram.md) apresenta as relações entre os componentes.
 As convenções para comentários e TSDoc estão em
 [Documentação no código](code-documentation.md).
+Para a estratégia, a organização e a execução da suíte, consulte o
+[Guia de testes](testing.md).
