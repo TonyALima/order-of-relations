@@ -6,16 +6,22 @@ Accepted
 
 ## Contexto
 
-O mapeamento de entidades do ORM é declarado por decoradores, como `@Entity`,
-`@Column` e `@ToOne`. Os decoradores legados do TypeScript e os decoradores
-ECMAScript Stage 3 possuem assinaturas incompatíveis; a escolha define como os
-metadados são registrados e quais requisitos são impostos aos consumidores.
+O ORM mantém o mapeamento junto às classes de entidade. Decoradores como
+`@Entity`, `@Column` e `@ToOne` descrevem tabelas, colunas e relações; essas
+informações precisam ser reunidas durante a declaração da classe para que
+`Database` possa criar o esquema e para que repositórios e consultas conheçam
+o mapeamento.
 
-O projeto já usa os contextos dos decoradores Stage 3. Os decoradores de campo
-registram dados em `context.metadata` e `@Entity` consolida esses dados em um
-`MetadataStorage` pertencente à instância de `Database`. A configuração do
-TypeScript não habilita `experimentalDecorators`, e as dependências não incluem
-`reflect-metadata`.
+Há dois modelos de decoradores em TypeScript: os decoradores legados e os
+decoradores ECMAScript Stage 3. Eles têm assinaturas, ciclo de execução e
+mecanismos de metadados incompatíveis. A biblioteca precisa estabelecer um
+único modelo antes de ampliar os decoradores, pois essa escolha orienta tanto
+sua implementação quanto a configuração exigida de quem a consome.
+
+Os metadados também devem permanecer associados à instância de `Database`
+usada pela entidade. Aplicações e testes podem manter conjuntos de entidades
+independentes em instâncias diferentes, portanto o registro não pode introduzir
+estado global compartilhado entre elas.
 
 ## Decisão
 
