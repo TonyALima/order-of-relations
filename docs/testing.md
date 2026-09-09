@@ -3,7 +3,8 @@
 Este documento descreve a estratégia e as convenções usadas para testar
 `order-of-relations`. A suíte usa a API [`bun:test`](https://bun.sh/docs/test/writing-tests)
 e deve validar comportamentos e contratos observáveis, não detalhes internos de
-implementação.
+implementação. A decisão que adotou o ciclo de desenvolvimento e a organização
+por escopo está registrada no [ADR-0006](adr/0006-ritmo-tdd-e-organizacao-dos-testes.md).
 
 ## Estratégia
 
