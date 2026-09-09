@@ -37,10 +37,12 @@ entre componentes, tenham alternativas relevantes, sejam difíceis de reverter
 ou precisem preservar o motivo para mudanças futuras. Decisões triviais ou
 locais não exigem ADR.
 
-## Decisões anteriores
+## Decisões registradas
 
-Nenhuma decisão existente será registrada retroativamente neste momento. O
-histórico disponível não contém, de forma confiável, o contexto e as
-alternativas necessários para um ADR. Registre decisões anteriores apenas se
-essas informações puderem ser recuperadas e ainda forem úteis; os novos ADRs
-seguem esta convenção a partir de agora.
+| ADR | Decisão | Status |
+| --- | --- | --- |
+| [0004](0004-sql-parametrizado.md) | Usar somente SQL parametrizado | Accepted |
+
+O ADR-0004 foi importado do histórico recuperado da wiki legada. Ele preserva
+o contexto e as alternativas que continuam necessários para orientar a
+composição SQL atual.
