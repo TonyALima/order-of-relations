@@ -42,6 +42,7 @@ locais não exigem ADR.
 | ADR | Decisão | Status |
 | --- | --- | --- |
 | [0004](0004-sql-parametrizado.md) | Usar somente SQL parametrizado | Accepted |
+| [0005](0005-no-any-type-driven-api.md) | Manter uma API estrita, sem `any` | Accepted |
 | [0006](0006-ritmo-tdd-e-organizacao-dos-testes.md) | Adotar TDD e organizar testes por escopo | Accepted |
 
 O ADR-0004 foi importado do histórico recuperado da wiki legada. Ele preserva
