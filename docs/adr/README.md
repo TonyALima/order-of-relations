@@ -37,6 +37,13 @@ entre componentes, tenham alternativas relevantes, sejam difíceis de reverter
 ou precisem preservar o motivo para mudanças futuras. Decisões triviais ou
 locais não exigem ADR.
 
-## Decisões importadas
+## Decisões registradas
 
-- [ADR-0006: Adotar TDD e organizar testes por escopo](0006-ritmo-tdd-e-organizacao-dos-testes.md)
+| ADR | Decisão | Status |
+| --- | --- | --- |
+| [0004](0004-sql-parametrizado.md) | Usar somente SQL parametrizado | Accepted |
+| [0006](0006-ritmo-tdd-e-organizacao-dos-testes.md) | Adotar TDD e organizar testes por escopo | Accepted |
+
+O ADR-0004 foi importado do histórico recuperado da wiki legada. Ele preserva
+o contexto e as alternativas que continuam necessários para orientar a
+composição SQL atual.

@@ -84,3 +84,4 @@ Os decoradores registram metadados das entidades. `Database` usa esses metadados
 - [Guia de testes](docs/testing.md)
 - [Guia de desenvolvimento](docs/development.md)
 - [Guia de contribuição](CONTRIBUTING.md)
+- [Backlog de desenvolvimento](https://github.com/TonyALima/order-of-relations/issues)
