@@ -131,6 +131,14 @@ export class Repository<T extends object> {
     `;
   }
 
+  /**
+   * Updates only the supplied fields of the row identified by its primary key.
+   *
+   * Omitted columns and relations retain their stored values.
+   *
+   * @throws {IncompletePrimaryKeyError} When a primary key is incomplete.
+   * @throws {EmptyUpdateError} When no non-primary-key field is supplied.
+   */
   async update(entity: Partial<UnbrandedT<T>> & PKInput<T>): Promise<void> {
     const db = this.db;
     const meta = db.getMetadata().get(this.entity)!;
