@@ -34,7 +34,11 @@ describe('Integration: Repository CRUD', () => {
   });
 
   afterEach(async () => {
-    await db.drop();
+    try {
+      await db.drop();
+    } finally {
+      await db.getConnection().close();
+    }
   });
 
   test('create() inserts a row that can be retrieved', async () => {
@@ -103,7 +107,11 @@ describe('Integration: Repository CRUD with composite primary key', () => {
   });
 
   afterEach(async () => {
-    await db.drop();
+    try {
+      await db.drop();
+    } finally {
+      await db.getConnection().close();
+    }
   });
 
   test('findById() returns the row matching every primary key field', async () => {
@@ -211,7 +219,11 @@ describe('Integration: Repository partial update', () => {
   });
 
   afterEach(async () => {
-    await db.drop();
+    try {
+      await db.drop();
+    } finally {
+      await db.getConnection().close();
+    }
   });
 
   test('update() with a partial entity changes only the provided fields', async () => {
