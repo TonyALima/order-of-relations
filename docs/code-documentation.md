@@ -47,8 +47,6 @@ Use as tags abaixo apenas quando acrescentarem informação útil:
 /**
  * Persiste a entidade e retorna sua chave primária.
  *
- * A operação participa da transação ativa quando houver uma.
- *
  * @throws {IncompletePrimaryKeyError} Quando uma chave primária composta estiver incompleta.
  */
 async create(entity: UnbrandedT<T>): Promise<PKOutput<T>> {
