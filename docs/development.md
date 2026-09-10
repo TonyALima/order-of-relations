@@ -56,6 +56,7 @@ Use-os somente com o banco de desenvolvimento configurado acima:
 ```bash
 bun examples/basic-crud/index.ts
 bun examples/inheritance/index.ts
+bun examples/relations/index.ts
 ```
 
 ## Estrutura do repositório
@@ -65,8 +66,8 @@ src/                    implementação pública da biblioteca
   core/                  banco, metadados, repositórios e tipos SQL
   decorators/            decoradores de entidades, colunas e relações
   query-builder/         construção de consultas tipadas
-tests/                   testes de integração com PostgreSQL
-examples/                fluxos executáveis de CRUD e herança
+tests/                   testes de integração: CRUD em SQLite em memória e cenários PostgreSQL
+examples/                fluxos executáveis de CRUD, herança e relações
 docs/                    documentação do projeto
 ```
 
