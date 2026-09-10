@@ -131,7 +131,7 @@ classDiagram
             -entity: Constructor~T~
             -db: Database
             -conditions: Condition[]
-            -orderByClause?: { column: keyof T, direction: "ASC" | "DESC" }
+            -orderByClause?: OrderByClause
             -limitValue?: number
             -offsetValue?: number
             +constructor(entity: Constructor~T~, db: Database)
@@ -176,12 +176,18 @@ classDiagram
             ONLY
             SUBCLASSES
         }
+        class OrderByClause {
+            <<type>>
+            +column: keyof T
+            +direction: "ASC" | "DESC"
+        }
     }
 
     Repository ..> QueryBuilder : creates for reads
     QueryBuilder --> Database : uses
     QueryBuilder o-- Condition : accumulates
     QueryBuilder --> FindOptions : applies
+    QueryBuilder --> OrderByClause : stores
     Conditions --> FieldConditionBuilder : maps fields to
     FieldConditionBuilder --> Condition : produces
     FindOptions --> Conditions
