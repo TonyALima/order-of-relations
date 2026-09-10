@@ -118,7 +118,7 @@ classDiagram
             +findById(key: PKInput~T~) Promise~T | null~
             +create(entity: UnbrandedT~T~) Promise~PKOutput~T~~
             +delete(key: PKInput~T~) Promise~void~
-            +update(entity: UnbrandedT~T~ & PKInput~T~) Promise~void~
+            +update(entity: Partial~UnbrandedT~T~~ & PKInput~T~) Promise~void~
         }
     }
 

@@ -11,7 +11,7 @@ Reduzir o código repetitivo entre modelos TypeScript e tabelas PostgreSQL, mant
 - Mapeamento de entidades, colunas e chaves primárias com decoradores.
 - Relações `ToOne`, incluindo chaves estrangeiras compostas e nulabilidade explícita.
 - Criação e remoção de tabelas a partir dos metadados das entidades.
-- Repositórios para criar, buscar, atualizar e remover registros.
+- Repositórios para criar, buscar, atualizar parcialmente e remover registros.
 - Consultas tipadas com filtros, ordenação, limite e deslocamento.
 - Herança de entidades com discriminador e geração de chaves no cliente ou no banco.
 

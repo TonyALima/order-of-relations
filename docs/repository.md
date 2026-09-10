@@ -12,7 +12,7 @@ As assinaturas implementadas são:
 | --- | --- | --- |
 | `create` | `(entity: UnbrandedT<T>) => Promise<PKOutput<T>>` | Insere a entidade e devolve todos os campos da chave primária. |
 | `findById` | `(key: PKInput<T>) => Promise<T \| null>` | Busca pela chave primária completa. |
-| `update` | `(entity: UnbrandedT<T> & PKInput<T>) => Promise<void>` | Atualiza a linha identificada pela chave primária completa. |
+| `update` | `(entity: Partial<UnbrandedT<T>> & PKInput<T>) => Promise<void>` | Atualiza os campos enviados na linha identificada pela chave primária completa. |
 | `delete` | `(key: PKInput<T>) => Promise<void>` | Remove a linha identificada pela chave primária completa. |
 
 `UnbrandedT`, `PKInput` e `PKOutput` são detalhes de implementação usados nas
@@ -67,7 +67,7 @@ const created = await sessions.create({ name: 'Planning' });
 
 const session = await sessions.findById(created);
 if (session) {
-  await sessions.update({ ...session, note: 'Confirmed' });
+  await sessions.update({ id: session.id, note: 'Confirmed' });
 }
 
 await sessions.delete(created);
@@ -75,8 +75,9 @@ await sessions.delete(created);
 
 `findById` retorna `null` quando não encontra uma linha. `update` e `delete`
 resolvem com `void`, inclusive quando nenhuma linha corresponde à chave. O
-`update` recebe a forma da entidade com a PK e escreve os campos não-PK; ele
-não é uma operação de atualização parcial.
+`update` é uma operação parcial: requer a PK completa e escreve somente os
+campos não-PK fornecidos. Colunas e relações omitidas preservam os valores já
+armazenados.
 
 ## Autogeração
 
@@ -183,6 +184,8 @@ em runtime para chamadas JavaScript ou para código que burlou os tipos:
 - `IncompletePrimaryKeyError` é lançado por `findById`, `delete` e `update`
   quando falta qualquer parte da PK. Em `create`, ele é lançado quando falta
   uma parte da PK que não tem `autogeneration`.
+- `EmptyUpdateError` é lançado por `update` quando a entrada contém somente a
+  PK, sem nenhum campo não-PK para atualizar.
 - `DatabaseNotConnectedError` pode ser lançado quando o `Database` ainda não
   recebeu `connect()`.
 

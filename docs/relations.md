@@ -74,4 +74,5 @@ await users.create({}); // `profile_id` recebe NULL porque a relação é opcion
 `Repository.create()` e `Repository.update()` copiam cada propriedade de chave
 primária da entidade relacionada para suas colunas de FK. Consultas não carregam
 a entidade relacionada automaticamente; use o repositório dela quando precisar
-dos seus dados.
+dos seus dados. Em `update()`, omitir a propriedade da relação preserva a FK
+existente; fornecê-la como `null` ou `undefined` limpa a FK.
