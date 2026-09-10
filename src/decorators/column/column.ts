@@ -1,8 +1,7 @@
 import type { ColumnMetadata } from '../../core/metadata/metadata';
 import type { PrimaryKey, NullablePrimaryKey, Autogeneration, ColumnOptions } from '../../types';
 import { COLUMNS_KEY } from '../entity/entity';
-import { MissingNullabilityDecoratorError } from '../nullable/nullable.errors';
-import { NULLABLE_KEY, type NullableField, type NotNullableField } from '../nullable/nullable';
+import { type NullableField, type NotNullableField } from '../nullable/nullable';
 
 function registerColumn(
   options: ColumnOptions,
@@ -11,20 +10,14 @@ function registerColumn(
 ) {
   const columns: ColumnMetadata[] = ((context.metadata[COLUMNS_KEY] as ColumnMetadata[]) ??= []);
 
-  const nullableMap = context.metadata[NULLABLE_KEY] as Map<string, boolean> | undefined;
   const propertyName = String(context.name);
-  const nullableEntry = nullableMap?.get(propertyName);
-
-  if (!primary && nullableEntry === undefined) {
-    throw new MissingNullabilityDecoratorError('Column', propertyName);
-  }
 
   columns.push({
     propertyName,
     columnName: options?.name ?? propertyName,
     type: options.type,
     primary,
-    nullable: primary ? false : nullableEntry!,
+    nullable: false,
     autogeneration: options.autogeneration,
   });
 }

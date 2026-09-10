@@ -244,10 +244,10 @@ classDiagram
     Entity --> EntityMetadata : registers
     Column --> ColumnMetadata : records
     PrimaryColumn --> ColumnMetadata : records primary key
-    Nullable ..> Column : required before
-    NotNullable ..> Column : required before
-    Nullable ..> ToOne : required before
-    NotNullable ..> ToOne : required before
+    Nullable ..> Column : required
+    NotNullable ..> Column : required
+    Nullable ..> ToOne : required
+    NotNullable ..> ToOne : required
     ToOne --> RelationMetadata : records
     ToOne --> ToOneOptions
     Column --> ColumnOptions

@@ -1,8 +1,6 @@
 import { RelationType, type RelationMetadata } from '../../core/metadata/metadata';
 import type { Constructor } from '../../core/utils/utils';
 import { RELATIONS_KEY } from '../entity/entity';
-import { NULLABLE_KEY } from '../nullable/nullable';
-import { MissingNullabilityDecoratorError } from '../nullable/nullable.errors';
 
 export interface ToOneOptions<TType> {
   target: () => Constructor<TType>;
@@ -19,16 +17,10 @@ export function ToOne<TType>(options: ToOneOptions<TType>) {
 
     const propertyName = context.name.toString();
 
-    const nullableMap = context.metadata[NULLABLE_KEY] as Map<string, boolean> | undefined;
-    const nullable = nullableMap?.get(propertyName);
-    if (nullable === undefined) {
-      throw new MissingNullabilityDecoratorError('ToOne', propertyName);
-    }
-
     relations.push({
       propertyName,
       relationType: RelationType.TO_ONE,
-      nullable,
+      nullable: false,
       columns: null,
       getTarget: options.target,
     });

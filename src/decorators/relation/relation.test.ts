@@ -55,7 +55,7 @@ describe('@ToOne decorator', () => {
     ]);
   });
 
-  test('stores nullable: true on the relation when @Nullable is applied', () => {
+  test('stores nullable: true on the relation in either decorator order', () => {
     @Entity(db)
     class Owner {
       @PrimaryColumn({ type: COLUMN_TYPE.SERIAL })
@@ -74,9 +74,21 @@ describe('@ToOne decorator', () => {
 
     const relation = db.getMetadata().get(Pet)!.relations[0]!;
     expect(relation.nullable).toBe(true);
+
+    @Entity(db)
+    class ReversedPet {
+      @PrimaryColumn({ type: COLUMN_TYPE.SERIAL })
+      id!: PrimaryKey<number>;
+
+      @Nullable
+      @ToOne({ target: () => Owner })
+      owner?: Owner;
+    }
+
+    expect(db.getMetadata().get(ReversedPet)!.relations[0]!.nullable).toBe(true);
   });
 
-  test('stores nullable: false on the relation when @NotNullable is applied', () => {
+  test('stores nullable: false on the relation in either decorator order', () => {
     @Entity(db)
     class Country {
       @PrimaryColumn({ type: COLUMN_TYPE.SERIAL })
@@ -95,6 +107,18 @@ describe('@ToOne decorator', () => {
 
     const relation = db.getMetadata().get(City)!.relations[0]!;
     expect(relation.nullable).toBe(false);
+
+    @Entity(db)
+    class ReversedCity {
+      @PrimaryColumn({ type: COLUMN_TYPE.SERIAL })
+      id!: PrimaryKey<number>;
+
+      @NotNullable
+      @ToOne({ target: () => Country })
+      country!: Country;
+    }
+
+    expect(db.getMetadata().get(ReversedCity)!.relations[0]!.nullable).toBe(false);
   });
 
   test('resolves columnType from target primary column', () => {
