@@ -57,8 +57,11 @@ describe('Integration: Relations CRUD', () => {
   });
 
   afterEach(async () => {
-    await db.drop();
-    await db.getConnection().close();
+    try {
+      await db.drop();
+    } finally {
+      await db.getConnection().close();
+    }
   });
 
   test('create() inserts a row that can be retrieved', async () => {

@@ -1,4 +1,4 @@
-import { test, expect, describe, beforeEach } from 'bun:test';
+import { test, expect, describe, beforeEach, afterEach } from 'bun:test';
 
 import { Database } from './database';
 import { DatabaseError, DatabaseNotConnectedError } from './database.errors';
@@ -29,9 +29,11 @@ describe('DatabaseNotConnectedError', () => {
 
 describe('Database', () => {
   let db: Database;
+  let connectedDatabases: Database[];
 
   beforeEach(() => {
     db = new Database();
+    connectedDatabases = [];
 
     db.getMetadata().set(DatabaseTestEntity, {
       tableName: 'database_test_entity',
@@ -59,6 +61,21 @@ describe('Database', () => {
       relations: [],
     });
   });
+
+  afterEach(async () => {
+    for (const database of connectedDatabases) {
+      try {
+        await database.drop();
+      } finally {
+        await database.getConnection().close();
+      }
+    }
+  });
+
+  const connect = (database: Database, url?: string) => {
+    database.connect(url);
+    connectedDatabases.push(database);
+  };
 
   describe('create()', () => {
     test('creates a table with a composite primary key', async () => {
@@ -91,7 +108,7 @@ describe('Database', () => {
         relations: [],
       });
 
-      compositeDb.connect('sqlite://:memory:');
+      connect(compositeDb, 'sqlite://:memory:');
       await compositeDb.create();
 
       const sql = compositeDb.getConnection();
@@ -142,7 +159,7 @@ describe('Database', () => {
         relations: [],
       });
 
-      nullDb.connect('sqlite://:memory:');
+      connect(nullDb, 'sqlite://:memory:');
       await nullDb.create();
 
       const sql = nullDb.getConnection();
@@ -160,7 +177,7 @@ describe('Database', () => {
     });
 
     test('applies the mapped schema to an in-memory SQLite database', async () => {
-      db.connect('sqlite://:memory:');
+      connect(db, 'sqlite://:memory:');
 
       await db.create();
 
@@ -234,7 +251,7 @@ describe('Database', () => {
     });
 
     test('adds FK column with auto-resolved name (<propertyName>_<pkPropertyName>) to the owning table', async () => {
-      db.connect(process.env.DATABASE_URL);
+      connect(db, process.env.DATABASE_URL);
       await db.drop();
       await db.create();
 
@@ -250,7 +267,7 @@ describe('Database', () => {
     });
 
     test('FK column references the correct target table and primary column', async () => {
-      db.connect(process.env.DATABASE_URL);
+      connect(db, process.env.DATABASE_URL);
       await db.drop();
       await db.create();
 
@@ -294,7 +311,7 @@ describe('Database', () => {
         ],
       });
 
-      db.connect(process.env.DATABASE_URL);
+      connect(db, process.env.DATABASE_URL);
       await db.drop();
       await db.create();
 
@@ -357,7 +374,7 @@ describe('Database', () => {
         ],
       });
 
-      compositeDb.connect(process.env.DATABASE_URL);
+      connect(compositeDb, process.env.DATABASE_URL);
       await compositeDb.drop();
       await compositeDb.create();
 
@@ -376,7 +393,7 @@ describe('Database', () => {
 
   describe('drop()', () => {
     test('removes the mapped tables from an in-memory SQLite database', async () => {
-      db.connect('sqlite://:memory:');
+      connect(db, 'sqlite://:memory:');
 
       await db.drop();
 

@@ -60,8 +60,11 @@ describe('Integration: @PrimaryColumn autogeneration', () => {
   });
 
   afterAll(async () => {
-    await db.drop();
-    await db.getConnection().close();
+    try {
+      await db.drop();
+    } finally {
+      await db.getConnection().close();
+    }
   });
 
   test('dbSide builder returning a fragment: CREATE TABLE emits DEFAULT clause', async () => {
