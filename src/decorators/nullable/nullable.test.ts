@@ -16,14 +16,14 @@ describe('MissingNullabilityDecoratorError', () => {
     const err = new MissingNullabilityDecoratorError('Column', 'email');
     expect(err.name).toBe('MissingNullabilityDecoratorError');
     expect(err.message).toBe(
-      "@Column on 'email' requires @Nullable or @NotNullable to be applied first.",
+      "@Column on 'email' requires @Nullable or @NotNullable.",
     );
   });
 
   test('has correct message for @ToOne', () => {
     const err = new MissingNullabilityDecoratorError('ToOne', 'profile');
     expect(err.message).toBe(
-      "@ToOne on 'profile' requires @Nullable or @NotNullable to be applied first.",
+      "@ToOne on 'profile' requires @Nullable or @NotNullable.",
     );
   });
 

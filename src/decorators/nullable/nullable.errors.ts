@@ -6,7 +6,7 @@ export class MissingNullabilityDecoratorError extends MetadataError {
     readonly propertyName: string,
   ) {
     super(
-      `@${decoratorName} on '${propertyName}' requires @Nullable or @NotNullable to be applied first.`,
+      `@${decoratorName} on '${propertyName}' requires @Nullable or @NotNullable.`,
     );
   }
 }

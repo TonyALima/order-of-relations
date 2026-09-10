@@ -29,8 +29,8 @@ referencia. Ainda assim, todas as classes devem ter sido registradas com
 `@Entity` antes de chamar `db.create()` ou de consultar os metadados; caso
 contrário, a relação não encontra sua entidade alvo.
 
-`@Nullable` ou `@NotNullable` é obrigatório e deve ser aplicado antes de
-`@ToOne` (o decorador mais próximo da propriedade é aplicado primeiro). Uma
+`@Nullable` ou `@NotNullable` é obrigatório e pode ser aplicado em qualquer
+ordem em relação a `@ToOne`. Uma
 relação opcional recebe colunas de FK que aceitam `NULL`; uma relação obrigatória
 cria essas colunas com `NOT NULL`.
 
