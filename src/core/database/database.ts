@@ -5,6 +5,26 @@ import { getColumnTypeDefinition } from '../sql-types/sql-types';
 import { sqlJoin } from '../utils/utils';
 import { DatabaseNotConnectedError } from './database.errors';
 
+const MAX_IDENTIFIER_LENGTH = 63;
+const DISCRIMINATOR_INDEX_PREFIX = 'idx_discriminator_';
+const UTF8_MAX_BYTES_PER_CHARACTER = 4;
+const HASH_SUFFIX_SEPARATOR = '_';
+const HASH_MAX_HEXADECIMAL_LENGTH = 16;
+const TABLE_NAME_PREFIX_LENGTH = Math.floor(
+  (MAX_IDENTIFIER_LENGTH -
+    DISCRIMINATOR_INDEX_PREFIX.length -
+    HASH_SUFFIX_SEPARATOR.length -
+    HASH_MAX_HEXADECIMAL_LENGTH) /
+    UTF8_MAX_BYTES_PER_CHARACTER,
+);
+
+export function discriminatorIndexName(tableName: string): string {
+  const name = `${DISCRIMINATOR_INDEX_PREFIX}${tableName}`;
+  if (new TextEncoder().encode(name).length <= MAX_IDENTIFIER_LENGTH) return name;
+
+  return `${DISCRIMINATOR_INDEX_PREFIX}${tableName.slice(0, TABLE_NAME_PREFIX_LENGTH)}${HASH_SUFFIX_SEPARATOR}${Bun.hash(tableName).toString(16)}`;
+}
+
 export class Database {
   constructor() {
     this.metadata = new MetadataStorage();
@@ -104,7 +124,8 @@ export class Database {
         await sql`
           ALTER TABLE ${sql(metadata.tableName)} 
           ADD COLUMN discriminator TEXT NOT NULL;
-          CREATE INDEX idx_discriminator ON ${sql(metadata.tableName)}(discriminator);
+          CREATE INDEX ${sql(discriminatorIndexName(metadata.tableName))}
+          ON ${sql(metadata.tableName)}(discriminator);
         `.simple();
       }
     }
