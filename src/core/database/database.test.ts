@@ -212,6 +212,46 @@ describe('Database', () => {
       const [rowCount] = await sql`SELECT COUNT(*) AS count FROM database_test_entity`;
       expect(Number(rowCount.count)).toBe(1);
     });
+
+    test('creates distinct discriminator indexes for independent STI hierarchies', async () => {
+      class FirstRoot {}
+      class FirstChild extends FirstRoot {}
+      class SecondRoot {}
+      class SecondChild extends SecondRoot {}
+
+      const stiDb = new Database();
+      const rootMetadata = (tableName: string) => ({
+        tableName,
+        columns: [
+          { propertyName: 'id', columnName: 'id', type: COLUMN_TYPE.SERIAL, primary: true, nullable: false },
+        ],
+        relations: [],
+      });
+
+      stiDb.getMetadata().set(FirstRoot, rootMetadata('sti_first_root'));
+      stiDb.getMetadata().set(FirstChild, rootMetadata('sti_first_child'));
+      stiDb.getMetadata().set(SecondRoot, rootMetadata('sti_second_root'));
+      stiDb.getMetadata().set(SecondChild, rootMetadata('sti_second_child'));
+
+      connect(stiDb, process.env.DATABASE_URL);
+      await stiDb.drop();
+      await stiDb.create();
+
+      const indexes = await stiDb.getConnection()<{ tablename: string; indexname: string }[]>`
+        SELECT tablename, indexname
+        FROM pg_indexes
+        WHERE schemaname = 'public'
+          AND tablename IN ('sti_first_root', 'sti_second_root')
+          AND indexdef LIKE '%(discriminator)%'
+        ORDER BY tablename
+      `;
+
+      expect(indexes).toHaveLength(2);
+      expect(indexes.map((index) => index.indexname)).toEqual([
+        'idx_discriminator_sti_first_root',
+        'idx_discriminator_sti_second_root',
+      ]);
+    });
   });
 
   describe('createRelations() (via create())', () => {
