@@ -1,6 +1,6 @@
 import { test, expect, describe, beforeEach, afterEach } from 'bun:test';
 
-import { Database } from './database';
+import { Database, discriminatorIndexName } from './database';
 import { DatabaseError, DatabaseNotConnectedError } from './database.errors';
 import { OrmError } from '../orm-error';
 import { RelationType } from '../metadata/metadata';
@@ -11,6 +11,14 @@ class DatabaseTestEntity {
   name!: string;
   isActive!: boolean;
 }
+
+describe('discriminatorIndexName', () => {
+  test('keeps the generated name within PostgreSQL\'s identifier limit', () => {
+    const name = discriminatorIndexName('long_table_name_'.repeat(10));
+
+    expect(new TextEncoder().encode(name).byteLength).toBeLessThanOrEqual(63);
+  });
+});
 
 describe('DatabaseNotConnectedError', () => {
   test('instanceof chain: OrmError > DatabaseError > DatabaseNotConnectedError', () => {

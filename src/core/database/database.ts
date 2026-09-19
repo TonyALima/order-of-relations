@@ -18,7 +18,7 @@ const TABLE_NAME_PREFIX_LENGTH = Math.floor(
     UTF8_MAX_BYTES_PER_CHARACTER,
 );
 
-function discriminatorIndexName(tableName: string): string {
+export function discriminatorIndexName(tableName: string): string {
   const name = `${DISCRIMINATOR_INDEX_PREFIX}${tableName}`;
   if (new TextEncoder().encode(name).length <= MAX_IDENTIFIER_LENGTH) return name;
 
